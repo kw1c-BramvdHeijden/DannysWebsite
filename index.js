@@ -71,6 +71,15 @@ const competitionTypeInput = document.querySelector("[data-competition-type]");
 const competitionDateInput = document.querySelector("[data-competition-date]");
 const competitionToneInput = document.querySelector("[data-competition-tone]");
 const competitionCancelButtons = Array.from(document.querySelectorAll("[data-competition-cancel]"));
+const leaderboardPreviewList = document.querySelector("[data-leaderboard-list]");
+const leaderboardOpenButton = document.querySelector("[data-leaderboard-open]");
+const leaderboardModal = document.querySelector("[data-leaderboard-modal]");
+const leaderboardModalCloseButton = document.querySelector("[data-leaderboard-close-button]");
+const leaderboardCloseButtons = Array.from(document.querySelectorAll("[data-leaderboard-close]"));
+const leaderboardTable = document.querySelector(".leaderboard-table");
+const leaderboardTableBody = document.querySelector("[data-leaderboard-table-body]");
+const leaderboardUpdatedText = document.querySelector("[data-leaderboard-updated]");
+const leaderboardTeamFilter = document.querySelector("[data-leaderboard-team-filter]");
 
 const AUTH_KEY = "boules_logged_in";
 const ROLE_KEY = "boules_role";
@@ -184,6 +193,25 @@ const translations = {
         "challenge.cta": "Meld je aan",
         "leaderboard.heading": "LEADERBOARD",
         "leaderboard.viewAll": "Bekijk volledig leaderboard",
+        "leaderboard.modalKicker": "VOLLEDIGE STAND",
+        "leaderboard.modalTitle": "Volledig leaderboard",
+        "leaderboard.modalDescription": "Bekijk alle teams, gespeelde wedstrijden en punten in een overzicht.",
+        "leaderboard.modalClose": "Sluit leaderboardvenster",
+        "leaderboard.pointsUnit": "pts",
+        "leaderboard.column.rank": "#",
+        "leaderboard.column.team": "Team",
+        "leaderboard.column.player": "Speler",
+        "leaderboard.teamFilter.all": "Alle teams",
+        "leaderboard.teamFilter.aria": "Filter leaderboard op team",
+        "leaderboard.column.played": "Gespeeld",
+        "leaderboard.column.won": "Gewonnen",
+        "leaderboard.column.diff": "Puntverschil",
+        "leaderboard.column.points": "Punten",
+        "leaderboard.column.trend": "Trend",
+        "leaderboard.trend.up": "Stijgt",
+        "leaderboard.trend.flat": "Gelijk",
+        "leaderboard.trend.down": "Daalt",
+        "leaderboard.playersOf": "Spelers van",
         "benefits.card1.title": "Voor de buurt",
         "benefits.card1.description": "Nodig buren uit en speel samen op jullie eigen plein.",
         "benefits.card2.title": "Makkelijk score bijhouden",
@@ -329,6 +357,25 @@ const translations = {
         "challenge.cta": "Sign up",
         "leaderboard.heading": "LEADERBOARD",
         "leaderboard.viewAll": "View full leaderboard",
+        "leaderboard.modalKicker": "FULL STANDINGS",
+        "leaderboard.modalTitle": "Full leaderboard",
+        "leaderboard.modalDescription": "See every team, matches played, and points in one overview.",
+        "leaderboard.modalClose": "Close leaderboard dialog",
+        "leaderboard.pointsUnit": "pts",
+        "leaderboard.column.rank": "#",
+        "leaderboard.column.team": "Team",
+        "leaderboard.column.player": "Player",
+        "leaderboard.teamFilter.all": "All teams",
+        "leaderboard.teamFilter.aria": "Filter leaderboard by team",
+        "leaderboard.column.played": "Played",
+        "leaderboard.column.won": "Won",
+        "leaderboard.column.diff": "Point diff",
+        "leaderboard.column.points": "Points",
+        "leaderboard.column.trend": "Trend",
+        "leaderboard.trend.up": "Rising",
+        "leaderboard.trend.flat": "Steady",
+        "leaderboard.trend.down": "Falling",
+        "leaderboard.playersOf": "Players of",
         "benefits.card1.title": "Built for the neighborhood",
         "benefits.card1.description": "Invite neighbors and play together on your own local square.",
         "benefits.card2.title": "Easy score tracking",
@@ -505,6 +552,149 @@ const defaultCompetitions = [
     }
 ];
 
+const defaultLeaderboard = [
+    {
+        team: "Les Boulistes",
+        played: 14,
+        won: 11,
+        diff: 64,
+        points: 1250,
+        trend: "up",
+        players: [
+            { name: "Danny", played: 14 },
+            { name: "Sanne", played: 13 },
+            { name: "Mo", played: 11 },
+            { name: "Lisa", played: 9 }
+        ]
+    },
+    {
+        team: "De Kugelkoningen",
+        played: 14,
+        won: 10,
+        diff: 47,
+        points: 1100,
+        trend: "flat",
+        players: [
+            { name: "Noor", played: 14 },
+            { name: "Bram", played: 12 },
+            { name: "Youssef", played: 10 },
+            { name: "Emma", played: 8 }
+        ]
+    },
+    {
+        team: "Team Cochonnet",
+        played: 14,
+        won: 9,
+        diff: 31,
+        points: 980,
+        trend: "up",
+        players: [
+            { name: "Mila", played: 14 },
+            { name: "Jens", played: 12 },
+            { name: "Fatima", played: 11 },
+            { name: "Rik", played: 7 }
+        ]
+    },
+    {
+        team: "Boule & Co",
+        played: 14,
+        won: 8,
+        diff: 12,
+        points: 860,
+        trend: "down",
+        players: [
+            { name: "Iris", played: 13 },
+            { name: "Koen", played: 12 },
+            { name: "Ravi", played: 9 },
+            { name: "Anne", played: 6 }
+        ]
+    },
+    {
+        team: "De Werpers",
+        played: 14,
+        won: 7,
+        diff: 6,
+        points: 750,
+        trend: "flat",
+        players: [
+            { name: "Tessa", played: 14 },
+            { name: "Milan", played: 11 },
+            { name: "Omar", played: 10 },
+            { name: "Kim", played: 8 }
+        ]
+    },
+    {
+        team: "Plein Precisie",
+        played: 14,
+        won: 7,
+        diff: -3,
+        points: 720,
+        trend: "up",
+        players: [
+            { name: "Lotte", played: 12 },
+            { name: "Freek", played: 11 },
+            { name: "Amina", played: 9 },
+            { name: "Tom", played: 7 }
+        ]
+    },
+    {
+        team: "Jeu de Ja",
+        played: 14,
+        won: 6,
+        diff: -8,
+        points: 680,
+        trend: "down",
+        players: [
+            { name: "Eva", played: 13 },
+            { name: "Sam", played: 10 },
+            { name: "Bilal", played: 8 },
+            { name: "Fleur", played: 6 }
+        ]
+    },
+    {
+        team: "De Gooiers",
+        played: 14,
+        won: 5,
+        diff: -14,
+        points: 610,
+        trend: "flat",
+        players: [
+            { name: "Nina", played: 12 },
+            { name: "Daan", played: 9 },
+            { name: "Farid", played: 7 },
+            { name: "Sofia", played: 5 }
+        ]
+    },
+    {
+        team: "Cafe Carreau",
+        played: 14,
+        won: 4,
+        diff: -28,
+        points: 540,
+        trend: "down",
+        players: [
+            { name: "Roos", played: 11 },
+            { name: "Gijs", played: 8 },
+            { name: "Anouk", played: 6 },
+            { name: "Pim", played: 4 }
+        ]
+    },
+    {
+        team: "Petanque Pioniers",
+        played: 14,
+        won: 3,
+        diff: -41,
+        points: 470,
+        trend: "up",
+        players: [
+            { name: "Zoe", played: 10 },
+            { name: "Lars", played: 7 },
+            { name: "Ilias", played: 5 },
+            { name: "Mara", played: 4 }
+        ]
+    }
+];
+
 function normalizeLanguage(language) {
     return language === "en" ? "en" : "nl";
 }
@@ -645,7 +835,8 @@ const state = {
     deletedCompetitionIds: readDeletedCompetitionIds(),
     pendingUpload: null,
     pendingPhotoId: null,
-    pendingCompetitionId: null
+    pendingCompetitionId: null,
+    leaderboardTeamFilter: "all"
 };
 
 let languageMenuTimer = 0;
@@ -653,6 +844,7 @@ let accountMenuTimer = 0;
 let uploadModalTimer = 0;
 let competitionModalTimer = 0;
 let authModalTimer = 0;
+let leaderboardModalTimer = 0;
 let scrollSpyFrame = 0;
 
 const navSections = navLinks
@@ -968,6 +1160,252 @@ function renderCompetitions() {
     });
 }
 
+function getLeaderboardCollection() {
+    return defaultLeaderboard
+        .slice()
+        .sort((left, right) => right.points - left.points || right.diff - left.diff || right.won - left.won || left.team.localeCompare(right.team));
+}
+
+function getLeaderboardRankTone(rank) {
+    if (rank === 1) {
+        return "gold";
+    }
+
+    if (rank === 2) {
+        return "silver";
+    }
+
+    if (rank === 3) {
+        return "bronze";
+    }
+
+    return "olive";
+}
+
+function getLeaderboardTrendSymbol(trend) {
+    if (trend === "up") {
+        return "+";
+    }
+
+    if (trend === "down") {
+        return "-";
+    }
+
+    return "=";
+}
+
+function getLeaderboardTrendLabel(trend) {
+    const normalizedTrend = trend === "up" || trend === "down" ? trend : "flat";
+    return t(`leaderboard.trend.${normalizedTrend}`);
+}
+
+function formatLeaderboardPoints(points) {
+    return `${points} ${t("leaderboard.pointsUnit")}`;
+}
+
+function formatLeaderboardDiff(diff) {
+    const normalizedDiff = Number(diff) || 0;
+    return normalizedDiff > 0 ? `+${normalizedDiff}` : String(normalizedDiff);
+}
+
+function getSelectedLeaderboardTeam() {
+    if (state.leaderboardTeamFilter === "all") {
+        return null;
+    }
+
+    return getLeaderboardCollection().find((entry) => entry.team === state.leaderboardTeamFilter) || null;
+}
+
+function syncLeaderboardTeamFilter() {
+    if (!leaderboardTeamFilter) {
+        return;
+    }
+
+    const selectedValue = getSelectedLeaderboardTeam()?.team || "all";
+    leaderboardTeamFilter.innerHTML = "";
+    leaderboardTeamFilter.setAttribute("aria-label", t("leaderboard.teamFilter.aria"));
+
+    const allOption = document.createElement("option");
+    allOption.value = "all";
+    allOption.textContent = t("leaderboard.teamFilter.all");
+    leaderboardTeamFilter.appendChild(allOption);
+
+    getLeaderboardCollection().forEach((entry) => {
+        const option = document.createElement("option");
+        option.value = entry.team;
+        option.textContent = entry.team;
+        leaderboardTeamFilter.appendChild(option);
+    });
+
+    leaderboardTeamFilter.value = selectedValue;
+}
+
+function getLeaderboardUpdatedLabel() {
+    const selectedTeam = getSelectedLeaderboardTeam();
+    if (selectedTeam) {
+        return `${t("leaderboard.playersOf")} ${selectedTeam.team}`;
+    }
+
+    const round = getLeaderboardCollection().reduce((maxRound, entry) => Math.max(maxRound, Number(entry.played) || 0), 0);
+    return state.lang === "en" ? `Updated after matchday ${round}` : `Bijgewerkt na speelronde ${round}`;
+}
+
+function createLeaderboardPreviewItem(entry, rank) {
+    const item = document.createElement("li");
+
+    const rankBadge = document.createElement("span");
+    rankBadge.className = `rank ${getLeaderboardRankTone(rank)}`;
+    rankBadge.textContent = String(rank);
+
+    const team = document.createElement("span");
+    team.className = "team";
+    team.textContent = entry.team;
+
+    const points = document.createElement("span");
+    points.className = "points";
+    points.textContent = formatLeaderboardPoints(entry.points);
+
+    const trend = document.createElement("span");
+    const trendState = entry.trend === "up" || entry.trend === "down" ? entry.trend : "flat";
+    trend.className = `trend ${trendState}`;
+    trend.textContent = getLeaderboardTrendSymbol(trendState);
+    trend.setAttribute("aria-label", getLeaderboardTrendLabel(trendState));
+    trend.title = getLeaderboardTrendLabel(trendState);
+
+    item.append(rankBadge, team, points, trend);
+    return item;
+}
+
+function createLeaderboardTableRow(entry, rank) {
+    const row = document.createElement("tr");
+    const trendState = entry.trend === "up" || entry.trend === "down" ? entry.trend : "flat";
+
+    const rankCell = document.createElement("td");
+    rankCell.dataset.label = t("leaderboard.column.rank");
+    const rankBadge = document.createElement("span");
+    rankBadge.className = `rank ${getLeaderboardRankTone(rank)}`;
+    rankBadge.textContent = String(rank);
+    rankCell.appendChild(rankBadge);
+
+    const teamCell = document.createElement("td");
+    teamCell.className = "leaderboard-table-team";
+    teamCell.dataset.label = t("leaderboard.column.team");
+    const teamName = document.createElement("strong");
+    teamName.textContent = entry.team;
+    teamCell.appendChild(teamName);
+
+    const playedCell = document.createElement("td");
+    playedCell.dataset.label = t("leaderboard.column.played");
+    playedCell.textContent = String(entry.played);
+
+    const wonCell = document.createElement("td");
+    wonCell.dataset.label = t("leaderboard.column.won");
+    wonCell.textContent = String(entry.won);
+
+    const diffCell = document.createElement("td");
+    diffCell.dataset.label = t("leaderboard.column.diff");
+    diffCell.textContent = formatLeaderboardDiff(entry.diff);
+
+    const pointsCell = document.createElement("td");
+    pointsCell.className = "leaderboard-table-points";
+    pointsCell.dataset.label = t("leaderboard.column.points");
+    pointsCell.textContent = formatLeaderboardPoints(entry.points);
+
+    const trendCell = document.createElement("td");
+    trendCell.dataset.label = t("leaderboard.column.trend");
+    const trendBadge = document.createElement("span");
+    trendBadge.className = `leaderboard-trend-badge ${trendState}`;
+    trendBadge.innerHTML = `<span aria-hidden="true">${getLeaderboardTrendSymbol(trendState)}</span><span>${getLeaderboardTrendLabel(trendState)}</span>`;
+    trendCell.appendChild(trendBadge);
+
+    row.append(rankCell, teamCell, playedCell, wonCell, diffCell, pointsCell, trendCell);
+    return row;
+}
+
+function createLeaderboardPlayerRow(player, rank, teamName) {
+    const row = document.createElement("tr");
+
+    const rankCell = document.createElement("td");
+    rankCell.dataset.label = t("leaderboard.column.rank");
+    const rankBadge = document.createElement("span");
+    rankBadge.className = "rank olive";
+    rankBadge.textContent = String(rank);
+    rankCell.appendChild(rankBadge);
+
+    const playerCell = document.createElement("td");
+    playerCell.className = "leaderboard-table-team";
+    playerCell.dataset.label = t("leaderboard.column.player");
+    const playerName = document.createElement("strong");
+    playerName.textContent = player.name;
+    const playerTeam = document.createElement("small");
+    playerTeam.className = "leaderboard-table-subcopy";
+    playerTeam.textContent = teamName;
+    playerCell.append(playerName, playerTeam);
+
+    const playedCell = document.createElement("td");
+    playedCell.dataset.label = t("leaderboard.column.played");
+    playedCell.textContent = String(player.played);
+
+    const wonCell = document.createElement("td");
+    wonCell.dataset.label = t("leaderboard.column.won");
+    wonCell.textContent = "";
+
+    const diffCell = document.createElement("td");
+    diffCell.dataset.label = t("leaderboard.column.diff");
+    diffCell.textContent = "";
+
+    const pointsCell = document.createElement("td");
+    pointsCell.className = "leaderboard-table-points";
+    pointsCell.dataset.label = t("leaderboard.column.points");
+    pointsCell.textContent = "";
+
+    const trendCell = document.createElement("td");
+    trendCell.dataset.label = t("leaderboard.column.trend");
+    trendCell.textContent = "";
+
+    row.append(rankCell, playerCell, playedCell, wonCell, diffCell, pointsCell, trendCell);
+    return row;
+}
+
+function renderLeaderboard() {
+    const leaderboard = getLeaderboardCollection();
+    const selectedTeam = getSelectedLeaderboardTeam();
+
+    if (leaderboardPreviewList) {
+        leaderboardPreviewList.innerHTML = "";
+        leaderboard.slice(0, 5).forEach((entry, index) => {
+            leaderboardPreviewList.appendChild(createLeaderboardPreviewItem(entry, index + 1));
+        });
+    }
+
+    syncLeaderboardTeamFilter();
+
+    if (leaderboardTable) {
+        leaderboardTable.dataset.mode = selectedTeam ? "players" : "teams";
+    }
+
+    if (leaderboardTableBody) {
+        leaderboardTableBody.innerHTML = "";
+
+        if (selectedTeam) {
+            selectedTeam.players
+                .slice()
+                .sort((left, right) => right.played - left.played || left.name.localeCompare(right.name))
+                .forEach((player, index) => {
+                    leaderboardTableBody.appendChild(createLeaderboardPlayerRow(player, index + 1, selectedTeam.team));
+                });
+        } else {
+            leaderboard.forEach((entry, index) => {
+                leaderboardTableBody.appendChild(createLeaderboardTableRow(entry, index + 1));
+            });
+        }
+    }
+
+    if (leaderboardUpdatedText) {
+        leaderboardUpdatedText.textContent = getLeaderboardUpdatedLabel();
+    }
+}
+
 function setCurrentNavLink(targetId) {
     navLinks.forEach((link) => {
         const isCurrent = link.getAttribute("href") === `#${targetId}`;
@@ -1281,6 +1719,7 @@ function applyTranslations() {
     syncAuthModalUI();
     syncUploadModalUI();
     syncCompetitionFormUI();
+    renderLeaderboard();
     renderCompetitions();
     renderPhotos();
 
@@ -1318,10 +1757,12 @@ function setLoggedIn(loggedIn) {
         closeAuthModal();
         closeUploadModal();
         closeCompetitionModal();
+        closeLeaderboardModal();
         closeAccountMenu();
     }
 
     syncAuthUI();
+    renderLeaderboard();
     renderCompetitions();
     renderPhotos();
 }
@@ -1680,6 +2121,40 @@ function closeCompetitionModal() {
         competitionModal.hidden = true;
         resetCompetitionForm();
         syncCompetitionFormUI();
+    }, 220);
+}
+
+function openLeaderboardModal() {
+    if (!leaderboardModal) {
+        return;
+    }
+
+    clearTimeout(leaderboardModalTimer);
+    leaderboardModal.hidden = false;
+    body.classList.add("leaderboard-modal-open");
+
+    requestAnimationFrame(() => {
+        leaderboardModal.classList.add("is-open");
+    });
+
+    window.setTimeout(() => {
+        if (leaderboardModal && !leaderboardModal.hidden) {
+            leaderboardModalCloseButton?.focus();
+        }
+    }, 120);
+}
+
+function closeLeaderboardModal() {
+    if (!leaderboardModal || leaderboardModal.hidden) {
+        return;
+    }
+
+    clearTimeout(leaderboardModalTimer);
+    leaderboardModal.classList.remove("is-open");
+    body.classList.remove("leaderboard-modal-open");
+
+    leaderboardModalTimer = window.setTimeout(() => {
+        leaderboardModal.hidden = true;
     }, 220);
 }
 
@@ -2078,6 +2553,22 @@ competitionCancelButtons.forEach((button) => {
     });
 });
 
+leaderboardOpenButton?.addEventListener("click", () => {
+    openLeaderboardModal();
+});
+
+leaderboardTeamFilter?.addEventListener("change", (event) => {
+    const nextValue = event.target instanceof HTMLSelectElement ? event.target.value : "all";
+    state.leaderboardTeamFilter = nextValue || "all";
+    renderLeaderboard();
+});
+
+leaderboardCloseButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        closeLeaderboardModal();
+    });
+});
+
 uploadForm?.addEventListener("submit", publishPendingPhoto);
 competitionForm?.addEventListener("submit", saveCompetition);
 
@@ -2153,6 +2644,11 @@ document.addEventListener("keydown", (event) => {
         return;
     }
 
+    if (leaderboardModal && !leaderboardModal.hidden) {
+        closeLeaderboardModal();
+        return;
+    }
+
     if (competitionModal && !competitionModal.hidden) {
         closeCompetitionModal();
         return;
@@ -2198,6 +2694,7 @@ setLoggedIn(state.loggedIn);
 setLanguageMenuOpen(false);
 setAccountMenuOpen(false);
 closeCompetitionModal();
+closeLeaderboardModal();
 setAuthMode("login");
 syncNavToggleLabel();
 updateActiveNavLink();
