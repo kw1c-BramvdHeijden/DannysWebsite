@@ -955,6 +955,11 @@ function setNavOpen(isOpen) {
         navToggle.setAttribute("aria-expanded", String(isOpen));
     }
 
+    if (!isOpen) {
+        closeLanguageMenu();
+        closeAccountMenu();
+    }
+
     syncNavToggleLabel();
 }
 
