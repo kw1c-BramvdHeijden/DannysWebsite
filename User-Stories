@@ -1,0 +1,158 @@
+User Stories — Jeu de Boules Toernooi Website:
+Rollen:
+    Speler
+    Team
+    Scheidsrechter
+    Admin
+    Bezoeker
+
+
+
+1. Account & Login
+    US-01 — Registreren als gebruiker:
+    Als speler wil ik een account kunnen registreren zodat ik kan deelnemen aan wedstrijden en toernooien
+
+    Acceptance criteria:
+    Gebruiker kan account aanmaken Wachtwoord wordt opgeslagen Gebruiker kan inloggen
+
+    US-02 — Wachtwoord vergeten:
+    Als gebruiker wil ik mijn wachtwoord kunnen resetten zodat ik weer toegang krijg tot mijn account
+
+    Acceptance criteria:
+    Er is een knop "Wachtwoord vergeten" Gebruiker ontvangt een e-mail Gebruiker kan nieuw wachtwoord instellen
+
+
+    US-03 — Login als team:
+    Als team wil ik kunnen inloggen als team zodat wij kunnen deelnemen aan wedstrijden
+
+    Acceptance criteria:
+    Team kan inloggen met teamnaam Team kan scores bekijken Team kan deelnemen aan wedstrijden
+
+
+
+2. Teams
+
+    US-04 — Team aanmaken:
+    Als speler wil ik een team kunnen aanmaken zodat ik kan deelnemen aan een toernooi
+
+    Acceptance criteria:
+    Teamnaam kan worden gekozen Team heeft 1–6 spelers Team wordt opgeslagen
+
+
+    US-05 — Lid worden van team:
+    Als speler wil ik lid kunnen worden van een team zodat ik samen kan spelen
+
+    Acceptance criteria:
+    Speler kan team selecteren Admin kan toegang beheren Team blijft bestaan als iemand vertrekt
+
+
+    US-06 — Teamnaam aanpassen (admin):
+    Als admin wil ik een teamnaam kunnen aanpassen zodat ik fouten kan corrigeren
+
+    Acceptance criteria:
+    Alleen admin kan naam wijzigen Teamnaam wordt gelocked tijdens wedstrijd
+
+
+
+3. Toernooi & Wedstrijden
+
+    US-07 — Inschrijven voor toernooi:
+    Als team wil ik mij kunnen inschrijven voor een toernooi zodat ik kan deelnemen
+
+    Acceptance criteria:
+    Team kan zich aanmelden Na inschrijfperiode wordt deelname gesloten Admin kan deelname starten
+
+
+    US-08 — Automatisch wedstrijdschema (bracket):
+    Als admin wil ik een wedstrijdschema kunnen genereren zodat teams automatisch tegen elkaar spelen
+
+    Acceptance criteria:
+    Teams worden ingedeeld in poules Winnaars gaan naar finale Verliezers worden toeschouwers
+
+
+    US-09 — Score invoeren:
+    Als team wil ik de score van een wedstrijd kunnen invoeren zodat de stand wordt bijgewerkt
+
+    Acceptance criteria:
+    Score kan worden ingevoerd Score moet worden bevestigd Score wordt opgeslagen
+
+
+    US-10 — Score overschrijven (scheidsrechter):
+    Als scheidsrechter wil ik een score kunnen aanpassen zodat de juiste uitslag wordt geregistreerd
+
+    Acceptance criteria:
+    Scheidsrechter kan score wijzigen wijziging wordt opgeslagen teams kunnen score niet terugzetten
+
+
+
+4. Rollen & Beheer
+
+    US-11 — Admin rol toekennen:
+    Als admin wil ik andere gebruikers admin kunnen maken zodat het beheer gedeeld kan worden
+
+
+    US-12 — Gebruiker bannen:
+    Als admin wil ik een gebruiker kunnen bannen zodat misbruik wordt voorkomen
+
+
+    US-13 — Competitie starten:
+    Als admin wil ik een competitie kunnen starten zodat wedstrijden kunnen beginnen
+
+
+    US-14 — Competitie beheren:
+    Als admin wil ik competities kunnen beheren zodat ik teams en wedstrijden kan controleren
+
+
+5. Planning
+
+    US-15 — Beschikbaarheid doorgeven:
+    Als team wil ik een tijdframe kunnen aangeven zodat wedstrijden gepland kunnen worden
+
+    Acceptance criteria:
+    Team kan week aangeven Geen exacte tijd nodig
+
+
+
+6. Weergave & Publiek
+
+    US-16 — Leaderboard bekijken:
+    Als bezoeker wil ik het leaderboard kunnen zien zodat ik de stand kan volgen
+
+    Acceptance criteria:
+    Iedereen kan leaderboard zien Geen login nodig
+
+
+    US-17 — Wedstrijden bekijken zonder login:
+    Als bezoeker wil ik wedstrijden kunnen bekijken zodat ik het toernooi kan volgen
+
+
+    US-18 — Foto pagina achter login:
+    Als gebruiker wil ik foto's alleen zien na login zodat privacy wordt beschermd
+
+
+
+7. Communicatie
+
+    US-19 — E-mail versturen (admin):
+    Als admin wil ik een e-mail naar teams kunnen sturen zodat ik informatie kan delen
+
+
+
+8. Systeem / Technisch (nuttig voor project)
+
+    US-20 — Website in Nederlands en Engels:
+    Als gebruiker wil ik de taal kunnen wisselen zodat ik de website begrijp
+
+
+    US-21 — Hosting en domein:
+    Als beheerder wil ik een server en domeinnaam kunnen instellen zodat de website online staat
+
+
+
+
+Dit is al een bruikbare voor:
+
+schoolproject
+scrum board
+documentatie
+development planning
