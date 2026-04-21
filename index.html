@@ -3,131 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeu de Dabs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <title>Boules Competities</title>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
     <main class="page-shell">
-        <section class="hero">
-            <header class="site-header">
-                <a href="#" class="brand">
-                    <span class="brand-mark" aria-hidden="true"></span>
-                    <span class="brand-copy">
-                        <strong>Jeu de Dabs</strong>
-                        <small>Nijmegen Club Nights</small>
-                    </span>
-                </a>
+        <header class="site-header">
+            <a class="brand" href="#home" data-i18n-aria-label="nav.brandHome" aria-label="Boules Competities home">
+                <span class="brand-ball" aria-hidden="true"></span>
+                <span class="brand-copy">
+                    <strong>BOULES</strong>
+                    <small data-i18n="brand.subtitle">COMPETITIES</small>
+                </span>
+            </a>
 
-                <button class="nav-toggle-button" type="button" aria-label="Menu openen" aria-expanded="false" aria-controls="nav-panel">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-i18n-aria-label="nav.menu" aria-label="Open menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
 
-                <div class="nav-panel" id="nav-panel">
-                    <nav class="site-nav" aria-label="Hoofdnavigatie">
-                        <a href="#" class="is-current">Home</a>
-                        <a href="#">Over Ons</a>
-                        <a href="#">Spelregels</a>
-                        <a href="#">Toernooien</a>
-                        <a href="#">Contact</a>
-                    </nav>
-                    <div class="nav-tools" aria-label="Taal en account">
-                        <div class="dropdown">
-                            <button class="dropdown-trigger" type="button" aria-expanded="false" aria-haspopup="true">
-                                <span class="dropdown-label">Taal</span>
-                                <span class="dropdown-value">NL</span>
-                            </button>
-                            <div class="dropdown-menu" hidden>
-                                <a href="#" class="dropdown-item is-selected">Nederlands</a>
-                                <a href="#" class="dropdown-item">English</a>
-                            </div>
-                        </div>
+            <div class="nav-panel" id="site-nav">
+                <nav class="main-nav" data-i18n-aria-label="nav.primary" aria-label="Hoofdnavigatie">
+                    <a href="#home" class="is-current" data-i18n="nav.home">Home</a>
+                    <a href="#competities" data-i18n="nav.competitions">Competities</a>
+                    <a href="#over" data-i18n="nav.about">Over ons</a>
+                    <a href="#werkt" data-i18n="nav.how">Hoe het werkt</a>
+                    <a href="#photos" data-i18n="nav.photos">Foto's</a>
+                </nav>
 
-                        <div class="dropdown account-dropdown">
-                            <button class="dropdown-trigger" type="button" aria-expanded="false" aria-haspopup="true">
-                                <span class="account-avatar" aria-hidden="true">D</span>
-                                <span class="account-copy">
-                                    <span class="dropdown-label">Ingelogd als</span>
-                                    <span class="dropdown-value">Danny</span>
-                                </span>
-                            </button>
-                            <div class="dropdown-menu" hidden>
-                                <span class="dropdown-group-label">Schakel rol</span>
-                                <a href="#" class="dropdown-item is-selected">Player</a>
-                                <a href="#" class="dropdown-item">Admin</a>
-                            </div>
+                <div class="header-actions">
+                    <div class="lang-switcher" data-lang-switcher>
+                        <button type="button" class="lang-toggle-button" data-lang-toggle aria-expanded="false" aria-haspopup="true">
+                            <i class="fa-solid fa-globe"></i>
+                            <span data-lang-current>NL</span>
+                            <i class="fa-solid fa-chevron-down lang-chevron"></i>
+                        </button>
+                        <div class="lang-menu" data-lang-menu hidden>
+                            <button type="button" class="lang-option is-active" data-lang-option="nl">Nederlands</button>
+                            <button type="button" class="lang-option" data-lang-option="en">English</button>
                         </div>
                     </div>
-                    <a href="#" class="nav-cta">Reserveer een baan</a>
+
+                    <button type="button" class="button button-ghost auth-toggle" data-auth-toggle>Inloggen</button>
+                    <a href="#aanmelden" class="button button-primary" data-signup-cta><span data-i18n="auth.signup">Aanmelden</span></a>
+                    <div class="account-switcher" data-account-switcher hidden>
+                        <button type="button" class="account-toggle-button" data-account-toggle aria-expanded="false" aria-haspopup="true">
+                            <span class="account-avatar" aria-hidden="true">D</span>
+                            <span class="account-copy">
+                                <strong data-account-name>Danny</strong>
+                                <small data-account-role>Speler</small>
+                            </span>
+                            <i class="fa-solid fa-chevron-down account-chevron"></i>
+                        </button>
+                        <div class="account-menu" data-account-menu hidden>
+                            <button type="button" class="account-option is-active" data-role-option="player">
+                                <span class="account-option-title" data-i18n="account.rolePlayer">Speler</span>
+                                <span class="account-option-copy" data-i18n="account.rolePlayerDescription">Kan foto's delen en buurtfoto's bekijken.</span>
+                            </button>
+                            <button type="button" class="account-option" data-role-option="admin">
+                                <span class="account-option-title" data-i18n="account.roleAdmin">Admin</span>
+                                <span class="account-option-copy" data-i18n="account.roleAdminDescription">Kan gedeelde foto's beheren en verwijderen.</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <div class="hero-grid">
-                <section class="hero-copy">
-                    <p class="eyebrow">Old city, young vibe</p>
-                    <h1>Speel jeu de dabs met stijl, sfeer en competitie.</h1>
-                    <p class="lead">
-                        Een moderne home page voor een clubavond, een vriendencompetitie
-                        of een zomertoernooi. Ontspannen sfeer vooraan, scherp spel op de baan.
-                    </p>
-                    <div class="hero-actions">
-                        <a href="#" class="button button-primary">Meld je aan</a>
-                        <a href="#" class="button button-secondary">Bekijk toernooien</a>
-                    </div>
-                </section>
+        <section class="hero-section" id="home">
+            <div class="hero-copy">
+                <h1>
+                    <span data-i18n="hero.line1">SPEEL.</span>
+                    <span data-i18n="hero.line2">STRIJD.</span>
+                    <span class="accent" data-i18n="hero.line3">GENIET.</span>
+                </h1>
+                <p data-i18n="hero.description">
+                    Doe mee aan spannende jeu de boules competities. Schrijf je in als team
+                    of individueel en klim naar de top van het leaderboard.
+                </p>
 
-                <section class="hero-art" aria-label="Decoratieve jeu de boule illustratie">
-                    <div class="art-card">
-                        <div class="art-stripe art-green"></div>
-                        <div class="art-stripe art-red"></div>
-                        <div class="art-stripe art-yellow"></div>
-                        <aside class="live-match-box" aria-label="Live wedstrijd">
-                            <div class="live-match-head">
-                                <span class="live-dot" aria-hidden="true"></span>
-                                <span class="live-label">Live Match</span>
-                            </div>
-                            <p class="live-meta">Baan 2 | Clubavond</p>
-                            <div class="live-scoreboard">
-                                <div class="live-team">
-                                    <span class="live-team-name">Danny / Mo</span>
-                                    <strong>9</strong>
-                                </div>
-                                <div class="live-team">
-                                    <span class="live-team-name">Sven / Luca</span>
-                                    <strong>7</strong>
-                                </div>
-                            </div>
-                            <p class="live-status">Bezig | Ronde 4 van 6</p>
-                        </aside>
-                        <div class="boule boule-large"></div>
-                        <div class="boule boule-small"></div>
-                        <div class="jack"></div>
-                        <div class="distance-line"></div>
-                        <div class="art-badge">Clubavond<br>Vrijdag 20:00</div>
-                    </div>
-                </section>
+                <div class="hero-actions">
+                    <a href="#aanmelden" class="button button-primary button-large">
+                        <span data-i18n="hero.ctaPrimary">Meld je aan</span>
+                        <span aria-hidden="true">-&gt;</span>
+                    </a>
+                    <a href="#competities" class="button button-outline button-large">
+                        <span data-i18n="hero.ctaSecondary">Bekijk competities</span>
+                        <span aria-hidden="true">-&gt;</span>
+                    </a>
+                </div>
+
+                <div class="hero-points">
+                    <article class="point-card">
+                        <i class="fa-solid fa-user-group"></i>
+                        <div><h2 data-i18n="hero.point1">Speel als team of individueel</h2></div>
+                    </article>
+                    <article class="point-card">
+                        <i class="fa-solid fa-trophy"></i>
+                        <div><h2 data-i18n="hero.point2">Leuke &amp; eerlijke competities</h2></div>
+                    </article>
+                    <article class="point-card">
+                        <i class="fa-solid fa-chess"></i>
+                        <div><h2 data-i18n="hero.point3">Klim op het leaderboard</h2></div>
+                    </article>
+                </div>
             </div>
 
-            <section class="highlights" aria-label="Hoogtepunten">
-                <article class="highlight-card">
-                    <span class="highlight-number">01</span>
-                    <h2>Open banen</h2>
-                    <p>Kom vrij spelen of train gericht met vrienden en clubleden.</p>
-                </article>
-                <article class="highlight-card">
-                    <span class="highlight-number">02</span>
-                    <h2>Toernooien</h2>
-                    <p>Van laagdrempelig instapniveau tot avonden met serieuze spanning.</p>
-                </article>
-                <article class="highlight-card">
-                    <span class="highlight-number">03</span>
-                    <h2>Gezelligheid</h2>
-                    <p>Een warme sfeer, sterke kleuren en een plek waar je wilt blijven hangen.</p>
-                </article>
+            <div class="hero-illustration">
+                <img class="hero-image" src="hero-scene.png" data-i18n-alt="hero.imageAlt" alt="Jeu de boules speler tijdens een wedstrijd op het plein">
+            </div>
+        </section>
+
+        <section class="content-grid" id="competities">
+            <section class="competitions-panel">
+                <div class="panel-heading">
+                    <h2 data-i18n="competitions.heading">AANKOMENDE COMPETITIES</h2>
+                    <div class="panel-actions">
+                        <span class="panel-admin-indicator" data-competition-admin-indicator hidden>
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span data-i18n="competitions.adminMode">Admin-modus: beheer aankomende competities</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="competition-cards" data-competition-grid></div>
+
+                <div class="challenge-banner">
+                    <div class="challenge-copy">
+                        <span class="challenge-boules" aria-hidden="true"></span>
+                        <div>
+                            <h3 data-i18n="challenge.title">Klaar om de uitdaging aan te gaan?</h3>
+                            <p data-i18n="challenge.description">Meld je aan en laat zien wat je in huis hebt!</p>
+                        </div>
+                    </div>
+                    <div class="challenge-actions">
+                        <a href="#aanmelden" class="button button-secondary"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></a>
+                        <button type="button" class="button button-outline panel-admin-button" data-competition-create hidden>
+                            <i class="fa-solid fa-plus"></i>
+                            <span data-i18n="competitions.add">Competitie toevoegen</span>
+                        </button>
+                    </div>
+                </div>
             </section>
+
+            <aside class="leaderboard-panel">
+                <div class="panel-heading leaderboard-heading">
+                    <div class="leaderboard-title">
+                        <span class="competition-icon olive"><i class="fa-solid fa-ranking-star"></i></span>
+                        <h2 data-i18n="leaderboard.heading">LEADERBOARD</h2>
+                    </div>
+                    <a href="#leaderboard"><span data-i18n="leaderboard.viewAll">Bekijk volledig leaderboard</span> <span aria-hidden="true">-&gt;</span></a>
+                </div>
+
+                <ol class="leaderboard-list">
+                    <li><span class="rank gold">1</span><span class="team">Les Boulistes</span><span class="points">1250 pts</span><span class="trend up">+</span></li>
+                    <li><span class="rank silver">2</span><span class="team">De Kugelkoningen</span><span class="points">1100 pts</span><span class="trend flat">=</span></li>
+                    <li><span class="rank bronze">3</span><span class="team">Team Cochonnet</span><span class="points">980 pts</span><span class="trend up">+</span></li>
+                    <li><span class="rank olive">4</span><span class="team">Boule &amp; Co</span><span class="points">860 pts</span><span class="trend down">-</span></li>
+                    <li><span class="rank olive">5</span><span class="team">De Werpers</span><span class="points">750 pts</span><span class="trend flat">=</span></li>
+                </ol>
+            </aside>
+        </section>
+
+        <section class="benefits-strip" id="werkt">
+            <article class="benefit"><span class="benefit-icon"><i class="fa-solid fa-user-group"></i></span><div><h2 data-i18n="benefits.card1.title">Voor iedereen</h2><p data-i18n="benefits.card1.description">Van beginner tot kampioen, iedereen is welkom.</p></div></article>
+            <article class="benefit"><span class="benefit-icon"><i class="fa-solid fa-shield-heart"></i></span><div><h2 data-i18n="benefits.card2.title">Eerlijk &amp; sportief</h2><p data-i18n="benefits.card2.description">Wij zorgen voor eerlijke wedstrijden en duidelijke regels.</p></div></article>
+            <article class="benefit"><span class="benefit-icon"><i class="fa-solid fa-comments"></i></span><div><h2 data-i18n="benefits.card3.title">Gezelligheid</h2><p data-i18n="benefits.card3.description">Meer dan een spel. Samen genieten staat centraal.</p></div></article>
+            <article class="benefit"><span class="benefit-icon"><i class="fa-solid fa-bullseye"></i></span><div><h2 data-i18n="benefits.card4.title">Altijd een doel</h2><p data-i18n="benefits.card4.description">Blijf verbeteren en klim naar de top.</p></div></article>
+        </section>
+
+        <section class="photo-hub" id="photos">
+            <div class="photo-head">
+                <div class="photo-intro">
+                    <p class="photo-kicker" data-i18n="photos.kicker">BUURT GALERIJ</p>
+                    <h2 data-i18n="photos.heading">Publiceer foto's van wedstrijden en bekijk foto's van andere spelers.</h2>
+                    <p data-i18n="photos.description">
+                        Alleen ingelogde spelers kunnen foto's publiceren en zien. Deel momenten
+                        van trainingen, toernooien en gezellige buurtavonden.
+                    </p>
+                </div>
+
+                <div class="photo-toolbar">
+                    <span class="photo-visibility">
+                        <i class="fa-solid fa-user-lock"></i>
+                        <span data-i18n="photos.visibility">Alleen zichtbaar voor ingelogde spelers</span>
+                    </span>
+                    <span class="photo-admin-indicator" data-admin-indicator hidden>
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span data-i18n="photos.adminMode">Admin-modus: je kunt gedeelde foto's verwijderen</span>
+                    </span>
+                    <input class="photo-input" data-photo-input type="file" accept="image/*">
+                </div>
+            </div>
+
+            <div class="photo-locked" data-photo-locked>
+                <i class="fa-solid fa-lock"></i>
+                <div class="photo-locked-copy">
+                    <h2 data-i18n="photos.lockedTitle">Log in om buurtfoto's te bekijken</h2>
+                    <p data-i18n="photos.lockedDescription">Als je bent ingelogd kun je foto's delen en foto's van andere spelers zien.</p>
+                </div>
+                <button type="button" class="button button-secondary" data-photo-login data-i18n="photos.lockedButton">Inloggen en foto's bekijken</button>
+            </div>
+
+            <div class="photo-feed" data-photo-feed hidden>
+                <article class="photo-highlight">
+                    <div>
+                        <h3 data-i18n="photos.highlightTitle">Laat de buurt meegenieten</h3>
+                        <p data-i18n="photos.highlightDescription">Upload een foto van jullie wedstrijd, training of toernooi. Andere ingelogde spelers zien hem direct terug.</p>
+                    </div>
+                    <button type="button" class="button button-outline" data-upload-trigger>
+                        <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                        <span data-i18n="photos.highlightButton">Upload foto</span>
+                    </button>
+                </article>
+
+                <div class="photo-grid" data-photo-grid></div>
+            </div>
         </section>
     </main>
+
+    <footer class="quote-footer" id="over">
+        <div class="quote-inner">
+            <div class="footer-boules" aria-hidden="true"><span></span><span></span><span class="small-red"></span></div>
+            <blockquote data-i18n-html="footer.quote">" Jeu de boules is meer dan een spel.<br>Het is samenzijn, strategie en plezier. "</blockquote>
+            <div class="footer-leaf" aria-hidden="true"></div>
+        </div>
+    </footer>
+
+    <div class="upload-modal" data-upload-modal hidden>
+        <div class="upload-modal-backdrop" data-upload-cancel></div>
+        <div class="upload-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
+            <button type="button" class="upload-modal-close" data-upload-cancel data-i18n-aria-label="upload.closeLabel" aria-label="Sluit uploadvenster">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="upload-modal-layout">
+                <div class="upload-preview-shell">
+                    <img src="" alt="" data-upload-preview>
+                </div>
+
+                <form class="upload-form" data-upload-form>
+                    <p class="photo-kicker" data-upload-kicker-text data-i18n="upload.kicker">FOTO PUBLICEREN</p>
+                    <h2 id="upload-modal-title" data-upload-title-text data-i18n="upload.title">Geef je foto een titel en beschrijving</h2>
+                    <p class="upload-description" data-upload-description-text data-i18n="upload.description">Pas eerst de titel en beschrijving aan voordat je de foto post.</p>
+
+                    <div class="upload-change-row">
+                        <button type="button" class="button button-outline upload-change-button" data-upload-change>
+                            <i class="fa-solid fa-images"></i>
+                            <span data-i18n="upload.changePhoto">Kies andere foto</span>
+                        </button>
+                    </div>
+
+                    <label class="upload-label">
+                        <span data-i18n="upload.photoTitle">Titel</span>
+                        <input type="text" data-upload-title data-i18n-placeholder="upload.photoTitlePlaceholder" placeholder="Bijvoorbeeld: Finale op het plein">
+                    </label>
+
+                    <label class="upload-label">
+                        <span data-i18n="upload.photoDescription">Beschrijving</span>
+                        <textarea rows="5" data-upload-description data-i18n-placeholder="upload.photoDescriptionPlaceholder" placeholder="Vertel kort wat er op deze foto te zien is"></textarea>
+                    </label>
+
+                    <div class="upload-actions">
+                        <button type="button" class="button button-ghost" data-upload-cancel data-i18n="upload.cancel">Annuleren</button>
+                        <button type="submit" class="button button-primary">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span data-upload-submit-label data-i18n="upload.submit">Publiceer foto</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="competition-modal" data-competition-modal hidden>
+        <div class="competition-modal-backdrop" data-competition-cancel></div>
+        <div class="competition-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="competition-modal-title">
+            <button type="button" class="competition-modal-close" data-competition-cancel data-i18n-aria-label="competitions.form.closeLabel" aria-label="Sluit competitievenster">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <form class="competition-form" data-competition-form>
+                <p class="photo-kicker" data-competition-form-kicker data-i18n="competitions.form.addKicker">COMPETITIE TOEVOEGEN</p>
+                <h2 id="competition-modal-title" data-competition-form-title data-i18n="competitions.form.addTitle">Maak een aankomende competitie aan</h2>
+                <p class="upload-description" data-competition-form-description data-i18n="competitions.form.description">Vul de belangrijkste informatie in zodat spelers zich kunnen voorbereiden.</p>
+
+                <label class="upload-label">
+                    <span data-i18n="competitions.form.name">Naam</span>
+                    <input type="text" data-competition-name data-i18n-placeholder="competitions.form.namePlaceholder" placeholder="Bijvoorbeeld: Voorjaars Toernooi">
+                </label>
+
+                <label class="upload-label">
+                    <span data-i18n="competitions.form.type">Type</span>
+                    <input type="text" data-competition-type data-i18n-placeholder="competitions.form.typePlaceholder" placeholder="Bijvoorbeeld: Doublette | Vrije inschrijving">
+                </label>
+
+                <label class="upload-label">
+                    <span data-i18n="competitions.form.date">Startdatum</span>
+                    <input type="date" data-competition-date>
+                </label>
+
+                <label class="upload-label">
+                    <span data-i18n="competitions.form.style">Accentkleur</span>
+                    <select class="competition-select" data-competition-tone>
+                        <option value="green" data-i18n="competitions.form.styleGreen">Groen</option>
+                        <option value="yellow" data-i18n="competitions.form.styleYellow">Geel</option>
+                        <option value="red" data-i18n="competitions.form.styleRed">Rood</option>
+                        <option value="olive" data-i18n="competitions.form.styleOlive">Olijf</option>
+                    </select>
+                </label>
+
+                <div class="upload-actions">
+                    <button type="button" class="button button-ghost" data-competition-cancel data-i18n="competitions.form.cancel">Annuleren</button>
+                    <button type="submit" class="button button-primary">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span data-competition-submit-label data-i18n="competitions.form.save">Competitie opslaan</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="index.js"></script>
 </body>
 </html>
