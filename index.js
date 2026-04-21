@@ -5,6 +5,7 @@ const navToggle = document.querySelector(".nav-toggle");
 const navPanel = document.querySelector(".nav-panel");
 const navLinks = Array.from(document.querySelectorAll(".main-nav a"));
 const authToggles = Array.from(document.querySelectorAll("[data-auth-toggle]"));
+const authOpeners = Array.from(document.querySelectorAll("[data-auth-open]"));
 const signupCta = document.querySelector("[data-signup-cta]");
 const accountSwitcher = document.querySelector("[data-account-switcher]");
 const accountToggle = document.querySelector("[data-account-toggle]");
@@ -13,6 +14,27 @@ const accountName = document.querySelector("[data-account-name]");
 const accountRole = document.querySelector("[data-account-role]");
 const roleOptions = Array.from(document.querySelectorAll("[data-role-option]"));
 const lockedLoginButton = document.querySelector("[data-photo-login]");
+const authModal = document.querySelector("[data-auth-modal]");
+const authModalTitle = document.querySelector("[data-auth-title]");
+const authModalKicker = document.querySelector("[data-auth-kicker]");
+const authModalDescription = document.querySelector("[data-auth-description]");
+const authTabs = Array.from(document.querySelectorAll("[data-auth-tab]"));
+const authSwitchButtons = Array.from(document.querySelectorAll("[data-auth-switch]"));
+const authForms = Array.from(document.querySelectorAll("[data-auth-form]"));
+const authCloseButtons = Array.from(document.querySelectorAll("[data-auth-close]"));
+const authForgotPassword = document.querySelector("[data-auth-forgot-password]");
+const authSubmitLogin = document.querySelector("[data-auth-submit-login]");
+const authSubmitSignup = document.querySelector("[data-auth-submit-signup]");
+const authSwitchCopyLogin = document.querySelector("[data-auth-switch-copy-login]");
+const authSwitchCopySignup = document.querySelector("[data-auth-switch-copy-signup]");
+const authLoginIdentityInput = document.querySelector("[data-auth-login-identity]");
+const authLoginPasswordInput = document.querySelector("[data-auth-login-password]");
+const authSignupNameInput = document.querySelector("[data-auth-signup-name]");
+const authSignupEmailInput = document.querySelector("[data-auth-signup-email]");
+const authSignupPasswordInput = document.querySelector("[data-auth-signup-password]");
+const authSignupPasswordConfirmInput = document.querySelector("[data-auth-signup-password-confirm]");
+const authFeedbackElements = Array.from(document.querySelectorAll("[data-auth-feedback]"));
+const authPasswordToggles = Array.from(document.querySelectorAll("[data-auth-password-toggle]"));
 const uploadTriggers = Array.from(document.querySelectorAll("[data-upload-trigger]"));
 const photoInput = document.querySelector("[data-photo-input]");
 const photoLocked = document.querySelector("[data-photo-locked]");
@@ -82,6 +104,29 @@ const translations = {
         "auth.login": "Inloggen",
         "auth.logout": "Uitloggen",
         "auth.signup": "Aanmelden",
+        "auth.modal.close": "Sluit inlogvenster",
+        "auth.modal.tabLogin": "Inloggen",
+        "auth.modal.tabSignup": "Aanmelden",
+        "auth.modal.loginKicker": "WELKOM TERUG",
+        "auth.modal.loginTitle": "Inloggen",
+        "auth.modal.loginDescription": "Log in om verder te gaan en de buurtcompetitie te openen.",
+        "auth.modal.signupKicker": "DOE MEE",
+        "auth.modal.signupTitle": "Aanmelden",
+        "auth.modal.signupDescription": "Maak je account aan en start meteen met competities, foto's en buurtmomenten.",
+        "auth.modal.identityPlaceholder": "Gebruikersnaam",
+        "auth.modal.passwordPlaceholder": "Wachtwoord",
+        "auth.modal.namePlaceholder": "Volledige naam",
+        "auth.modal.emailPlaceholder": "E-mailadres",
+        "auth.modal.passwordConfirmPlaceholder": "Herhaal wachtwoord",
+        "auth.modal.forgotPassword": "Wachtwoord vergeten?",
+        "auth.modal.switchToSignupLead": "Nog geen account?",
+        "auth.modal.switchToLoginLead": "Heb je al een account?",
+        "auth.modal.showPassword": "Toon wachtwoord",
+        "auth.modal.hidePassword": "Verberg wachtwoord",
+        "auth.modal.feedback.loginMissing": "Vul je gebruikersnaam en wachtwoord in.",
+        "auth.modal.feedback.signupMissing": "Vul alle velden in om je account aan te maken.",
+        "auth.modal.feedback.passwordShort": "Gebruik een wachtwoord van minimaal 6 tekens.",
+        "auth.modal.feedback.passwordMismatch": "De wachtwoorden komen niet overeen.",
         "account.menuLabel": "Open accountmenu",
         "account.name": "Danny",
         "account.rolePlayer": "Speler",
@@ -204,6 +249,29 @@ const translations = {
         "auth.login": "Log in",
         "auth.logout": "Log out",
         "auth.signup": "Sign up",
+        "auth.modal.close": "Close login dialog",
+        "auth.modal.tabLogin": "Log in",
+        "auth.modal.tabSignup": "Sign up",
+        "auth.modal.loginKicker": "WELCOME BACK",
+        "auth.modal.loginTitle": "Log in",
+        "auth.modal.loginDescription": "Log in to continue and open the neighborhood competition.",
+        "auth.modal.signupKicker": "JOIN IN",
+        "auth.modal.signupTitle": "Sign up",
+        "auth.modal.signupDescription": "Create your account and start with competitions, photos, and neighborhood moments right away.",
+        "auth.modal.identityPlaceholder": "Username",
+        "auth.modal.passwordPlaceholder": "Password",
+        "auth.modal.namePlaceholder": "Full name",
+        "auth.modal.emailPlaceholder": "Email address",
+        "auth.modal.passwordConfirmPlaceholder": "Repeat password",
+        "auth.modal.forgotPassword": "Forgot password?",
+        "auth.modal.switchToSignupLead": "Don't have an account?",
+        "auth.modal.switchToLoginLead": "Already have an account?",
+        "auth.modal.showPassword": "Show password",
+        "auth.modal.hidePassword": "Hide password",
+        "auth.modal.feedback.loginMissing": "Enter your username and password.",
+        "auth.modal.feedback.signupMissing": "Fill in all fields to create your account.",
+        "auth.modal.feedback.passwordShort": "Use a password with at least 6 characters.",
+        "auth.modal.feedback.passwordMismatch": "The passwords do not match.",
         "account.menuLabel": "Open account menu",
         "account.name": "Danny",
         "account.rolePlayer": "Player",
@@ -584,6 +652,7 @@ let languageMenuTimer = 0;
 let accountMenuTimer = 0;
 let uploadModalTimer = 0;
 let competitionModalTimer = 0;
+let authModalTimer = 0;
 let scrollSpyFrame = 0;
 
 const navSections = navLinks
@@ -1110,6 +1179,73 @@ function syncAuthUI() {
     syncCompetitionAdminUI();
 }
 
+function syncAuthModalUI() {
+    const currentMode = authForms.find((form) => form.classList.contains("is-active"))?.dataset.authForm === "signup" ? "signup" : "login";
+
+    if (authCloseButtons[0]) {
+        authCloseButtons[0].setAttribute("aria-label", t("auth.modal.close"));
+    }
+
+    authTabs.forEach((tab) => {
+        tab.textContent = t(tab.dataset.authTab === "signup" ? "auth.modal.tabSignup" : "auth.modal.tabLogin");
+    });
+
+    authSwitchButtons.forEach((button) => {
+        button.textContent = t(button.dataset.authSwitch === "signup" ? "auth.modal.tabSignup" : "auth.modal.tabLogin");
+    });
+
+    if (authForgotPassword) {
+        authForgotPassword.textContent = t("auth.modal.forgotPassword");
+    }
+
+    if (authSubmitLogin) {
+        authSubmitLogin.textContent = t("auth.modal.tabLogin");
+    }
+
+    if (authSubmitSignup) {
+        authSubmitSignup.textContent = t("auth.signup");
+    }
+
+    if (authSwitchCopyLogin) {
+        authSwitchCopyLogin.textContent = t("auth.modal.switchToSignupLead");
+    }
+
+    if (authSwitchCopySignup) {
+        authSwitchCopySignup.textContent = t("auth.modal.switchToLoginLead");
+    }
+
+    if (authLoginIdentityInput) {
+        authLoginIdentityInput.placeholder = t("auth.modal.identityPlaceholder");
+    }
+
+    if (authLoginPasswordInput) {
+        authLoginPasswordInput.placeholder = t("auth.modal.passwordPlaceholder");
+    }
+
+    if (authSignupNameInput) {
+        authSignupNameInput.placeholder = t("auth.modal.namePlaceholder");
+    }
+
+    if (authSignupEmailInput) {
+        authSignupEmailInput.placeholder = t("auth.modal.emailPlaceholder");
+    }
+
+    if (authSignupPasswordInput) {
+        authSignupPasswordInput.placeholder = t("auth.modal.passwordPlaceholder");
+    }
+
+    if (authSignupPasswordConfirmInput) {
+        authSignupPasswordConfirmInput.placeholder = t("auth.modal.passwordConfirmPlaceholder");
+    }
+
+    authPasswordToggles.forEach((toggle) => {
+        const isActive = toggle.classList.contains("is-active");
+        toggle.setAttribute("aria-label", t(isActive ? "auth.modal.hidePassword" : "auth.modal.showPassword"));
+    });
+
+    setAuthMode(currentMode);
+}
+
 function applyTranslations() {
     html.lang = state.lang;
     document.title = t("meta.title");
@@ -1137,6 +1273,7 @@ function applyTranslations() {
     syncNavToggleLabel();
     syncLanguageUI();
     syncAuthUI();
+    syncAuthModalUI();
     syncUploadModalUI();
     syncCompetitionFormUI();
     renderCompetitions();
@@ -1173,6 +1310,7 @@ function setLoggedIn(loggedIn) {
     body.classList.toggle("is-logged-in", loggedIn);
 
     if (!loggedIn) {
+        closeAuthModal();
         closeUploadModal();
         closeCompetitionModal();
         closeAccountMenu();
@@ -1181,6 +1319,115 @@ function setLoggedIn(loggedIn) {
     syncAuthUI();
     renderCompetitions();
     renderPhotos();
+}
+
+function setAuthMode(mode) {
+    const nextMode = mode === "signup" ? "signup" : "login";
+
+    authTabs.forEach((tab) => {
+        tab.classList.toggle("is-active", tab.dataset.authTab === nextMode);
+    });
+
+    authForms.forEach((form) => {
+        const isActive = form.dataset.authForm === nextMode;
+        form.hidden = !isActive;
+        form.classList.toggle("is-active", isActive);
+    });
+
+    authFeedbackElements.forEach((element) => {
+        element.textContent = "";
+        element.classList.remove("is-success");
+    });
+
+    if (authModalKicker) {
+        authModalKicker.textContent = t(nextMode === "signup" ? "auth.modal.signupKicker" : "auth.modal.loginKicker");
+    }
+
+    if (authModalTitle) {
+        authModalTitle.textContent = t(nextMode === "signup" ? "auth.modal.signupTitle" : "auth.modal.loginTitle");
+    }
+
+    if (authModalDescription) {
+        authModalDescription.textContent = t(nextMode === "signup" ? "auth.modal.signupDescription" : "auth.modal.loginDescription");
+    }
+}
+
+function openAuthModal(mode = "login") {
+    if (!authModal || state.loggedIn) {
+        return;
+    }
+
+    clearTimeout(authModalTimer);
+    setAuthMode(mode);
+    authModal.hidden = false;
+    body.classList.add("auth-modal-open");
+
+    requestAnimationFrame(() => {
+        authModal.classList.add("is-open");
+    });
+
+    window.setTimeout(() => {
+        if (!authModal || authModal.hidden) {
+            return;
+        }
+
+        const activeForm = authForms.find((form) => form.dataset.authForm === (mode === "signup" ? "signup" : "login"));
+        const firstInput = activeForm?.querySelector("input");
+        firstInput?.focus();
+    }, 120);
+}
+
+function closeAuthModal() {
+    if (!authModal || authModal.hidden) {
+        return;
+    }
+
+    clearTimeout(authModalTimer);
+    authModal.classList.remove("is-open");
+    body.classList.remove("auth-modal-open");
+
+    authModalTimer = window.setTimeout(() => {
+        authModal.hidden = true;
+
+        authForms.forEach((form) => {
+            form.reset();
+        });
+
+        authFeedbackElements.forEach((element) => {
+            element.textContent = "";
+            element.classList.remove("is-success");
+        });
+
+        authPasswordToggles.forEach((toggle) => {
+            toggle.classList.remove("is-active");
+            const icon = toggle.querySelector("i");
+            if (icon) {
+                icon.className = "fa-regular fa-eye";
+            }
+        });
+
+        authForms.forEach((form) => {
+            form.querySelectorAll("input[type='text'], input[type='email']").forEach((input) => {
+                input.value = input.value.trim();
+            });
+
+            form.querySelectorAll("input[type='text'], input[type='email'], input[type='password']").forEach((input) => {
+                if (input instanceof HTMLInputElement && input.dataset.authInputOriginalType) {
+                    input.type = input.dataset.authInputOriginalType;
+                }
+            });
+        });
+    }, 220);
+}
+
+function setAuthFeedback(mode, message, isSuccess = false) {
+    const feedback = authFeedbackElements.find((element) => element.dataset.authFeedback === mode);
+    if (!feedback) {
+        return;
+    }
+
+    feedback.textContent = message;
+    feedback.classList.toggle("is-success", isSuccess);
 }
 
 function sanitizeFilename(fileName) {
@@ -1607,8 +1854,30 @@ navLinks.forEach((link) => {
 });
 
 authToggles.forEach((toggle) => {
-    toggle.addEventListener("click", () => {
-        setLoggedIn(!state.loggedIn);
+    toggle.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        if (state.loggedIn) {
+            setLoggedIn(false);
+        } else {
+            openAuthModal("login");
+        }
+
+        if (window.innerWidth <= 920) {
+            closeMobileMenu();
+        }
+    });
+});
+
+authOpeners.forEach((opener) => {
+    opener.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        if (state.loggedIn) {
+            return;
+        }
+
+        openAuthModal(opener.dataset.authOpen);
 
         if (window.innerWidth <= 920) {
             closeMobileMenu();
@@ -1617,7 +1886,106 @@ authToggles.forEach((toggle) => {
 });
 
 lockedLoginButton?.addEventListener("click", () => {
-    setLoggedIn(true);
+    if (!state.loggedIn) {
+        openAuthModal("login");
+    }
+});
+
+authTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+        setAuthMode(tab.dataset.authTab);
+    });
+});
+
+authSwitchButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        setAuthMode(button.dataset.authSwitch);
+    });
+});
+
+authCloseButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        closeAuthModal();
+    });
+});
+
+authPasswordToggles.forEach((toggle) => {
+    const input = toggle.closest(".auth-input-password")?.querySelector("input");
+    if (input instanceof HTMLInputElement) {
+        input.dataset.authInputOriginalType = input.type;
+    }
+
+    toggle.addEventListener("click", () => {
+        const field = toggle.closest(".auth-input-password")?.querySelector("input");
+        const icon = toggle.querySelector("i");
+
+        if (!(field instanceof HTMLInputElement)) {
+            return;
+        }
+
+        const revealPassword = field.type === "password";
+        field.type = revealPassword ? "text" : "password";
+        toggle.classList.toggle("is-active", revealPassword);
+        toggle.setAttribute("aria-label", revealPassword ? "Verberg wachtwoord" : "Toon wachtwoord");
+
+        if (icon) {
+            icon.className = revealPassword ? "fa-regular fa-eye-slash" : "fa-regular fa-eye";
+        }
+    });
+});
+
+authForms.forEach((form) => {
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const mode = form.dataset.authForm === "signup" ? "signup" : "login";
+        setAuthFeedback(mode, "");
+
+        if (mode === "login") {
+            const identityInput = form.querySelector("[data-auth-login-identity]");
+            const passwordInput = form.querySelector("[data-auth-login-password]");
+            const identity = identityInput instanceof HTMLInputElement ? identityInput.value.trim() : "";
+            const password = passwordInput instanceof HTMLInputElement ? passwordInput.value.trim() : "";
+
+            if (!identity || !password) {
+                setAuthFeedback("login", t("auth.modal.feedback.loginMissing"));
+                return;
+            }
+
+            setRole("player");
+            setLoggedIn(true);
+            closeAuthModal();
+            return;
+        }
+
+        const nameInput = form.querySelector("[data-auth-signup-name]");
+        const emailInput = form.querySelector("[data-auth-signup-email]");
+        const passwordInput = form.querySelector("[data-auth-signup-password]");
+        const confirmInput = form.querySelector("[data-auth-signup-password-confirm]");
+        const name = nameInput instanceof HTMLInputElement ? nameInput.value.trim() : "";
+        const email = emailInput instanceof HTMLInputElement ? emailInput.value.trim() : "";
+        const password = passwordInput instanceof HTMLInputElement ? passwordInput.value : "";
+        const passwordConfirm = confirmInput instanceof HTMLInputElement ? confirmInput.value : "";
+
+        if (!name || !email || !password || !passwordConfirm) {
+            setAuthFeedback("signup", t("auth.modal.feedback.signupMissing"));
+            return;
+        }
+
+        if (password.length < 6) {
+            setAuthFeedback("signup", t("auth.modal.feedback.passwordShort"));
+            return;
+        }
+
+        if (password !== passwordConfirm) {
+            setAuthFeedback("signup", t("auth.modal.feedback.passwordMismatch"));
+            return;
+        }
+
+        setRole("player");
+        setLoggedIn(true);
+        closeAuthModal();
+    });
 });
 
 langToggle?.addEventListener("click", () => {
@@ -1763,6 +2131,13 @@ document.addEventListener("click", (event) => {
         closeAccountMenu();
     }
 
+    if (authModal && !authModal.hidden) {
+        const dialog = authModal.querySelector(".auth-modal-dialog");
+        if (dialog && !dialog.contains(target) && target instanceof Element && target.hasAttribute("data-auth-close")) {
+            closeAuthModal();
+        }
+    }
+
     if (window.innerWidth <= 920 && siteHeader && !siteHeader.contains(target) && body.classList.contains("nav-open")) {
         closeMobileMenu();
     }
@@ -1775,6 +2150,11 @@ document.addEventListener("keydown", (event) => {
 
     if (competitionModal && !competitionModal.hidden) {
         closeCompetitionModal();
+        return;
+    }
+
+    if (authModal && !authModal.hidden) {
+        closeAuthModal();
         return;
     }
 
@@ -1813,5 +2193,6 @@ setLoggedIn(state.loggedIn);
 setLanguageMenuOpen(false);
 setAccountMenuOpen(false);
 closeCompetitionModal();
+setAuthMode("login");
 syncNavToggleLabel();
 updateActiveNavLink();
