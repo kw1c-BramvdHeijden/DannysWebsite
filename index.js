@@ -91,6 +91,8 @@ const COMPETITION_DELETED_KEY = "boules_deleted_competitions";
 const LANG_KEY = "boules_language";
 const DEFAULT_AUTHOR = "Danny";
 const CURRENT_USER_ID = "danny";
+const DEMO_ADMIN_USERNAME = "Danny";
+const DEMO_ADMIN_PASSWORD = "123";
 const localeMap = {
     nl: "nl-NL",
     en: "en-GB"
@@ -133,6 +135,7 @@ const translations = {
         "auth.modal.showPassword": "Toon wachtwoord",
         "auth.modal.hidePassword": "Verberg wachtwoord",
         "auth.modal.feedback.loginMissing": "Vul je gebruikersnaam en wachtwoord in.",
+        "auth.modal.feedback.loginInvalid": "De ingevoerde gegevens zijn onjuist.",
         "auth.modal.feedback.signupMissing": "Vul alle velden in om je account aan te maken.",
         "auth.modal.feedback.passwordShort": "Gebruik een wachtwoord van minimaal 6 tekens.",
         "auth.modal.feedback.passwordMismatch": "De wachtwoorden komen niet overeen.",
@@ -297,6 +300,7 @@ const translations = {
         "auth.modal.showPassword": "Show password",
         "auth.modal.hidePassword": "Hide password",
         "auth.modal.feedback.loginMissing": "Enter your username and password.",
+        "auth.modal.feedback.loginInvalid": "The entered credentials are incorrect.",
         "auth.modal.feedback.signupMissing": "Fill in all fields to create your account.",
         "auth.modal.feedback.passwordShort": "Use a password with at least 6 characters.",
         "auth.modal.feedback.passwordMismatch": "The passwords do not match.",
@@ -2432,7 +2436,14 @@ authForms.forEach((form) => {
                 return;
             }
 
-            setRole("player");
+            const matchesDemoAdmin = identity.toLowerCase() === DEMO_ADMIN_USERNAME.toLowerCase() && password === DEMO_ADMIN_PASSWORD;
+
+            if (!matchesDemoAdmin) {
+                setAuthFeedback("login", t("auth.modal.feedback.loginInvalid"));
+                return;
+            }
+
+            setRole("admin");
             setLoggedIn(true);
             closeAuthModal();
             return;
