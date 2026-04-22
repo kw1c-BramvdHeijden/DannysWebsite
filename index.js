@@ -6,6 +6,7 @@ const navPanel = document.querySelector(".nav-panel");
 const navLinks = Array.from(document.querySelectorAll(".main-nav a"));
 const authToggles = Array.from(document.querySelectorAll("[data-auth-toggle]"));
 const authOpeners = Array.from(document.querySelectorAll("[data-auth-open]"));
+const teamOpeners = Array.from(document.querySelectorAll("[data-team-open]"));
 const signupCta = document.querySelector("[data-signup-cta]");
 const accountSwitcher = document.querySelector("[data-account-switcher]");
 const accountToggle = document.querySelector("[data-account-toggle]");
@@ -35,6 +36,41 @@ const authSignupPasswordInput = document.querySelector("[data-auth-signup-passwo
 const authSignupPasswordConfirmInput = document.querySelector("[data-auth-signup-password-confirm]");
 const authFeedbackElements = Array.from(document.querySelectorAll("[data-auth-feedback]"));
 const authPasswordToggles = Array.from(document.querySelectorAll("[data-auth-password-toggle]"));
+const teamModal = document.querySelector("[data-team-modal]");
+const teamForm = document.querySelector("[data-team-form]");
+const teamCloseButtons = Array.from(document.querySelectorAll("[data-team-close]"));
+const teamModalKicker = document.querySelector("[data-team-modal-kicker]");
+const teamModalTitle = document.querySelector("[data-team-modal-title]");
+const teamModalDescription = document.querySelector("[data-team-modal-description]");
+const teamNameInput = document.querySelector("[data-team-name]");
+const teamLabelInput = document.querySelector("[data-team-label]");
+const teamMottoInput = document.querySelector("[data-team-motto]");
+const teamColorOptions = Array.from(document.querySelectorAll("[data-team-color-option]"));
+const teamCustomColorInput = document.querySelector("[data-team-custom-color]");
+const teamCustomColorSwatch = document.querySelector("[data-team-custom-swatch]");
+const teamCustomHex = document.querySelector("[data-team-custom-hex]");
+const teamCustomRgb = document.querySelector("[data-team-custom-rgb]");
+const teamMemberQueryInput = document.querySelector("[data-team-member-query]");
+const teamSearchResults = document.querySelector("[data-team-search-results]");
+const teamSearchStatus = document.querySelector("[data-team-search-status]");
+const teamSelectedMembers = document.querySelector("[data-team-selected-members]");
+const teamSelectedEmpty = document.querySelector("[data-team-selected-empty]");
+const teamMemberCount = document.querySelector("[data-team-member-count]");
+const teamFeedback = document.querySelector("[data-team-feedback]");
+const teamSubmitLabel = document.querySelector("[data-team-submit-label]");
+const teamAdminToolbar = document.querySelector("[data-team-admin-toolbar]");
+const teamAdminToggle = document.querySelector("[data-team-admin-toggle]");
+const teamAdminToggleLabel = document.querySelector("[data-team-admin-toggle-label]");
+const teamAdminSummary = document.querySelector("[data-team-admin-summary]");
+const teamAdminPanel = document.querySelector("[data-team-admin-panel]");
+const teamAdminList = document.querySelector("[data-team-admin-list]");
+const teamAdminEmpty = document.querySelector("[data-team-admin-empty]");
+const teamPreviewCard = document.querySelector(".team-preview-card");
+const teamPreviewLabel = document.querySelector("[data-team-preview-label]");
+const teamPreviewTitle = document.querySelector("[data-team-preview-title]");
+const teamPreviewMotto = document.querySelector("[data-team-preview-motto]");
+const teamPreviewMembers = document.querySelector("[data-team-preview-members]");
+const teamToast = document.querySelector("[data-team-toast]");
 const uploadTriggers = Array.from(document.querySelectorAll("[data-upload-trigger]"));
 const photoInput = document.querySelector("[data-photo-input]");
 const photoLocked = document.querySelector("[data-photo-locked]");
@@ -88,11 +124,33 @@ const DELETED_PHOTOS_KEY = "boules_deleted_photos";
 const COMPETITION_CUSTOM_KEY = "boules_custom_competitions";
 const COMPETITION_EDITS_KEY = "boules_competition_edits";
 const COMPETITION_DELETED_KEY = "boules_deleted_competitions";
+const TEAM_STORAGE_KEY = "boules_saved_teams";
+const TEAM_INVITES_KEY = "boules_team_invites";
 const LANG_KEY = "boules_language";
 const DEFAULT_AUTHOR = "Danny";
 const CURRENT_USER_ID = "danny";
 const DEMO_ADMIN_USERNAME = "Danny";
 const DEMO_ADMIN_PASSWORD = "123";
+const LEGACY_TEAM_COLOR_MAP = {
+    olive: "#9BAA67",
+    red: "#CB352C",
+    green: "#7B9151",
+    yellow: "#F0C458",
+    ink: "#353A36"
+};
+const DEFAULT_TEAM_COLOR = LEGACY_TEAM_COLOR_MAP.olive;
+const DEMO_TEAM_ACCOUNTS = [
+    { accountId: "danny01", name: "Danny", email: "danny@boules.nl" },
+    { accountId: "danny02", name: "Danny", email: "danny.vriend@boules.nl" },
+    { accountId: "sanne01", name: "Sanne", email: "sanne@boules.nl" },
+    { accountId: "milan01", name: "Milan", email: "milan@boules.nl" },
+    { accountId: "lotte01", name: "Lotte", email: "lotte@boules.nl" },
+    { accountId: "lotte02", name: "Lotte", email: "lotte.vdb@boules.nl" },
+    { accountId: "jamal01", name: "Jamal", email: "jamal@boules.nl" },
+    { accountId: "noor01", name: "Noor", email: "noor@boules.nl" },
+    { accountId: "sem01", name: "Sem", email: "sem@boules.nl" },
+    { accountId: "yara01", name: "Yara", email: "yara@boules.nl" }
+];
 const localeMap = {
     nl: "nl-NL",
     en: "en-GB"
@@ -139,6 +197,70 @@ const translations = {
         "auth.modal.feedback.signupMissing": "Vul alle velden in om je account aan te maken.",
         "auth.modal.feedback.passwordShort": "Gebruik een wachtwoord van minimaal 6 tekens.",
         "auth.modal.feedback.passwordMismatch": "De wachtwoorden komen niet overeen.",
+        "team.modal.close": "Sluit teamvenster",
+        "team.modal.kicker": "TEAM AANMAKEN",
+        "team.modal.title": "Meld een team aan",
+        "team.modal.description": "Vul de teamgegevens in, kies een kleur en voeg spelers toe via zoeken.",
+        "team.modal.editKicker": "TEAM BEWERKEN",
+        "team.modal.editTitle": "Pas een team aan",
+        "team.modal.editDescription": "Werk teamgegevens bij, verander spelers of verwijder een team via het beheer.",
+        "team.modal.previewKicker": "TEAM PREVIEW",
+        "team.preview.defaultTitle": "Nieuw team",
+        "team.preview.defaultMotto": "Voeg een motto of korte beschrijving toe.",
+        "team.preview.defaultLabel": "TEAM",
+        "team.preview.membersPrefix": "Spelers",
+        "team.preview.memberCount": "spelers",
+        "team.form.name": "Titel van het team",
+        "team.form.namePlaceholder": "Bijvoorbeeld: De Werpers",
+        "team.form.label": "Label van het team",
+        "team.form.labelPlaceholder": "Bijvoorbeeld: DWT",
+        "team.form.motto": "Motto / beschrijving",
+        "team.form.mottoPlaceholder": "Geef kort aan waar het team voor staat",
+        "team.form.color": "Labelkleur van het team",
+        "team.color.olive": "Olijf",
+        "team.color.red": "Rood",
+        "team.color.green": "Groen",
+        "team.color.yellow": "Geel",
+        "team.color.ink": "Donker",
+        "team.color.basic": "Basiskleuren",
+        "team.color.custom": "Aangepaste kleur",
+        "team.color.pick": "Kies een aangepaste kleur",
+        "team.form.membersTitle": "Gebruiker toevoegen aan het team",
+        "team.form.membersDescription": "Typ een naam of account-id en kies direct de juiste gebruiker uit de lijst.",
+        "team.form.memberSearchLabel": "Zoek op naam of account-id",
+        "team.form.memberPlaceholder": "Zoek op naam of account-id",
+        "team.form.memberHint": "Begin met typen om spelers te zoeken.",
+        "team.form.membersEmpty": "Nog geen teamleden toegevoegd.",
+        "team.form.membersEmptyShort": "Nog geen spelers toegevoegd",
+        "team.form.emailNote": "Uitnodigingen worden na koppeling met een backend per e-mail verzonden. In deze demo slaan we ze lokaal op.",
+        "team.form.submit": "Team aanmaken",
+        "team.form.save": "Wijzigingen opslaan",
+        "team.form.cancel": "Annuleren",
+        "team.admin.toggleOpen": "Beheer teams",
+        "team.admin.toggleClose": "Sluit teambeheer",
+        "team.admin.heading": "Aangemaakte en actieve teams",
+        "team.admin.description": "Open een team om het formulier te vullen, of verwijder het direct.",
+        "team.admin.empty": "Nog geen teams opgeslagen.",
+        "team.admin.summarySingle": "team",
+        "team.admin.summaryPlural": "teams",
+        "team.admin.edit": "Aanpassen",
+        "team.admin.delete": "Verwijderen",
+        "team.admin.deleteConfirm": "Weet je zeker dat je dit team wilt verwijderen?",
+        "team.admin.editing": "Wordt bewerkt",
+        "team.feedback.nameRequired": "Vul een teamnaam in.",
+        "team.feedback.memberRequired": "Voeg minimaal een gebruiker toe aan het team.",
+        "team.feedback.searchNoResults": "Geen accounts gevonden voor deze zoekopdracht.",
+        "team.feedback.searchTyping": "Blijf typen om spelers te zoeken.",
+        "team.feedback.memberAdded": "is toegevoegd aan het team. Uitnodiging staat lokaal klaar.",
+        "team.feedback.memberRemoved": "is verwijderd uit het team.",
+        "team.feedback.created": "is aangemaakt en opgeslagen.",
+        "team.feedback.updated": "is bijgewerkt en opgeslagen.",
+        "team.feedback.deleted": "is verwijderd.",
+        "team.feedback.editLoaded": "is geladen om te bewerken.",
+        "team.feedback.toast": "Team opgeslagen. Uitnodigingen staan lokaal klaar.",
+        "team.feedback.pickSuggestion": "Klik op een account om iemand toe te voegen.",
+        "team.feedback.duplicateMember": "Deze gebruiker zit al in het team.",
+        "team.feedback.emailPending": "E-mailuitnodiging staat klaar na backend-koppeling.",
         "account.menuLabel": "Open accountmenu",
         "account.name": "Danny",
         "account.rolePlayer": "Speler",
@@ -304,6 +426,70 @@ const translations = {
         "auth.modal.feedback.signupMissing": "Fill in all fields to create your account.",
         "auth.modal.feedback.passwordShort": "Use a password with at least 6 characters.",
         "auth.modal.feedback.passwordMismatch": "The passwords do not match.",
+        "team.modal.close": "Close team dialog",
+        "team.modal.kicker": "CREATE TEAM",
+        "team.modal.title": "Register a team",
+        "team.modal.description": "Fill in the team details, choose a color, and add players through search.",
+        "team.modal.editKicker": "EDIT TEAM",
+        "team.modal.editTitle": "Update a team",
+        "team.modal.editDescription": "Update team details, change players, or remove a team through the admin tools.",
+        "team.modal.previewKicker": "TEAM PREVIEW",
+        "team.preview.defaultTitle": "New team",
+        "team.preview.defaultMotto": "Add a motto or short description.",
+        "team.preview.defaultLabel": "TEAM",
+        "team.preview.membersPrefix": "Players",
+        "team.preview.memberCount": "players",
+        "team.form.name": "Team title",
+        "team.form.namePlaceholder": "For example: The Throwers",
+        "team.form.label": "Team label",
+        "team.form.labelPlaceholder": "For example: THR",
+        "team.form.motto": "Motto / description",
+        "team.form.mottoPlaceholder": "Briefly describe what the team stands for",
+        "team.form.color": "Team label color",
+        "team.color.olive": "Olive",
+        "team.color.red": "Red",
+        "team.color.green": "Green",
+        "team.color.yellow": "Yellow",
+        "team.color.ink": "Dark",
+        "team.color.basic": "Basic colors",
+        "team.color.custom": "Custom color",
+        "team.color.pick": "Pick a custom color",
+        "team.form.membersTitle": "Add a user to the team",
+        "team.form.membersDescription": "Type a name or account ID and pick the right user directly from the list.",
+        "team.form.memberSearchLabel": "Search by name or account ID",
+        "team.form.memberPlaceholder": "Search by name or account ID",
+        "team.form.memberHint": "Start typing to search players.",
+        "team.form.membersEmpty": "No team members added yet.",
+        "team.form.membersEmptyShort": "No players added yet",
+        "team.form.emailNote": "Invitations will be sent by email after a backend is connected. In this demo we store them locally.",
+        "team.form.submit": "Create team",
+        "team.form.save": "Save changes",
+        "team.form.cancel": "Cancel",
+        "team.admin.toggleOpen": "Manage teams",
+        "team.admin.toggleClose": "Close team manager",
+        "team.admin.heading": "Created and active teams",
+        "team.admin.description": "Load a team into the form to edit it, or remove it directly.",
+        "team.admin.empty": "No teams saved yet.",
+        "team.admin.summarySingle": "team",
+        "team.admin.summaryPlural": "teams",
+        "team.admin.edit": "Edit",
+        "team.admin.delete": "Delete",
+        "team.admin.deleteConfirm": "Are you sure you want to remove this team?",
+        "team.admin.editing": "Editing",
+        "team.feedback.nameRequired": "Enter a team name.",
+        "team.feedback.memberRequired": "Add at least one user to the team.",
+        "team.feedback.searchNoResults": "No accounts found for this search.",
+        "team.feedback.searchTyping": "Keep typing to search players.",
+        "team.feedback.memberAdded": "was added to the team. The invitation is queued locally.",
+        "team.feedback.memberRemoved": "was removed from the team.",
+        "team.feedback.created": "was created and saved.",
+        "team.feedback.updated": "was updated and saved.",
+        "team.feedback.deleted": "was removed.",
+        "team.feedback.editLoaded": "was loaded for editing.",
+        "team.feedback.toast": "Team saved. Invitations are queued locally.",
+        "team.feedback.pickSuggestion": "Click an account to add that player.",
+        "team.feedback.duplicateMember": "This user is already in the team.",
+        "team.feedback.emailPending": "Email invitation is queued until a backend is connected.",
         "account.menuLabel": "Open account menu",
         "account.name": "Danny",
         "account.rolePlayer": "Player",
@@ -731,6 +917,149 @@ function t(key) {
     return translations[state.lang][key] || translations.nl[key] || key;
 }
 
+function isHexColor(value) {
+    return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value.trim());
+}
+
+function normalizeTeamColor(color) {
+    if (isHexColor(color)) {
+        return color.trim().toUpperCase();
+    }
+
+    if (typeof color === "string" && LEGACY_TEAM_COLOR_MAP[color]) {
+        return LEGACY_TEAM_COLOR_MAP[color];
+    }
+
+    return DEFAULT_TEAM_COLOR;
+}
+
+function hexToRgb(hexColor) {
+    const normalizedColor = normalizeTeamColor(hexColor).slice(1);
+
+    return {
+        red: Number.parseInt(normalizedColor.slice(0, 2), 16),
+        green: Number.parseInt(normalizedColor.slice(2, 4), 16),
+        blue: Number.parseInt(normalizedColor.slice(4, 6), 16)
+    };
+}
+
+function shadeHexColor(hexColor, amount) {
+    const { red, green, blue } = hexToRgb(hexColor);
+    const clamp = (value) => Math.max(0, Math.min(255, value));
+    const nextRed = clamp(red + amount);
+    const nextGreen = clamp(green + amount);
+    const nextBlue = clamp(blue + amount);
+
+    return `#${[nextRed, nextGreen, nextBlue]
+        .map((value) => value.toString(16).padStart(2, "0"))
+        .join("")
+        .toUpperCase()}`;
+}
+
+function isLightColor(hexColor) {
+    const { red, green, blue } = hexToRgb(hexColor);
+    const luminance = (0.299 * red) + (0.587 * green) + (0.114 * blue);
+    return luminance >= 170;
+}
+
+function normalizeTeamMember(member) {
+    if (!member || typeof member !== "object") {
+        return null;
+    }
+
+    const accountId = typeof member.accountId === "string" ? member.accountId.trim() : "";
+    const name = typeof member.name === "string" ? member.name.trim() : "";
+    const email = typeof member.email === "string" ? member.email.trim() : "";
+
+    if (!accountId || !name || !email) {
+        return null;
+    }
+
+    return {
+        accountId,
+        name,
+        email
+    };
+}
+
+function normalizeStoredTeam(team) {
+    if (!team || typeof team !== "object") {
+        return null;
+    }
+
+    const name = typeof team.name === "string" ? team.name.trim() : "";
+    if (!name) {
+        return null;
+    }
+
+    const members = Array.isArray(team.members)
+        ? team.members.map(normalizeTeamMember).filter(Boolean)
+        : [];
+
+    if (!members.length) {
+        return null;
+    }
+
+    return {
+        id: typeof team.id === "string" || typeof team.id === "number" ? String(team.id) : String(Date.now()),
+        name,
+        label: typeof team.label === "string" ? team.label.trim() : "",
+        motto: typeof team.motto === "string" ? team.motto.trim() : "",
+        color: normalizeTeamColor(team.color),
+        members,
+        createdAt: typeof team.createdAt === "string" ? team.createdAt : new Date().toISOString()
+    };
+}
+
+function normalizeStoredInvite(invite) {
+    if (!invite || typeof invite !== "object") {
+        return null;
+    }
+
+    const teamId = typeof invite.teamId === "string" || typeof invite.teamId === "number" ? String(invite.teamId) : "";
+    const accountId = typeof invite.accountId === "string" ? invite.accountId.trim() : "";
+    const email = typeof invite.email === "string" ? invite.email.trim() : "";
+    const teamName = typeof invite.teamName === "string" ? invite.teamName.trim() : "";
+
+    if (!accountId || !email || !teamName) {
+        return null;
+    }
+
+    return {
+        id: typeof invite.id === "string" || typeof invite.id === "number" ? String(invite.id) : String(Date.now()),
+        teamId,
+        accountId,
+        email,
+        teamName,
+        createdAt: typeof invite.createdAt === "string" ? invite.createdAt : new Date().toISOString(),
+        status: invite.status === "queued" ? "queued" : "queued"
+    };
+}
+
+function readStoredTeams() {
+    try {
+        const storedTeams = JSON.parse(localStorage.getItem(TEAM_STORAGE_KEY) || "[]");
+        return Array.isArray(storedTeams)
+            ? storedTeams.map(normalizeStoredTeam).filter(Boolean)
+            : [];
+    } catch (error) {
+        console.error("Could not load stored teams", error);
+        return [];
+    }
+}
+
+function readStoredTeamInvites() {
+    try {
+        const storedInvites = JSON.parse(localStorage.getItem(TEAM_INVITES_KEY) || "[]");
+        return Array.isArray(storedInvites)
+            ? storedInvites.map(normalizeStoredInvite).filter(Boolean)
+            : [];
+    } catch (error) {
+        console.error("Could not load stored team invites", error);
+        return [];
+    }
+}
+
 function readStoredPhotos() {
     try {
         const storedPhotos = JSON.parse(localStorage.getItem(PHOTOS_KEY) || "[]");
@@ -832,6 +1161,8 @@ const state = {
     lang: normalizeLanguage(localStorage.getItem(LANG_KEY)),
     loggedIn: localStorage.getItem(AUTH_KEY) === "true",
     role: normalizeRole(localStorage.getItem(ROLE_KEY)),
+    teams: readStoredTeams(),
+    teamInvites: readStoredTeamInvites(),
     photos: readStoredPhotos(),
     deletedPhotoIds: readDeletedPhotoIds(),
     competitions: readStoredCompetitions(),
@@ -840,6 +1171,8 @@ const state = {
     pendingUpload: null,
     pendingPhotoId: null,
     pendingCompetitionId: null,
+    pendingTeamEditId: null,
+    teamAdminPanelOpen: false,
     leaderboardTeamFilter: "all"
 };
 
@@ -848,8 +1181,11 @@ let accountMenuTimer = 0;
 let uploadModalTimer = 0;
 let competitionModalTimer = 0;
 let authModalTimer = 0;
+let teamModalTimer = 0;
 let leaderboardModalTimer = 0;
 let scrollSpyFrame = 0;
+let teamToastTimer = 0;
+let teamDraft = createEmptyTeamDraft();
 
 const navSections = navLinks
     .map((link) => {
@@ -889,6 +1225,14 @@ function saveCompetitionEdits() {
 
 function saveDeletedCompetitionIds() {
     localStorage.setItem(COMPETITION_DELETED_KEY, JSON.stringify(state.deletedCompetitionIds));
+}
+
+function saveTeams() {
+    localStorage.setItem(TEAM_STORAGE_KEY, JSON.stringify(state.teams));
+}
+
+function saveTeamInvites() {
+    localStorage.setItem(TEAM_INVITES_KEY, JSON.stringify(state.teamInvites));
 }
 
 function canDeletePhoto(photo) {
@@ -1065,6 +1409,10 @@ function renderPhotos() {
 }
 
 function canManageCompetitions() {
+    return state.loggedIn && state.role === "admin";
+}
+
+function canManageTeams() {
     return state.loggedIn && state.role === "admin";
 }
 
@@ -1721,6 +2069,7 @@ function applyTranslations() {
     syncLanguageUI();
     syncAuthUI();
     syncAuthModalUI();
+    syncTeamModalUI();
     syncUploadModalUI();
     syncCompetitionFormUI();
     renderLeaderboard();
@@ -1744,10 +2093,13 @@ function setRole(role) {
 
     if (state.role !== "admin") {
         closeCompetitionModal();
+        state.pendingTeamEditId = null;
+        setTeamAdminPanelOpen(false);
     }
 
     syncAccountUI();
     syncCompetitionAdminUI();
+    syncTeamModalUI();
     renderCompetitions();
     renderPhotos();
 }
@@ -1759,6 +2111,7 @@ function setLoggedIn(loggedIn) {
 
     if (!loggedIn) {
         closeAuthModal();
+        closeTeamModal();
         closeUploadModal();
         closeCompetitionModal();
         closeLeaderboardModal();
@@ -1878,6 +2231,717 @@ function setAuthFeedback(mode, message, isSuccess = false) {
 
     feedback.textContent = message;
     feedback.classList.toggle("is-success", isSuccess);
+}
+
+function createEmptyTeamDraft() {
+    return {
+        name: "",
+        label: "",
+        motto: "",
+        color: DEFAULT_TEAM_COLOR,
+        members: []
+    };
+}
+
+function createTeamInvite(teamId, teamName, member) {
+    return {
+        id: generateUploadId(),
+        teamId: String(teamId),
+        accountId: member.accountId,
+        email: member.email,
+        teamName,
+        createdAt: new Date().toISOString(),
+        status: "queued"
+    };
+}
+
+function getTeamLabel(name, label = "") {
+    const manualLabel = typeof label === "string" ? label.trim() : "";
+    if (manualLabel) {
+        return manualLabel.toUpperCase().slice(0, 8);
+    }
+
+    const teamName = typeof name === "string" ? name.trim() : "";
+    if (!teamName) {
+        return t("team.preview.defaultLabel");
+    }
+
+    const words = teamName.split(/\s+/).filter(Boolean);
+    if (words.length > 1) {
+        return words.slice(0, 3).map((word) => word.charAt(0)).join("").toUpperCase();
+    }
+
+    return teamName.slice(0, 4).toUpperCase();
+}
+
+function getTeamDraftName() {
+    return teamNameInput?.value.trim() || teamDraft.name || "";
+}
+
+function getTeamDraftLabel() {
+    return getTeamLabel(getTeamDraftName(), teamLabelInput?.value.trim() || teamDraft.label || "");
+}
+
+function setTeamFeedback(message, isSuccess = false) {
+    if (!teamFeedback) {
+        return;
+    }
+
+    teamFeedback.textContent = message;
+    teamFeedback.classList.toggle("is-success", isSuccess);
+}
+
+function setTeamSearchStatus(message, tone = "default") {
+    if (!teamSearchStatus) {
+        return;
+    }
+
+    teamSearchStatus.textContent = message;
+    teamSearchStatus.dataset.tone = tone;
+}
+
+function showTeamToast(message) {
+    if (!teamToast) {
+        return;
+    }
+
+    clearTimeout(teamToastTimer);
+    teamToast.textContent = message;
+    teamToast.hidden = false;
+    teamToast.classList.add("is-visible");
+
+    teamToastTimer = window.setTimeout(() => {
+        teamToast.classList.remove("is-visible");
+        teamToast.hidden = true;
+    }, 2800);
+}
+
+function resetTeamSearchResults() {
+    if (teamSearchResults) {
+        teamSearchResults.hidden = true;
+        teamSearchResults.innerHTML = "";
+    }
+}
+
+function getStoredTeamById(teamId) {
+    return state.teams.find((team) => String(team.id) === String(teamId)) || null;
+}
+
+function getTeamAdminSummaryLabel() {
+    const count = state.teams.length;
+    return `${count} ${t(count === 1 ? "team.admin.summarySingle" : "team.admin.summaryPlural")}`;
+}
+
+function setTeamAdminPanelOpen(isOpen) {
+    state.teamAdminPanelOpen = Boolean(isOpen) && canManageTeams();
+}
+
+function populateTeamFormFromDraft() {
+    if (teamNameInput) {
+        teamNameInput.value = teamDraft.name;
+    }
+
+    if (teamLabelInput) {
+        teamLabelInput.value = teamDraft.label;
+    }
+
+    if (teamMottoInput) {
+        teamMottoInput.value = teamDraft.motto;
+    }
+
+    if (teamCustomColorInput) {
+        teamCustomColorInput.value = normalizeTeamColor(teamDraft.color).toLowerCase();
+    }
+}
+
+function resetTeamDraft(options = {}) {
+    const { preserveAdminPanel = false, preserveFeedback = false } = options;
+
+    teamDraft = createEmptyTeamDraft();
+    state.pendingTeamEditId = null;
+
+    if (!preserveAdminPanel) {
+        setTeamAdminPanelOpen(false);
+    }
+
+    teamForm?.reset();
+    if (teamCustomColorInput) {
+        teamCustomColorInput.value = DEFAULT_TEAM_COLOR;
+    }
+
+    if (!preserveFeedback) {
+        setTeamFeedback("");
+    }
+    resetTeamSearchResults();
+    setTeamSearchStatus(t("team.form.memberHint"));
+    syncTeamModalUI();
+}
+
+function openTeamModal() {
+    if (!teamModal) {
+        return;
+    }
+
+    clearTimeout(teamModalTimer);
+    resetTeamDraft();
+    teamModal.hidden = false;
+    body.classList.add("team-modal-open");
+
+    requestAnimationFrame(() => {
+        teamModal.classList.add("is-open");
+    });
+
+    window.setTimeout(() => {
+        teamNameInput?.focus();
+    }, 120);
+}
+
+function closeTeamModal() {
+    if (!teamModal || teamModal.hidden) {
+        resetTeamDraft();
+        return;
+    }
+
+    clearTimeout(teamModalTimer);
+    teamModal.classList.remove("is-open");
+    body.classList.remove("team-modal-open");
+
+    teamModalTimer = window.setTimeout(() => {
+        teamModal.hidden = true;
+        resetTeamDraft();
+    }, 220);
+}
+
+function createTeamAdminCard(team) {
+    const item = document.createElement("article");
+    item.className = "team-admin-card";
+
+    const info = document.createElement("div");
+    info.className = "team-admin-card-copy";
+
+    const titleRow = document.createElement("div");
+    titleRow.className = "team-admin-card-head";
+
+    const badge = document.createElement("span");
+    badge.className = "team-admin-card-label";
+    badge.textContent = getTeamLabel(team.name, team.label);
+    badge.style.background = normalizeTeamColor(team.color);
+    badge.style.color = isLightColor(team.color) ? "#4e3c12" : "#ffffff";
+
+    const title = document.createElement("strong");
+    title.textContent = team.name;
+
+    titleRow.append(badge, title);
+
+    const meta = document.createElement("p");
+    meta.className = "team-admin-card-meta";
+    meta.textContent = `${team.members.length} ${t("team.preview.memberCount")}`;
+
+    info.append(titleRow, meta);
+
+    if (team.motto) {
+        const motto = document.createElement("p");
+        motto.className = "team-admin-card-motto";
+        motto.textContent = team.motto;
+        info.appendChild(motto);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "team-admin-card-actions";
+
+    if (String(team.id) === String(state.pendingTeamEditId)) {
+        const editingState = document.createElement("span");
+        editingState.className = "team-admin-card-state";
+        editingState.textContent = t("team.admin.editing");
+        actions.appendChild(editingState);
+    }
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.className = "team-admin-action";
+    editButton.dataset.teamEdit = String(team.id);
+    editButton.textContent = t("team.admin.edit");
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "team-admin-action is-danger";
+    deleteButton.dataset.teamDelete = String(team.id);
+    deleteButton.textContent = t("team.admin.delete");
+
+    actions.append(editButton, deleteButton);
+    item.append(info, actions);
+    return item;
+}
+
+function renderTeamAdminPanel() {
+    if (!teamAdminToolbar || !teamAdminPanel || !teamAdminList || !teamAdminEmpty) {
+        return;
+    }
+
+    const canManage = canManageTeams();
+    teamAdminToolbar.hidden = !canManage;
+    teamAdminPanel.hidden = !canManage || !state.teamAdminPanelOpen;
+
+    if (teamAdminSummary) {
+        teamAdminSummary.textContent = getTeamAdminSummaryLabel();
+    }
+
+    if (teamAdminToggleLabel) {
+        teamAdminToggleLabel.textContent = t(state.teamAdminPanelOpen ? "team.admin.toggleClose" : "team.admin.toggleOpen");
+    }
+
+    teamAdminList.innerHTML = "";
+
+    if (!canManage) {
+        return;
+    }
+
+    state.teams.forEach((team) => {
+        teamAdminList.appendChild(createTeamAdminCard(team));
+    });
+
+    teamAdminEmpty.hidden = state.teams.length > 0;
+}
+
+function loadTeamForEdit(teamId) {
+    if (!canManageTeams()) {
+        return;
+    }
+
+    const team = getStoredTeamById(teamId);
+    if (!team) {
+        return;
+    }
+
+    state.pendingTeamEditId = String(team.id);
+    teamDraft = {
+        name: team.name,
+        label: team.label || "",
+        motto: team.motto || "",
+        color: normalizeTeamColor(team.color),
+        members: team.members.map((member) => ({ ...member }))
+    };
+
+    populateTeamFormFromDraft();
+    if (teamMemberQueryInput) {
+        teamMemberQueryInput.value = "";
+    }
+    resetTeamSearchResults();
+    setTeamAdminPanelOpen(false);
+    setTeamFeedback(`${team.name} ${t("team.feedback.editLoaded")}`, true);
+    syncTeamModalUI();
+    teamNameInput?.focus();
+}
+
+function deleteTeam(teamId) {
+    if (!canManageTeams()) {
+        return;
+    }
+
+    const team = getStoredTeamById(teamId);
+    if (!team) {
+        return;
+    }
+
+    if (!window.confirm(`${t("team.admin.deleteConfirm")}\n\n${team.name}`)) {
+        return;
+    }
+
+    state.teams = state.teams.filter((item) => String(item.id) !== String(teamId));
+    state.teamInvites = state.teamInvites.filter((invite) => {
+        if (invite.teamId) {
+            return String(invite.teamId) !== String(teamId);
+        }
+
+        return invite.teamName !== team.name;
+    });
+
+    saveTeams();
+    saveTeamInvites();
+
+    if (String(state.pendingTeamEditId) === String(teamId)) {
+        resetTeamDraft({ preserveAdminPanel: true, preserveFeedback: true });
+    } else {
+        syncTeamModalUI();
+    }
+
+    setTeamFeedback(`${team.name} ${t("team.feedback.deleted")}`, true);
+    setTeamSearchStatus(`${team.name} ${t("team.feedback.deleted")}`, "success");
+}
+
+function renderTeamColorOptions() {
+    const selectedColor = normalizeTeamColor(teamDraft.color);
+    teamDraft.color = selectedColor;
+
+    teamColorOptions.forEach((option) => {
+        const optionColor = normalizeTeamColor(option.dataset.teamColorValue || "");
+        option.classList.toggle("is-selected", optionColor === selectedColor);
+    });
+
+    if (teamCustomColorInput) {
+        teamCustomColorInput.value = selectedColor.toLowerCase();
+    }
+
+    if (teamCustomColorSwatch) {
+        teamCustomColorSwatch.style.background = selectedColor;
+    }
+
+    if (teamCustomHex) {
+        teamCustomHex.textContent = selectedColor;
+    }
+
+    if (teamCustomRgb) {
+        const { red, green, blue } = hexToRgb(selectedColor);
+        teamCustomRgb.textContent = `RGB ${red}, ${green}, ${blue}`;
+    }
+
+    if (teamPreviewCard) {
+        const darkerTone = shadeHexColor(selectedColor, -28);
+        teamPreviewCard.style.background = `linear-gradient(145deg, ${selectedColor}, ${darkerTone})`;
+        teamPreviewCard.classList.toggle("is-light", isLightColor(selectedColor));
+        teamPreviewCard.style.setProperty("--team-preview-chip-bg", isLightColor(selectedColor)
+            ? "rgba(78, 60, 18, 0.14)"
+            : "rgba(255, 255, 255, 0.18)");
+    }
+}
+
+function renderTeamPreviewMembers() {
+    if (!teamPreviewMembers) {
+        return;
+    }
+
+    teamPreviewMembers.innerHTML = "";
+
+    if (!teamDraft.members.length) {
+        const empty = document.createElement("span");
+        empty.className = "team-preview-members-empty";
+        empty.textContent = t("team.form.membersEmptyShort");
+        teamPreviewMembers.appendChild(empty);
+        return;
+    }
+
+    teamDraft.members.slice(0, 4).forEach((member) => {
+        const tag = document.createElement("span");
+        tag.className = "team-preview-member";
+        tag.textContent = member.name;
+        teamPreviewMembers.appendChild(tag);
+    });
+
+    if (teamDraft.members.length > 4) {
+        const extra = document.createElement("span");
+        extra.className = "team-preview-member";
+        extra.textContent = `+${teamDraft.members.length - 4}`;
+        teamPreviewMembers.appendChild(extra);
+    }
+}
+
+function renderTeamPreview() {
+    if (teamPreviewLabel) {
+        teamPreviewLabel.textContent = getTeamDraftLabel();
+    }
+
+    if (teamPreviewTitle) {
+        teamPreviewTitle.textContent = getTeamDraftName() || t("team.preview.defaultTitle");
+    }
+
+    if (teamPreviewMotto) {
+        const motto = teamMottoInput?.value.trim() || teamDraft.motto || "";
+        teamPreviewMotto.textContent = motto || t("team.preview.defaultMotto");
+    }
+
+    renderTeamPreviewMembers();
+    renderTeamColorOptions();
+}
+
+function createSelectedMemberCard(member) {
+    const item = document.createElement("article");
+    item.className = "team-selected-member";
+
+    const copy = document.createElement("div");
+    copy.className = "team-selected-member-copy";
+
+    const name = document.createElement("strong");
+    name.textContent = member.name;
+
+    const meta = document.createElement("span");
+    meta.textContent = `${member.accountId} | ${member.email}`;
+
+    const status = document.createElement("small");
+    status.textContent = t("team.feedback.emailPending");
+
+    copy.append(name, meta, status);
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "team-remove-member";
+    removeButton.dataset.teamRemoveMember = member.accountId;
+    removeButton.setAttribute("aria-label", state.lang === "en" ? `Remove ${member.name}` : `${member.name} verwijderen`);
+    removeButton.innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
+
+    item.append(copy, removeButton);
+    return item;
+}
+
+function renderSelectedTeamMembers() {
+    if (!teamSelectedMembers || !teamSelectedEmpty || !teamMemberCount) {
+        return;
+    }
+
+    teamSelectedMembers.innerHTML = "";
+
+    teamDraft.members.forEach((member) => {
+        teamSelectedMembers.appendChild(createSelectedMemberCard(member));
+    });
+
+    teamSelectedEmpty.hidden = teamDraft.members.length > 0;
+    teamMemberCount.textContent = `${teamDraft.members.length} ${t("team.preview.memberCount")}`;
+}
+
+function getTeamSearchMatchScore(account, query) {
+    const normalizedQuery = query.toLowerCase();
+    const name = account.name.toLowerCase();
+    const accountId = account.accountId.toLowerCase();
+    const email = account.email.toLowerCase();
+
+    if (name.startsWith(normalizedQuery)) {
+        return 0;
+    }
+
+    if (accountId.startsWith(normalizedQuery)) {
+        return 1;
+    }
+
+    if (email.startsWith(normalizedQuery)) {
+        return 2;
+    }
+
+    if (name.includes(normalizedQuery)) {
+        return 3;
+    }
+
+    if (accountId.includes(normalizedQuery)) {
+        return 4;
+    }
+
+    return 5;
+}
+
+function searchTeamAccounts(query) {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) {
+        return [];
+    }
+
+    return DEMO_TEAM_ACCOUNTS
+        .filter((account) => {
+            const alreadyAdded = teamDraft.members.some((member) => member.accountId === account.accountId);
+            if (alreadyAdded) {
+                return false;
+            }
+
+            return account.name.toLowerCase().includes(normalizedQuery) ||
+                account.accountId.toLowerCase().includes(normalizedQuery) ||
+                account.email.toLowerCase().includes(normalizedQuery);
+        })
+        .sort((left, right) => {
+            return getTeamSearchMatchScore(left, normalizedQuery) - getTeamSearchMatchScore(right, normalizedQuery) ||
+                left.name.localeCompare(right.name, state.lang) ||
+                left.accountId.localeCompare(right.accountId, state.lang);
+        })
+        .slice(0, 6);
+}
+
+function createTeamSearchResult(account) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "team-search-result";
+    button.dataset.teamAddMember = account.accountId;
+
+    const avatar = document.createElement("span");
+    avatar.className = "team-search-avatar";
+    avatar.textContent = account.name.charAt(0).toUpperCase();
+
+    const copy = document.createElement("span");
+    copy.className = "team-search-result-copy";
+
+    const title = document.createElement("strong");
+    title.textContent = account.name;
+
+    const meta = document.createElement("span");
+    meta.textContent = `${account.accountId} | ${account.email}`;
+
+    copy.append(title, meta);
+    button.append(avatar, copy);
+    return button;
+}
+
+function renderTeamSearchMatches(matches) {
+    if (!teamSearchResults) {
+        return;
+    }
+
+    teamSearchResults.innerHTML = "";
+
+    if (!matches.length) {
+        resetTeamSearchResults();
+        return;
+    }
+
+    matches.forEach((account) => {
+        teamSearchResults.appendChild(createTeamSearchResult(account));
+    });
+
+    teamSearchResults.hidden = false;
+}
+
+function renderTeamDraft() {
+    renderSelectedTeamMembers();
+    renderTeamPreview();
+}
+
+function updateTeamSearch() {
+    if (!teamMemberQueryInput) {
+        return;
+    }
+
+    const query = teamMemberQueryInput.value.trim();
+    if (!query) {
+        resetTeamSearchResults();
+        setTeamSearchStatus(t("team.form.memberHint"));
+        return;
+    }
+
+    if (query.length < 2) {
+        resetTeamSearchResults();
+        setTeamSearchStatus(t("team.feedback.searchTyping"));
+        return;
+    }
+
+    const matches = searchTeamAccounts(query);
+    renderTeamSearchMatches(matches);
+
+    if (!matches.length) {
+        setTeamSearchStatus(t("team.feedback.searchNoResults"), "error");
+        return;
+    }
+
+    setTeamSearchStatus(t("team.feedback.pickSuggestion"), "success");
+}
+
+function addMemberToTeamDraft(accountId) {
+    const account = DEMO_TEAM_ACCOUNTS.find((item) => item.accountId === accountId);
+    if (!account) {
+        return;
+    }
+
+    if (teamDraft.members.some((member) => member.accountId === accountId)) {
+        setTeamFeedback(t("team.feedback.duplicateMember"));
+        return;
+    }
+
+    teamDraft.members.push({ ...account });
+    if (teamMemberQueryInput) {
+        teamMemberQueryInput.value = "";
+    }
+    resetTeamSearchResults();
+    setTeamSearchStatus(`${account.name} ${t("team.feedback.memberAdded")}`, "success");
+    setTeamFeedback("");
+    renderTeamDraft();
+}
+
+function removeMemberFromTeamDraft(accountId) {
+    const member = teamDraft.members.find((item) => item.accountId === accountId);
+    teamDraft.members = teamDraft.members.filter((item) => item.accountId !== accountId);
+    renderTeamDraft();
+
+    if (member) {
+        setTeamSearchStatus(`${member.name} ${t("team.feedback.memberRemoved")}`);
+    }
+}
+
+function saveTeamDraft(event) {
+    event.preventDefault();
+
+    const name = teamNameInput?.value.trim() || "";
+    const label = teamLabelInput?.value.trim() || "";
+    const motto = teamMottoInput?.value.trim() || "";
+    const color = normalizeTeamColor(teamDraft.color);
+    const existingTeam = state.pendingTeamEditId ? getStoredTeamById(state.pendingTeamEditId) : null;
+
+    if (!name) {
+        setTeamFeedback(t("team.feedback.nameRequired"));
+        teamNameInput?.focus();
+        return;
+    }
+
+    if (!teamDraft.members.length) {
+        setTeamFeedback(t("team.feedback.memberRequired"));
+        teamMemberQueryInput?.focus();
+        return;
+    }
+
+    const teamId = existingTeam ? String(existingTeam.id) : generateUploadId();
+    const savedTeam = {
+        id: teamId,
+        name,
+        label,
+        motto,
+        color,
+        members: teamDraft.members.map((member) => ({ ...member })),
+        createdAt: existingTeam?.createdAt || new Date().toISOString()
+    };
+
+    if (existingTeam) {
+        state.teams = state.teams.map((team) => {
+            return String(team.id) === teamId ? savedTeam : team;
+        });
+        state.teamInvites = state.teamInvites.filter((invite) => {
+            if (invite.teamId) {
+                return String(invite.teamId) !== teamId;
+            }
+
+            return invite.teamName !== existingTeam.name;
+        });
+    } else {
+        state.teams.unshift(savedTeam);
+    }
+
+    state.teamInvites.unshift(...teamDraft.members.map((member) => createTeamInvite(teamId, savedTeam.name, member)));
+    saveTeams();
+    saveTeamInvites();
+
+    const successMessage = `${savedTeam.name} ${t(existingTeam ? "team.feedback.updated" : "team.feedback.created")}`;
+    closeTeamModal();
+    showTeamToast(successMessage);
+}
+
+function syncTeamModalUI() {
+    renderTeamDraft();
+    renderTeamAdminPanel();
+
+    const isEditing = Boolean(state.pendingTeamEditId);
+
+    if (teamModalKicker) {
+        teamModalKicker.textContent = t(isEditing ? "team.modal.editKicker" : "team.modal.kicker");
+    }
+
+    if (teamModalTitle) {
+        teamModalTitle.textContent = t(isEditing ? "team.modal.editTitle" : "team.modal.title");
+    }
+
+    if (teamModalDescription) {
+        teamModalDescription.textContent = t(isEditing ? "team.modal.editDescription" : "team.modal.description");
+    }
+
+    if (teamSubmitLabel) {
+        teamSubmitLabel.textContent = t(isEditing ? "team.form.save" : "team.form.submit");
+    }
+
+    if (teamMemberQueryInput?.value.trim()) {
+        updateTeamSearch();
+    } else {
+        setTeamSearchStatus(t("team.form.memberHint"));
+    }
 }
 
 function sanitizeFilename(fileName) {
@@ -2369,6 +3433,17 @@ authOpeners.forEach((opener) => {
     });
 });
 
+teamOpeners.forEach((opener) => {
+    opener.addEventListener("click", (event) => {
+        event.preventDefault();
+        openTeamModal();
+
+        if (window.innerWidth <= 920) {
+            closeMobileMenu();
+        }
+    });
+});
+
 lockedLoginButton?.addEventListener("click", () => {
     if (!state.loggedIn) {
         openAuthModal("login");
@@ -2391,6 +3466,17 @@ authCloseButtons.forEach((button) => {
     button.addEventListener("click", () => {
         closeAuthModal();
     });
+});
+
+teamCloseButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        closeTeamModal();
+    });
+});
+
+teamAdminToggle?.addEventListener("click", () => {
+    setTeamAdminPanelOpen(!state.teamAdminPanelOpen);
+    syncTeamModalUI();
 });
 
 authPasswordToggles.forEach((toggle) => {
@@ -2416,6 +3502,85 @@ authPasswordToggles.forEach((toggle) => {
             icon.className = revealPassword ? "fa-regular fa-eye-slash" : "fa-regular fa-eye";
         }
     });
+});
+
+teamForm?.addEventListener("submit", saveTeamDraft);
+
+teamNameInput?.addEventListener("input", () => {
+    teamDraft.name = teamNameInput.value.trim();
+    renderTeamPreview();
+});
+
+teamLabelInput?.addEventListener("input", () => {
+    teamDraft.label = teamLabelInput.value.trim();
+    renderTeamPreview();
+});
+
+teamMottoInput?.addEventListener("input", () => {
+    teamDraft.motto = teamMottoInput.value.trim();
+    renderTeamPreview();
+});
+
+teamColorOptions.forEach((option) => {
+    option.addEventListener("click", () => {
+        teamDraft.color = normalizeTeamColor(option.dataset.teamColorValue || "");
+        renderTeamPreview();
+    });
+});
+
+teamCustomColorInput?.addEventListener("input", () => {
+    teamDraft.color = normalizeTeamColor(teamCustomColorInput.value);
+    renderTeamPreview();
+});
+
+teamMemberQueryInput?.addEventListener("input", () => {
+    setTeamFeedback("");
+    updateTeamSearch();
+});
+
+teamMemberQueryInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+
+        const firstMatch = teamSearchResults?.querySelector("[data-team-add-member]");
+        if (firstMatch instanceof HTMLButtonElement) {
+            addMemberToTeamDraft(firstMatch.dataset.teamAddMember || "");
+        }
+    }
+});
+
+teamSearchResults?.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target.closest("[data-team-add-member]") : null;
+    if (!(target instanceof HTMLButtonElement)) {
+        return;
+    }
+
+    addMemberToTeamDraft(target.dataset.teamAddMember || "");
+});
+
+teamSelectedMembers?.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target.closest("[data-team-remove-member]") : null;
+    if (!(target instanceof HTMLButtonElement)) {
+        return;
+    }
+
+    removeMemberFromTeamDraft(target.dataset.teamRemoveMember || "");
+});
+
+teamAdminList?.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target.closest("[data-team-edit], [data-team-delete]") : null;
+    if (!(target instanceof HTMLButtonElement)) {
+        return;
+    }
+
+    if (target.dataset.teamEdit) {
+        loadTeamForEdit(target.dataset.teamEdit);
+        return;
+    }
+
+    if (target.dataset.teamDelete) {
+        deleteTeam(target.dataset.teamDelete);
+    }
 });
 
 authForms.forEach((form) => {
@@ -2662,6 +3827,11 @@ document.addEventListener("keydown", (event) => {
 
     if (competitionModal && !competitionModal.hidden) {
         closeCompetitionModal();
+        return;
+    }
+
+    if (teamModal && !teamModal.hidden) {
+        closeTeamModal();
         return;
     }
 

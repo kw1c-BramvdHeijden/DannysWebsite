@@ -100,7 +100,7 @@
                 </p>
 
                 <div class="hero-actions">
-                    <button type="button" class="button button-primary button-large" data-auth-open="signup">
+                    <button type="button" class="button button-primary button-large" data-team-open>
                         <span data-i18n="hero.ctaPrimary">Meld je aan</span>
                         <span aria-hidden="true">-&gt;</span>
                     </button>
@@ -154,7 +154,7 @@
                         </div>
                     </div>
                     <div class="challenge-actions">
-                        <button type="button" class="button button-secondary" data-auth-open="signup"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
+                        <button type="button" class="button button-secondary" data-team-open><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
                         <button type="button" class="button button-outline panel-admin-button" data-competition-create hidden>
                             <i class="fa-solid fa-plus"></i>
                             <span data-i18n="competitions.add">Competitie toevoegen</span>
@@ -333,6 +333,157 @@
             </div>
         </div>
     </div>
+
+    <div class="team-modal" data-team-modal hidden>
+        <div class="team-modal-backdrop" data-team-close></div>
+        <div class="team-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="team-modal-title">
+            <button type="button" class="team-modal-close" data-team-close data-i18n-aria-label="team.modal.close" aria-label="Sluit teamvenster">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="team-modal-layout">
+                <aside class="team-preview-panel" data-team-preview-panel>
+                    <p class="photo-kicker" data-i18n="team.modal.previewKicker">TEAM PREVIEW</p>
+                    <div class="team-preview-card" data-team-preview-tone="olive">
+                        <span class="team-preview-badge" data-team-preview-label>TEAM</span>
+                        <h3 data-team-preview-title>Nieuw team</h3>
+                        <p data-team-preview-motto>Voeg een motto of korte beschrijving toe.</p>
+                        <div class="team-preview-members" data-team-preview-members>
+                            <span class="team-preview-members-empty" data-i18n="team.form.membersEmptyShort">Nog geen spelers toegevoegd</span>
+                        </div>
+                    </div>
+                </aside>
+
+                <form class="team-form" data-team-form>
+                    <p class="photo-kicker" data-team-modal-kicker data-i18n="team.modal.kicker">TEAM AANMAKEN</p>
+                    <h2 id="team-modal-title" data-team-modal-title data-i18n="team.modal.title">Meld een team aan</h2>
+                    <p class="upload-description" data-team-modal-description data-i18n="team.modal.description">Vul de teamgegevens in, kies een kleur en voeg spelers toe via zoeken.</p>
+
+                    <div class="team-admin-toolbar" data-team-admin-toolbar hidden>
+                        <button type="button" class="button button-outline team-admin-toggle" data-team-admin-toggle>
+                            <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                            <span data-team-admin-toggle-label data-i18n="team.admin.toggleOpen">Beheer teams</span>
+                        </button>
+                        <span class="team-admin-summary" data-team-admin-summary>0 teams</span>
+                    </div>
+
+                    <section class="team-admin-panel" data-team-admin-panel hidden>
+                        <div class="team-admin-panel-head">
+                            <div>
+                                <strong data-i18n="team.admin.heading">Aangemaakte en actieve teams</strong>
+                                <p data-i18n="team.admin.description">Open een team om het formulier te vullen, of verwijder het direct.</p>
+                            </div>
+                        </div>
+
+                        <div class="team-admin-list" data-team-admin-list></div>
+                        <p class="team-admin-empty" data-team-admin-empty data-i18n="team.admin.empty">Nog geen teams opgeslagen.</p>
+                    </section>
+
+                    <div class="team-form-grid">
+                        <label class="team-field">
+                            <span data-i18n="team.form.name">Titel van het team</span>
+                            <input type="text" data-team-name maxlength="48" data-i18n-placeholder="team.form.namePlaceholder" placeholder="Bijvoorbeeld: De Werpers">
+                        </label>
+
+                        <label class="team-field">
+                            <span data-i18n="team.form.label">Label van het team</span>
+                            <input type="text" data-team-label maxlength="18" data-i18n-placeholder="team.form.labelPlaceholder" placeholder="Bijvoorbeeld: DWT">
+                        </label>
+                    </div>
+
+                    <label class="team-field">
+                        <span data-i18n="team.form.motto">Motto / beschrijving</span>
+                        <textarea rows="3" data-team-motto data-i18n-placeholder="team.form.mottoPlaceholder" placeholder="Geef kort aan waar het team voor staat"></textarea>
+                    </label>
+
+                    <fieldset class="team-palette">
+                        <legend data-i18n="team.form.color">Labelkleur van het team</legend>
+                        <div class="team-palette-shell">
+                            <div class="team-palette-section">
+                                <span class="team-palette-label" data-i18n="team.color.basic">Basiskleuren</span>
+                                <div class="team-color-grid">
+                                    <button type="button" class="team-color-option is-selected" data-team-color-option data-team-color-value="#9BAA67" aria-label="Olijf" title="Olijf" style="--team-color: #9BAA67;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#CB352C" aria-label="Rood" title="Rood" style="--team-color: #CB352C;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#7B9151" aria-label="Groen" title="Groen" style="--team-color: #7B9151;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#F0C458" aria-label="Geel" title="Geel" style="--team-color: #F0C458;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#353A36" aria-label="Donker" title="Donker" style="--team-color: #353A36;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#FF7A7A" aria-label="Zacht rood" title="Zacht rood" style="--team-color: #FF7A7A;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#FFF07A" aria-label="Licht geel" title="Licht geel" style="--team-color: #FFF07A;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#7AFFA1" aria-label="Mint" title="Mint" style="--team-color: #7AFFA1;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#37E7A8" aria-label="Turquoise" title="Turquoise" style="--team-color: #37E7A8;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#7AE7FF" aria-label="Licht blauw" title="Licht blauw" style="--team-color: #7AE7FF;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#4FA2FF" aria-label="Blauw" title="Blauw" style="--team-color: #4FA2FF;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#FF91D2" aria-label="Roze" title="Roze" style="--team-color: #FF91D2;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#F247FF" aria-label="Magenta" title="Magenta" style="--team-color: #F247FF;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#B85C00" aria-label="Oranje" title="Oranje" style="--team-color: #B85C00;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#63B800" aria-label="Limoen" title="Limoen" style="--team-color: #63B800;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#00835D" aria-label="Zeegroen" title="Zeegroen" style="--team-color: #00835D;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#005F73" aria-label="Petrol" title="Petrol" style="--team-color: #005F73;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#2F55D4" aria-label="Kobalt" title="Kobalt" style="--team-color: #2F55D4;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#6B4EFF" aria-label="Paars" title="Paars" style="--team-color: #6B4EFF;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#7A1C52" aria-label="Bordeaux" title="Bordeaux" style="--team-color: #7A1C52;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#000000" aria-label="Zwart" title="Zwart" style="--team-color: #000000;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#7F7F7F" aria-label="Grijs" title="Grijs" style="--team-color: #7F7F7F;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#B9B9B9" aria-label="Licht grijs" title="Licht grijs" style="--team-color: #B9B9B9;"></button>
+                                    <button type="button" class="team-color-option" data-team-color-option data-team-color-value="#FFFFFF" aria-label="Wit" title="Wit" style="--team-color: #FFFFFF;"></button>
+                                </div>
+                            </div>
+
+                            <div class="team-custom-color-panel">
+                                <span class="team-palette-label" data-i18n="team.color.custom">Aangepaste kleur</span>
+                                <div class="team-custom-color-preview">
+                                    <span class="team-custom-color-swatch" data-team-custom-swatch></span>
+                                    <div class="team-custom-color-values">
+                                        <strong data-team-custom-hex>#9BAA67</strong>
+                                        <span data-team-custom-rgb>RGB 155, 170, 103</span>
+                                    </div>
+                                </div>
+
+                                <label class="team-custom-color-picker">
+                                    <span data-i18n="team.color.pick">Kies een aangepaste kleur</span>
+                                    <input type="color" value="#9BAA67" data-team-custom-color>
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <section class="team-members-panel">
+                        <div class="team-members-head">
+                            <div>
+                                <strong data-i18n="team.form.membersTitle">Gebruiker toevoegen aan het team</strong>
+                                <p data-i18n="team.form.membersDescription">Typ een naam of account-id en kies direct de juiste gebruiker uit de lijst.</p>
+                            </div>
+                            <span class="team-member-count" data-team-member-count>0 spelers</span>
+                        </div>
+
+                        <label class="team-field team-search-field">
+                            <span data-i18n="team.form.memberSearchLabel">Zoek op naam of account-id</span>
+                            <div class="team-search-input-wrap">
+                                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                                <input type="text" data-team-member-query autocomplete="off" data-i18n-placeholder="team.form.memberPlaceholder" placeholder="Zoek op naam of account-id">
+                            </div>
+                        </label>
+
+                        <div class="team-search-results" data-team-search-results hidden></div>
+                        <p class="team-search-status" data-team-search-status data-i18n="team.form.memberHint">Begin met typen om spelers te zoeken.</p>
+
+                        <div class="team-selected-list" data-team-selected-members></div>
+                        <p class="team-selected-empty" data-team-selected-empty data-i18n="team.form.membersEmpty">Nog geen teamleden toegevoegd.</p>
+                    </section>
+
+                    <p class="team-email-note" data-i18n="team.form.emailNote">Uitnodigingen worden na koppeling met een backend per e-mail verzonden. In deze demo slaan we ze lokaal op.</p>
+                    <p class="team-form-feedback" data-team-feedback aria-live="polite"></p>
+
+                    <div class="upload-actions team-form-actions">
+                        <button type="submit" class="button button-primary" data-team-submit-label data-i18n="team.form.submit">Team aanmaken</button>
+                        <button type="button" class="button button-outline" data-team-close data-i18n="team.form.cancel">Annuleren</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="team-toast" data-team-toast hidden aria-live="polite"></div>
 
     <div class="upload-modal" data-upload-modal hidden>
         <div class="upload-modal-backdrop" data-upload-cancel></div>
