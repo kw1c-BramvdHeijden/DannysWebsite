@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
+    <!-- Hoofdcontent: vaste navigatie, hero, competities, leaderboard en fotogalerij. -->
     <main class="page-shell">
         <header class="site-header">
             <a class="brand" href="#home" data-i18n-aria-label="nav.brandHome" aria-label="Boules Competities home">
@@ -87,6 +88,7 @@
             </div>
         </header>
 
+        <!-- Hero: eerste scherm met primaire acties voor aanmelden en competities. -->
         <section class="hero-section" id="home">
             <div class="hero-copy">
                 <h1>
@@ -131,6 +133,7 @@
             </div>
         </section>
 
+        <!-- Competitie-overzicht en korte leaderboard-preview worden vanuit index.js gevuld. -->
         <section class="content-grid" id="competities">
             <section class="competitions-panel">
                 <div class="panel-heading">
@@ -179,6 +182,7 @@
             </aside>
         </section>
 
+        <!-- Uitlegstrip met de belangrijkste redenen om mee te doen. -->
         <section class="benefits-strip" id="werkt">
             <article class="benefit"><span class="benefit-icon"><i class="fa-solid fa-user-group"></i></span><div><h2 data-i18n="benefits.card1.title">Voor iedereen</h2><p data-i18n="benefits.card1.description">Van beginner tot kampioen, iedereen is welkom.</p></div></article>
             <article class="benefit"><span class="benefit-icon"><i class="fa-solid fa-shield-heart"></i></span><div><h2 data-i18n="benefits.card2.title">Eerlijk &amp; sportief</h2><p data-i18n="benefits.card2.description">Wij zorgen voor eerlijke wedstrijden en duidelijke regels.</p></div></article>
@@ -186,6 +190,7 @@
             <article class="benefit"><span class="benefit-icon"><i class="fa-solid fa-bullseye"></i></span><div><h2 data-i18n="benefits.card4.title">Altijd een doel</h2><p data-i18n="benefits.card4.description">Blijf verbeteren en klim naar de top.</p></div></article>
         </section>
 
+        <!-- Fotohub: blijft vergrendeld tot de bezoeker is ingelogd. -->
         <section class="photo-hub" id="photos">
             <div class="photo-head">
                 <div class="photo-intro">
@@ -236,6 +241,7 @@
         </section>
     </main>
 
+    <!-- Over-ons footer met afsluitende quote. -->
     <footer class="quote-footer" id="over">
         <div class="quote-inner">
             <div class="footer-boules" aria-hidden="true"><span></span><span></span><span class="small-red"></span></div>
@@ -244,6 +250,7 @@
         </div>
     </footer>
 
+    <!-- Modals: index.js opent/sluit deze via data-attributen en body classes. -->
     <div class="auth-modal" data-auth-modal hidden>
         <div class="auth-modal-backdrop" data-auth-close></div>
         <div class="auth-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
@@ -334,6 +341,7 @@
         </div>
     </div>
 
+    <!-- Teammodal: bevat zowel formulier, live-preview als lokaal teambeheer. -->
     <div class="team-modal" data-team-modal hidden>
         <div class="team-modal-backdrop" data-team-close></div>
         <div class="team-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="team-modal-title">
@@ -485,6 +493,7 @@
 
     <div class="team-toast" data-team-toast hidden aria-live="polite"></div>
 
+    <!-- Uploadmodal: hergebruikt voor nieuwe foto's en het bewerken van bestaande foto's. -->
     <div class="upload-modal" data-upload-modal hidden>
         <div class="upload-modal-backdrop" data-upload-cancel></div>
         <div class="upload-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
@@ -531,6 +540,7 @@
         </div>
     </div>
 
+    <!-- Competitiemodal: admin kan hiermee competities toevoegen of aanpassen. -->
     <div class="competition-modal" data-competition-modal hidden>
         <div class="competition-modal-backdrop" data-competition-cancel></div>
         <div class="competition-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="competition-modal-title">
@@ -579,6 +589,7 @@
         </div>
     </div>
 
+    <!-- Volledig leaderboard met teamfilter. -->
     <div class="leaderboard-modal" data-leaderboard-modal hidden>
         <div class="leaderboard-modal-backdrop" data-leaderboard-close></div>
         <div class="leaderboard-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="leaderboard-modal-title">

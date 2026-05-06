@@ -1,4 +1,5 @@
 :root {
+    /* Centrale tokens voor kleur, schaduw en animatiesnelheid. */
     --bg: #f5efe6;
     --bg-deep: #ede0cb;
     --panel: rgba(255, 249, 241, 0.82);
@@ -81,6 +82,7 @@ footer[id] {
     padding: 20px 20px 0;
 }
 
+/* Header en navigatie */
 .site-header {
     position: sticky;
     top: 12px;
@@ -475,6 +477,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
     line-height: 1.45;
 }
 
+/* Herbruikbare knoppen */
 .button {
     display: inline-flex;
     align-items: center;
@@ -519,6 +522,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
     border-radius: 16px;
 }
 
+/* Hero */
 .hero-section {
     display: grid;
     grid-template-columns: minmax(340px, 0.9fr) minmax(440px, 1.1fr);
@@ -613,6 +617,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
     height: auto;
 }
 
+/* Competities en leaderboard-preview */
 .content-grid {
     display: grid;
     grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.9fr);
@@ -961,6 +966,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
     color: var(--red);
 }
 
+/* Voordelenstrip */
 .benefits-strip {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1001,6 +1007,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
     line-height: 1.45;
 }
 
+/* Fotogalerij */
 .photo-hub {
     margin-top: 22px;
     padding: 24px;
@@ -1259,6 +1266,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
     transform: none;
 }
 
+/* Footer */
 .quote-footer {
     margin-top: 28px;
     color: #f2ede3;
@@ -1331,6 +1339,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
         radial-gradient(circle at 80% 75%, rgba(123, 145, 81, 0.85), transparent 28%);
 }
 
+/* Authenticatiemodal */
 .auth-modal {
     position: fixed;
     inset: 0;
@@ -1561,6 +1570,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
     border-radius: 16px;
 }
 
+/* Teammodal en teambeheer */
 .team-modal {
     position: fixed;
     inset: 0;
@@ -2268,6 +2278,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
     transform: translate(-50%, 0);
 }
 
+/* Uploadmodal */
 .upload-modal {
     position: fixed;
     inset: 0;
@@ -2413,6 +2424,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
     margin-top: 6px;
 }
 
+/* Competitiemodal */
 .competition-modal {
     position: fixed;
     inset: 0;
@@ -2506,6 +2518,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
     background: var(--white);
 }
 
+/* Leaderboardmodal */
 .leaderboard-modal {
     position: fixed;
     inset: 0;
@@ -2760,6 +2773,7 @@ body.nav-open .nav-toggle span:nth-child(3) {
     }
 }
 
+/* Responsieve layout */
 @media (max-width: 1120px) {
     .hero-section,
     .content-grid,

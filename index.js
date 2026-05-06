@@ -1,3 +1,4 @@
+// DOM-koppelingen: alle interactieve elementen worden via data-attributen benaderd.
 const body = document.body;
 const html = document.documentElement;
 const siteHeader = document.querySelector(".site-header");
@@ -117,6 +118,7 @@ const leaderboardTableBody = document.querySelector("[data-leaderboard-table-bod
 const leaderboardUpdatedText = document.querySelector("[data-leaderboard-updated]");
 const leaderboardTeamFilter = document.querySelector("[data-leaderboard-team-filter]");
 
+// localStorage-sleutels voor de demo-state. Er is nog geen backend gekoppeld.
 const AUTH_KEY = "boules_logged_in";
 const ROLE_KEY = "boules_role";
 const PHOTOS_KEY = "boules_shared_photos";
@@ -131,6 +133,8 @@ const DEFAULT_AUTHOR = "Danny";
 const CURRENT_USER_ID = "danny";
 const DEMO_ADMIN_USERNAME = "Danny";
 const DEMO_ADMIN_PASSWORD = "123";
+
+// Demo-data voor teamleden en vaste kleurwaarden.
 const LEGACY_TEAM_COLOR_MAP = {
     olive: "#9BAA67",
     red: "#CB352C",
@@ -617,6 +621,7 @@ const translations = {
     }
 };
 
+// Helpers voor gegenereerde demo-afbeeldingen en datums.
 function makePlaceholder(author, title, colorA, colorB) {
     const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 700">
@@ -690,6 +695,7 @@ const defaultPhotos = [
     }
 ];
 
+// Seed-data: deze lijsten vormen de basis voor competities en leaderboard.
 const competitionToneMap = {
     green: "fa-calendar-days",
     yellow: "fa-sun",
@@ -885,6 +891,7 @@ const defaultLeaderboard = [
     }
 ];
 
+// Normalisatie en opslaghelpers houden oude localStorage-data bruikbaar.
 function normalizeLanguage(language) {
     return language === "en" ? "en" : "nl";
 }
@@ -1176,6 +1183,7 @@ const state = {
     leaderboardTeamFilter: "all"
 };
 
+// Tijdelijke UI timers voor menu's, modals en feedback.
 let languageMenuTimer = 0;
 let accountMenuTimer = 0;
 let uploadModalTimer = 0;
@@ -1207,6 +1215,7 @@ const navSections = navLinks
     })
     .filter(Boolean);
 
+// Persistente demo-state schrijven.
 function savePhotos() {
     localStorage.setItem(PHOTOS_KEY, JSON.stringify(state.photos));
 }
@@ -1251,6 +1260,7 @@ function canEditPhoto(photo) {
     return state.loggedIn && photo.ownerId === CURRENT_USER_ID;
 }
 
+// Rendercollecties combineren seed-data met lokale bewerkingen/verwijderingen.
 function buildPhotoCollection() {
     return [...state.photos, ...defaultPhotos]
         .filter((photo) => !state.deletedPhotoIds.includes(String(photo.id)))
@@ -1370,6 +1380,7 @@ function createPhotoCard(photo) {
     return card;
 }
 
+// Renderfuncties bouwen de zichtbare lijsten opnieuw vanuit de huidige state.
 function renderPhotos() {
     if (!photoGrid) {
         return;
@@ -1765,6 +1776,7 @@ function setCurrentNavLink(targetId) {
     });
 }
 
+// Navigatie, menu's en accountstatus synchroniseren met de DOM.
 function updateActiveNavLink() {
     if (navSections.length === 0) {
         return;
@@ -2081,6 +2093,7 @@ function applyTranslations() {
     }
 }
 
+// Taal, rol en loginstatus worden als lokale demo-state bijgehouden.
 function setLanguage(language) {
     state.lang = normalizeLanguage(language);
     localStorage.setItem(LANG_KEY, state.lang);
@@ -2243,6 +2256,7 @@ function createEmptyTeamDraft() {
     };
 }
 
+// Teamdraft en teambeheer.
 function createTeamInvite(teamId, teamName, member) {
     return {
         id: generateUploadId(),
@@ -2952,6 +2966,7 @@ function sanitizeFilename(fileName) {
         .trim();
 }
 
+// Foto-upload en fotobewerking.
 function generateUploadId() {
     return globalThis.crypto && typeof globalThis.crypto.randomUUID === "function"
         ? globalThis.crypto.randomUUID()
@@ -3110,6 +3125,7 @@ function getCompetitionById(competitionId) {
     return buildCompetitionCollection().find((competition) => String(competition.id) === String(competitionId)) || null;
 }
 
+// Competitie- en leaderboardmodals.
 function syncCompetitionFormUI() {
     const isEditing = Boolean(state.pendingCompetitionId);
 
@@ -3384,6 +3400,7 @@ function deletePhoto(photoId) {
     renderPhotos();
 }
 
+// Event handlers en initialisatie.
 navToggle?.addEventListener("click", () => {
     setNavOpen(!body.classList.contains("nav-open"));
 });
