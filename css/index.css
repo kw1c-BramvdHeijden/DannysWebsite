@@ -1,24 +1,3 @@
-:root {
-    --bg: #f5efe6;
-    --bg-deep: #ede0cb;
-    --panel: rgba(255, 249, 241, 0.82);
-    --panel-solid: #fbf5ec;
-    --ink: #1f2321;
-    --muted: #6b655e;
-    --line: rgba(130, 110, 83, 0.18);
-    --line-strong: rgba(130, 110, 83, 0.3);
-    --red: #cb352c;
-    --red-deep: #ab2e27;
-    --green: #7b9151;
-    --green-deep: #526833;
-    --olive: #9baa67;
-    --yellow: #f0c458;
-    --white: #ffffff;
-    --shadow-soft: 0 16px 38px rgba(59, 46, 31, 0.08);
-    --shadow-strong: 0 28px 70px rgba(59, 46, 31, 0.14);
-    --ease: 180ms ease;
-}
-
 * {
     box-sizing: border-box;
 }
