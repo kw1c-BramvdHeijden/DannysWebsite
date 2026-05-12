@@ -65,9 +65,9 @@
                     <button type="button" class="button button-primary" data-signup-cta data-auth-open="signup"><span data-i18n="auth.signup">Aanmelden</span></button>
                     <div class="account-switcher" data-account-switcher hidden>
                         <button type="button" class="account-toggle-button" data-account-toggle aria-expanded="false" aria-haspopup="true">
-                            <span class="account-avatar" aria-hidden="true">D</span>
+                            <span class="account-avatar" aria-hidden="true">A</span>
                             <span class="account-copy">
-                                <strong data-account-name>Danny</strong>
+                                <strong data-account-name>Account</strong>
                                 <small data-account-role>Speler</small>
                             </span>
                             <i class="fa-solid fa-chevron-down account-chevron"></i>
@@ -474,6 +474,6 @@
         </div>
     </div>
 
-    <script src="scripts/index.js"></script>
+    <script type="module" src="scripts/index.js"></script>
 </body>
 </html>

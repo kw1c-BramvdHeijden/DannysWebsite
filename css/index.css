@@ -907,6 +907,13 @@ body.nav-open .nav-toggle span:nth-child(3) {
     border-top: 1px solid rgba(134, 109, 74, 0.12);
 }
 
+.leaderboard-list .leaderboard-empty {
+    display: block;
+    padding: 18px 0 0;
+    color: var(--muted);
+    border-top: 1px solid rgba(134, 109, 74, 0.12);
+}
+
 .rank {
     display: inline-grid;
     place-items: center;
@@ -1940,6 +1947,12 @@ body.nav-open .nav-toggle span:nth-child(3) {
     padding: 16px 18px;
     font-weight: 700;
     vertical-align: middle;
+}
+
+.leaderboard-empty-cell {
+    padding: 28px 18px;
+    text-align: center;
+    color: var(--muted);
 }
 
 .leaderboard-table-team {
