@@ -20,6 +20,10 @@ export function createCompetitionsModule({
             .sort((left, right) => left.startDate.localeCompare(right.startDate));
     }
 
+    function getDefaultCompetitionHref() {
+        return document.body.dataset.competitionsHref || "pages/competities.php";
+    }
+
     function formatCompetitionDate(startDate) {
         if (!startDate) {
             return "";
@@ -76,7 +80,7 @@ export function createCompetitionsModule({
         date.textContent = formatCompetitionDate(competition.startDate);
 
         const link = document.createElement("a");
-        link.href = competition.href || "#competities";
+        link.href = competition.href || getDefaultCompetitionHref();
         link.innerHTML = `<span>${t("competitions.more")}</span> <span aria-hidden="true">-&gt;</span>`;
 
         card.append(icon, title, type, date, link);
@@ -228,7 +232,7 @@ export function createCompetitionsModule({
             type,
             startDate,
             tone: competitionToneMap[tone] ? tone : "green",
-            href: "#competities"
+            href: getDefaultCompetitionHref()
         };
 
         if (state.pendingCompetitionId) {

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Boules Competities | Spelregels</title>
-  <link rel="stylesheet" href="css/spelregels.css">
+  <link rel="stylesheet" href="../css/spelregels.css">
 </head>
 <body>
   <div class="page-shell">
@@ -176,6 +176,6 @@
     </main>
   </div>
 
-  <script src="scripts/spelregels.js"></script>
+  <script src="../scripts/spelregels.js"></script>
 </body>
 </html>

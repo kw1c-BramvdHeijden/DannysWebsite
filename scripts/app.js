@@ -9,6 +9,8 @@ import {
     normalizeRole,
     sanitizeFilename,
     saveCompetitions,
+    saveAuth,
+    clearAuth,
     saveLanguage,
     savePhotos
 } from "./app-data.js";
@@ -56,6 +58,8 @@ export function createApp() {
         t,
         normalizeLanguage,
         normalizeRole,
+        saveAuth,
+        clearAuth,
         saveLanguage,
         renderPhotos: photos.renderPhotos,
         renderCompetitions: competitions.renderCompetitions,

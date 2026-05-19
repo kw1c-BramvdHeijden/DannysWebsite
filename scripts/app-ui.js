@@ -4,6 +4,8 @@ export function createUiModule({
     t,
     normalizeLanguage,
     normalizeRole,
+    saveAuth,
+    clearAuth,
     saveLanguage,
     renderPhotos,
     renderCompetitions,
@@ -199,6 +201,10 @@ export function createUiModule({
 
         if (refs.signupCta) {
             refs.signupCta.hidden = state.loggedIn;
+        }
+
+        if (refs.challengeSignupCta) {
+            refs.challengeSignupCta.hidden = state.loggedIn;
         }
 
         if (refs.accountSwitcher) {
@@ -433,6 +439,7 @@ export function createUiModule({
         if (!state.loggedIn) {
             state.role = "player";
             state.user = null;
+            clearAuth?.();
             closeAuthModal();
             closeUploadModal();
             closeCompetitionModal();
@@ -444,6 +451,23 @@ export function createUiModule({
         renderLeaderboard();
         renderCompetitions();
         renderPhotos();
+    }
+
+    function setAuthenticatedUser(name) {
+        const displayName = name && name.trim() ? name.trim() : t("account.name");
+
+        state.user = {
+            id: displayName.toLowerCase().replace(/\s+/g, "-"),
+            name: displayName,
+            initials: displayName.charAt(0).toUpperCase() || "A"
+        };
+
+        saveAuth?.({
+            role: state.role,
+            user: state.user
+        });
+        setLoggedIn(true);
+        closeAuthModal();
     }
 
     function openAuthModal(mode = "login") {
@@ -555,9 +579,7 @@ export function createUiModule({
                 return;
             }
 
-            if (feedback) {
-                feedback.textContent = t("auth.modal.feedback.backendPending");
-            }
+            setAuthenticatedUser(identity);
             return;
         }
 
@@ -591,9 +613,7 @@ export function createUiModule({
             return;
         }
 
-        if (feedback) {
-            feedback.textContent = t("auth.modal.feedback.backendPending");
-        }
+        setAuthenticatedUser(name);
     }
 
     return {

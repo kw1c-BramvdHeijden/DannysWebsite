@@ -153,6 +153,16 @@ function readList(bootstrapValue, key, normalizer) {
         : readStoredList(key, normalizer);
 }
 
+function readStoredAuth() {
+    try {
+        const storedValue = JSON.parse(localStorage.getItem(STORAGE_KEYS.auth) || "null");
+        return storedValue && typeof storedValue === "object" ? storedValue : {};
+    } catch (error) {
+        console.error("Could not load auth state", error);
+        return {};
+    }
+}
+
 export function normalizeLanguage(language) {
     return language === "en" ? "en" : "nl";
 }
@@ -185,14 +195,15 @@ export function generateRecordId() {
 
 export function createAppState() {
     const bootstrap = getBootstrapData();
-    const auth = bootstrap.auth && typeof bootstrap.auth === "object" ? bootstrap.auth : {};
+    const storedAuth = readStoredAuth();
+    const auth = bootstrap.auth && typeof bootstrap.auth === "object" ? bootstrap.auth : storedAuth;
     const loggedIn = auth.loggedIn === true;
 
     return {
         lang: normalizeLanguage(localStorage.getItem(STORAGE_KEYS.lang)),
         loggedIn,
         role: normalizeRole(auth.role),
-        user: loggedIn ? normalizeUser(bootstrap.user ?? auth.user) : null,
+        user: loggedIn ? normalizeUser(bootstrap.user ?? auth.user ?? storedAuth.user) : null,
         photos: readList(bootstrap.photos, STORAGE_KEYS.photos, normalizePhoto),
         competitions: readList(bootstrap.competitions, STORAGE_KEYS.competitions, normalizeCompetition),
         leaderboard: readList(bootstrap.leaderboard, STORAGE_KEYS.leaderboard, normalizeLeaderboardEntry),
@@ -205,6 +216,18 @@ export function createAppState() {
 
 export function saveLanguage(language) {
     localStorage.setItem(STORAGE_KEYS.lang, language);
+}
+
+export function saveAuth({ role, user }) {
+    localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify({
+        loggedIn: true,
+        role: normalizeRole(role),
+        user: normalizeUser(user)
+    }));
+}
+
+export function clearAuth() {
+    localStorage.removeItem(STORAGE_KEYS.auth);
 }
 
 export function savePhotos(photos) {
