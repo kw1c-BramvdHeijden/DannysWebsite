@@ -2,12 +2,9 @@ export function createUiModule({
     refs,
     state,
     t,
-    devAdminAccount,
     normalizeLanguage,
     normalizeRole,
     saveLanguage,
-    saveAuthSession,
-    clearAuthSession,
     renderPhotos,
     renderCompetitions,
     renderLeaderboard,
@@ -434,7 +431,6 @@ export function createUiModule({
         refs.body.classList.toggle("is-logged-in", state.loggedIn);
 
         if (!state.loggedIn) {
-            clearAuthSession();
             state.role = "player";
             state.user = null;
             closeAuthModal();
@@ -559,27 +555,8 @@ export function createUiModule({
                 return;
             }
 
-            const matchesAdmin = identity.toLowerCase() === devAdminAccount.username.toLowerCase()
-                && password === devAdminAccount.password;
-
-            if (!matchesAdmin) {
-                if (feedback) {
-                    feedback.textContent = t("auth.modal.feedback.loginInvalid");
-                }
-                return;
-            }
-
-            state.user = { ...devAdminAccount.user };
-            state.role = devAdminAccount.role;
-            saveAuthSession({
-                role: state.role,
-                user: state.user
-            });
-            setLoggedIn(true);
-            closeAuthModal();
-
             if (feedback) {
-                feedback.textContent = "";
+                feedback.textContent = t("auth.modal.feedback.backendPending");
             }
             return;
         }

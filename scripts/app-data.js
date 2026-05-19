@@ -153,16 +153,6 @@ function readList(bootstrapValue, key, normalizer) {
         : readStoredList(key, normalizer);
 }
 
-function readStoredUser() {
-    try {
-        const storedValue = JSON.parse(localStorage.getItem(STORAGE_KEYS.user) || "null");
-        return normalizeUser(storedValue);
-    } catch (error) {
-        console.error(`Could not load ${STORAGE_KEYS.user}`, error);
-        return null;
-    }
-}
-
 export function normalizeLanguage(language) {
     return language === "en" ? "en" : "nl";
 }
@@ -196,21 +186,13 @@ export function generateRecordId() {
 export function createAppState() {
     const bootstrap = getBootstrapData();
     const auth = bootstrap.auth && typeof bootstrap.auth === "object" ? bootstrap.auth : {};
-    const hasBootstrapAuth = Object.prototype.hasOwnProperty.call(auth, "loggedIn");
-    const storedLoggedIn = localStorage.getItem(STORAGE_KEYS.auth) === "true";
-    const storedRole = normalizeRole(localStorage.getItem(STORAGE_KEYS.role));
-    const storedUser = readStoredUser();
-    const loggedIn = hasBootstrapAuth ? auth.loggedIn === true : storedLoggedIn;
-    const role = hasBootstrapAuth ? normalizeRole(auth.role) : storedRole;
-    const user = loggedIn
-        ? (hasBootstrapAuth ? normalizeUser(bootstrap.user ?? auth.user) : storedUser)
-        : null;
+    const loggedIn = auth.loggedIn === true;
 
     return {
         lang: normalizeLanguage(localStorage.getItem(STORAGE_KEYS.lang)),
         loggedIn,
-        role,
-        user,
+        role: normalizeRole(auth.role),
+        user: loggedIn ? normalizeUser(bootstrap.user ?? auth.user) : null,
         photos: readList(bootstrap.photos, STORAGE_KEYS.photos, normalizePhoto),
         competitions: readList(bootstrap.competitions, STORAGE_KEYS.competitions, normalizeCompetition),
         leaderboard: readList(bootstrap.leaderboard, STORAGE_KEYS.leaderboard, normalizeLeaderboardEntry),
@@ -223,18 +205,6 @@ export function createAppState() {
 
 export function saveLanguage(language) {
     localStorage.setItem(STORAGE_KEYS.lang, language);
-}
-
-export function saveAuthSession({ role, user }) {
-    localStorage.setItem(STORAGE_KEYS.auth, "true");
-    localStorage.setItem(STORAGE_KEYS.role, normalizeRole(role));
-    localStorage.setItem(STORAGE_KEYS.user, JSON.stringify(user));
-}
-
-export function clearAuthSession() {
-    localStorage.removeItem(STORAGE_KEYS.auth);
-    localStorage.removeItem(STORAGE_KEYS.role);
-    localStorage.removeItem(STORAGE_KEYS.user);
 }
 
 export function savePhotos(photos) {

@@ -1,4 +1,5 @@
 export const STORAGE_KEYS = {
+    auth: "boules_auth",
     lang: "boules_language",
     auth: "boules_logged_in",
     role: "boules_role",

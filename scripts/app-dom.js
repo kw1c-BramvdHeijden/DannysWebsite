@@ -7,6 +7,7 @@ export const refs = {
     authToggles: Array.from(document.querySelectorAll("[data-auth-toggle]")),
     authOpeners: Array.from(document.querySelectorAll("[data-auth-open]")),
     signupCta: document.querySelector("[data-signup-cta]"),
+    challengeSignupCta: document.querySelector("[data-challenge-signup]"),
     accountSwitcher: document.querySelector("[data-account-switcher]"),
     accountToggle: document.querySelector("[data-account-toggle]"),
     accountMenu: document.querySelector("[data-account-menu]"),

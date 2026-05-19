@@ -12,10 +12,11 @@ include_once("includes/footer.php");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <title>Boules Competities</title>
+    <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/variables.css">
 </head>
-<body>
+<body data-competitions-href="pages/competities.php">
     <main class="page-shell">
         <header class="site-header">
             <a class="brand" href="#home" data-i18n-aria-label="nav.brandHome" aria-label="Boules Competities home">
@@ -38,7 +39,7 @@ include_once("includes/footer.php");
                         <i class="fa-solid fa-house" aria-hidden="true"></i>
                         <span data-i18n="nav.home">Home</span>
                     </a>
-                    <a href="#competities">
+                    <a href="pages/competities.php">
                         <i class="fa-solid fa-trophy" aria-hidden="true"></i>
                         <span data-i18n="nav.competitions">Competities</span>
                     </a>
@@ -112,7 +113,7 @@ include_once("includes/footer.php");
                         <span data-i18n="hero.ctaPrimary">Meld je aan</span>
                         <span aria-hidden="true">-&gt;</span>
                     </button>
-                    <a href="#competities" class="button button-outline button-large">
+                    <a href="pages/competities.php" class="button button-outline button-large">
                         <span data-i18n="hero.ctaSecondary">Bekijk competities</span>
                         <span aria-hidden="true">-&gt;</span>
                     </a>
@@ -162,7 +163,7 @@ include_once("includes/footer.php");
                         </div>
                     </div>
                     <div class="challenge-actions">
-                        <button type="button" class="button button-secondary" data-auth-open="signup"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
+                        <button type="button" class="button button-secondary" data-challenge-signup data-auth-open="signup"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
                         <button type="button" class="button button-outline panel-admin-button" data-competition-create hidden>
                             <i class="fa-solid fa-plus"></i>
                             <span data-i18n="competitions.add">Competitie toevoegen</span>

@@ -11,6 +11,8 @@ import {
     sanitizeFilename,
     saveAuthSession,
     saveCompetitions,
+    saveAuth,
+    clearAuth,
     saveLanguage,
     savePhotos
 } from "./app-data.js";
@@ -59,6 +61,8 @@ export function createApp() {
         devAdminAccount,
         normalizeLanguage,
         normalizeRole,
+        saveAuth,
+        clearAuth,
         saveLanguage,
         saveAuthSession,
         clearAuthSession,
