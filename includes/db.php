@@ -1,6 +1,6 @@
 <?php
 
-$host = "https://st1739531586.splsites.nl/";
+$host = "st1739531586.splsites.nl";
 $dbname = "st1739531586";
 $username = "st1739531586";
 $password = "K6sBm9z1fabKwtj";
