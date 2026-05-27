@@ -51,7 +51,7 @@ include_once("includes/footer.php");
                         <i class="fa-solid fa-list-check" aria-hidden="true"></i>
                         <span data-i18n="nav.how">Hoe het werkt</span>
                     </a>
-                    <a href="#photos">
+                    <a href="pages/fotos.php">
                         <i class="fa-solid fa-camera" aria-hidden="true"></i>
                         <span data-i18n="nav.photos">Foto's</span>
                     </a>
@@ -195,27 +195,26 @@ include_once("includes/footer.php");
             <article class="benefit"><span class="benefit-icon"><i class="fa-solid fa-bullseye"></i></span><div><h2 data-i18n="benefits.card4.title">Altijd een doel</h2><p data-i18n="benefits.card4.description">Blijf verbeteren en klim naar de top.</p></div></article>
         </section>
 
-        <section class="photo-hub" id="photos">
+        <section class="photo-hub" id="photos" data-photo-public data-photo-limit="5">
             <div class="photo-head">
                 <div class="photo-intro">
                     <p class="photo-kicker" data-i18n="photos.kicker">BUURT GALERIJ</p>
-                    <h2 data-i18n="photos.heading">Publiceer foto's van wedstrijden en bekijk foto's van andere spelers.</h2>
-                    <p data-i18n="photos.description">
-                        Alleen ingelogde spelers kunnen foto's publiceren en zien. Deel momenten
-                        van trainingen, toernooien en gezellige buurtavonden.
+                    <h2>De 5 nieuwste foto's uit de buurt.</h2>
+                    <p>
+                        De nieuwste uploads verschijnen hier automatisch. Foto's plaatsen kan op
+                        de fotopagina wanneer je bent ingelogd.
                     </p>
                 </div>
 
                 <div class="photo-toolbar">
                     <span class="photo-visibility">
-                        <i class="fa-solid fa-user-lock"></i>
-                        <span data-i18n="photos.visibility">Alleen zichtbaar voor ingelogde spelers</span>
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span>5 meest recente foto's</span>
                     </span>
                     <span class="photo-admin-indicator" data-admin-indicator hidden>
                         <i class="fa-solid fa-shield-halved"></i>
                         <span data-i18n="photos.adminMode">Admin-modus: je kunt gedeelde foto's verwijderen</span>
                     </span>
-                    <input class="photo-input" data-photo-input type="file" accept="image/*">
                 </div>
             </div>
 
@@ -231,13 +230,13 @@ include_once("includes/footer.php");
             <div class="photo-feed" data-photo-feed hidden>
                 <article class="photo-highlight">
                     <div>
-                        <h3 data-i18n="photos.highlightTitle">Laat de buurt meegenieten</h3>
-                        <p data-i18n="photos.highlightDescription">Upload een foto van jullie wedstrijd, training of toernooi. Andere ingelogde spelers zien hem direct terug.</p>
+                        <h3>Recente wedstrijdfoto's</h3>
+                        <p>Bekijk hier de nieuwste uploads. Foto's toevoegen doe je op de fotopagina.</p>
                     </div>
-                    <button type="button" class="button button-outline" data-upload-trigger>
-                        <i class="fa-solid fa-arrow-up-from-bracket"></i>
-                        <span data-i18n="photos.highlightButton">Upload foto</span>
-                    </button>
+                    <a class="button button-outline" href="pages/fotos.php">
+                        <i class="fa-solid fa-images"></i>
+                        <span>Alle foto's bekijken</span>
+                    </a>
                 </article>
 
                 <div class="photo-grid" data-photo-grid></div>
@@ -338,52 +337,6 @@ include_once("includes/footer.php");
                         <span data-auth-switch-copy-signup>Heb je al een account?</span>
                         <button type="button" class="auth-switch-button" data-auth-switch="login">Inloggen</button>
                     </p>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="upload-modal" data-upload-modal hidden>
-        <div class="upload-modal-backdrop" data-upload-cancel></div>
-        <div class="upload-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
-            <button type="button" class="upload-modal-close" data-upload-cancel data-i18n-aria-label="upload.closeLabel" aria-label="Sluit uploadvenster">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <div class="upload-modal-layout">
-                <div class="upload-preview-shell">
-                    <img src="" alt="" data-upload-preview>
-                </div>
-
-                <form class="upload-form" data-upload-form>
-                    <p class="photo-kicker" data-upload-kicker-text data-i18n="upload.kicker">FOTO PUBLICEREN</p>
-                    <h2 id="upload-modal-title" data-upload-title-text data-i18n="upload.title">Geef je foto een titel en beschrijving</h2>
-                    <p class="upload-description" data-upload-description-text data-i18n="upload.description">Pas eerst de titel en beschrijving aan voordat je de foto post.</p>
-
-                    <div class="upload-change-row">
-                        <button type="button" class="button button-outline upload-change-button" data-upload-change>
-                            <i class="fa-solid fa-images"></i>
-                            <span data-i18n="upload.changePhoto">Kies andere foto</span>
-                        </button>
-                    </div>
-
-                    <label class="upload-label">
-                        <span data-i18n="upload.photoTitle">Titel</span>
-                        <input type="text" data-upload-title data-i18n-placeholder="upload.photoTitlePlaceholder" placeholder="Bijvoorbeeld: Finale op het plein">
-                    </label>
-
-                    <label class="upload-label">
-                        <span data-i18n="upload.photoDescription">Beschrijving</span>
-                        <textarea rows="5" data-upload-description data-i18n-placeholder="upload.photoDescriptionPlaceholder" placeholder="Vertel kort wat er op deze foto te zien is"></textarea>
-                    </label>
-
-                    <div class="upload-actions">
-                        <button type="button" class="button button-ghost" data-upload-cancel data-i18n="upload.cancel">Annuleren</button>
-                        <button type="submit" class="button button-primary">
-                            <i class="fa-solid fa-paper-plane"></i>
-                            <span data-upload-submit-label data-i18n="upload.submit">Publiceer foto</span>
-                        </button>
-                    </div>
                 </form>
             </div>
         </div>

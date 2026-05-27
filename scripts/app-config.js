@@ -1,5 +1,6 @@
 export const STORAGE_KEYS = {
     lang: "boules_language",
+    auth: "boules_auth",
     photos: "boules_shared_photos",
     competitions: "boules_custom_competitions",
     leaderboard: "boules_leaderboard"
@@ -15,4 +16,15 @@ export const competitionToneMap = {
     yellow: "fa-sun",
     red: "fa-trophy",
     olive: "fa-ranking-star"
+};
+
+export const devAdminAccount = {
+    username: "Danny",
+    password: "123",
+    role: "admin",
+    user: {
+        id: "admin-local",
+        name: "Danny",
+        initials: "D"
+    }
 };
