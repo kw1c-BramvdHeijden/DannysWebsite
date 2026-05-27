@@ -153,6 +153,29 @@ function readList(bootstrapValue, key, normalizer) {
         : readStoredList(key, normalizer);
 }
 
+function readStoredAuth() {
+    try {
+        const storedValue = JSON.parse(localStorage.getItem(STORAGE_KEYS.auth) || "null");
+        if (!storedValue || typeof storedValue !== "object" || storedValue.loggedIn !== true) {
+            return null;
+        }
+
+        const user = normalizeUser(storedValue.user);
+        if (!user) {
+            return null;
+        }
+
+        return {
+            loggedIn: true,
+            role: normalizeRole(storedValue.role),
+            user
+        };
+    } catch (error) {
+        console.error(`Could not load ${STORAGE_KEYS.auth}`, error);
+        return null;
+    }
+}
+
 export function normalizeLanguage(language) {
     return language === "en" ? "en" : "nl";
 }
@@ -186,13 +209,22 @@ export function generateRecordId() {
 export function createAppState() {
     const bootstrap = getBootstrapData();
     const auth = bootstrap.auth && typeof bootstrap.auth === "object" ? bootstrap.auth : {};
-    const loggedIn = auth.loggedIn === true;
+    const storedAuth = readStoredAuth();
+    const bootstrapUser = normalizeUser(bootstrap.user ?? auth.user);
+    const bootstrapAuth = auth.loggedIn === true && bootstrapUser
+        ? {
+            loggedIn: true,
+            role: normalizeRole(auth.role),
+            user: bootstrapUser
+        }
+        : null;
+    const activeAuth = bootstrapAuth || storedAuth;
 
     return {
         lang: normalizeLanguage(localStorage.getItem(STORAGE_KEYS.lang)),
-        loggedIn,
-        role: normalizeRole(auth.role),
-        user: loggedIn ? normalizeUser(bootstrap.user ?? auth.user) : null,
+        loggedIn: Boolean(activeAuth),
+        role: normalizeRole(activeAuth?.role),
+        user: activeAuth?.user || null,
         photos: readList(bootstrap.photos, STORAGE_KEYS.photos, normalizePhoto),
         competitions: readList(bootstrap.competitions, STORAGE_KEYS.competitions, normalizeCompetition),
         leaderboard: readList(bootstrap.leaderboard, STORAGE_KEYS.leaderboard, normalizeLeaderboardEntry),
@@ -205,6 +237,19 @@ export function createAppState() {
 
 export function saveLanguage(language) {
     localStorage.setItem(STORAGE_KEYS.lang, language);
+}
+
+export function saveAuth(auth) {
+    if (!auth || auth.loggedIn !== true || !auth.user) {
+        localStorage.removeItem(STORAGE_KEYS.auth);
+        return;
+    }
+
+    localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify({
+        loggedIn: true,
+        role: normalizeRole(auth.role),
+        user: normalizeUser(auth.user)
+    }));
 }
 
 export function savePhotos(photos) {

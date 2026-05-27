@@ -1,4 +1,4 @@
-import { competitionToneMap, localeMap } from "./app-config.js";
+import { competitionToneMap, devAdminAccount, localeMap } from "./app-config.js";
 import { refs } from "./app-dom.js";
 import { translations } from "./app-translations.js";
 import {
@@ -7,6 +7,7 @@ import {
     getLocalizedText,
     normalizeLanguage,
     normalizeRole,
+    saveAuth,
     sanitizeFilename,
     saveCompetitions,
     saveLanguage,
@@ -54,8 +55,10 @@ export function createApp() {
         refs,
         state,
         t,
+        devAdminAccount,
         normalizeLanguage,
         normalizeRole,
+        saveAuth,
         saveLanguage,
         renderPhotos: photos.renderPhotos,
         renderCompetitions: competitions.renderCompetitions,

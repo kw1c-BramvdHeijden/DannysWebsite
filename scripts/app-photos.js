@@ -27,9 +27,12 @@ export function createPhotosModule({
     }
 
     function buildPhotoCollection() {
-        return state.photos
+        const limit = Number(refs.photoHub?.dataset.photoLimit || 0);
+        const photos = state.photos
             .slice()
             .sort((left, right) => right.createdAt - left.createdAt);
+
+        return limit > 0 ? photos.slice(0, limit) : photos;
     }
 
     function formatPhotoTime(createdAt) {
@@ -58,8 +61,9 @@ export function createPhotosModule({
     function createPhotoCard(photo) {
         const card = document.createElement("article");
         card.className = "photo-card";
+        const isPublicGallery = refs.photoHub?.hasAttribute("data-photo-public") === true;
 
-        if (canEditPhoto(photo) || canDeletePhoto(photo)) {
+        if (!isPublicGallery && (canEditPhoto(photo) || canDeletePhoto(photo))) {
             const actions = document.createElement("div");
             actions.className = "photo-card-actions";
 
@@ -130,17 +134,20 @@ export function createPhotosModule({
             return;
         }
 
+        const isPublicGallery = refs.photoHub?.hasAttribute("data-photo-public") === true;
+        const canViewGallery = state.loggedIn || isPublicGallery;
+
         if (refs.photoLocked) {
-            refs.photoLocked.hidden = state.loggedIn;
+            refs.photoLocked.hidden = canViewGallery;
         }
 
         if (refs.photoFeed) {
-            refs.photoFeed.hidden = !state.loggedIn;
+            refs.photoFeed.hidden = !canViewGallery;
         }
 
         refs.photoGrid.innerHTML = "";
 
-        if (!state.loggedIn) {
+        if (!canViewGallery) {
             return;
         }
 

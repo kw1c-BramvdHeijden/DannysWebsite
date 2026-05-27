@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <title>Boules Competities | Competities</title>
+    <title>Boules Competities | Foto's</title>
     <link rel="stylesheet" href="../css/variables.css">
     <link rel="stylesheet" href="../css/index.css">
 </head>
-<body data-competitions-href="#competities">
+<body data-competitions-href="competities.php">
     <main class="page-shell">
         <header class="site-header">
             <a class="brand" href="../index.php#home" data-i18n-aria-label="nav.brandHome" aria-label="Boules Competities home">
@@ -31,7 +31,7 @@
                         <i class="fa-solid fa-house" aria-hidden="true"></i>
                         <span data-i18n="nav.home">Home</span>
                     </a>
-                    <a href="#competities" class="is-current">
+                    <a href="competities.php">
                         <i class="fa-solid fa-trophy" aria-hidden="true"></i>
                         <span data-i18n="nav.competitions">Competities</span>
                     </a>
@@ -43,7 +43,7 @@
                         <i class="fa-solid fa-list-check" aria-hidden="true"></i>
                         <span data-i18n="nav.how">Hoe het werkt</span>
                     </a>
-                    <a href="fotos.php">
+                    <a href="#photos" class="is-current">
                         <i class="fa-solid fa-camera" aria-hidden="true"></i>
                         <span data-i18n="nav.photos">Foto's</span>
                     </a>
@@ -88,52 +88,48 @@
             </div>
         </header>
 
-        <section class="hero-section" id="competities">
-            <div class="hero-copy">
-                <h1>
-                    <span>BEKIJK.</span>
-                    <span>PLAN.</span>
-                    <span class="accent">SPEEL.</span>
-                </h1>
-                <p>
-                    Alle geplande competities staan hier overzichtelijk bij elkaar.
-                    Bekijk de datum, het type competitie en open de details.
-                </p>
-            </div>
+        <section class="photo-hub" id="photos">
+            <div class="photo-head">
+                <div class="photo-intro">
+                    <p class="photo-kicker">FOTO'S</p>
+                    <h2>Wedstrijdfoto's</h2>
+                    <p>
+                        Upload hier nieuwe foto's en bekijk de gedeelde momenten van wedstrijden,
+                        trainingen en toernooien.
+                    </p>
+                </div>
 
-            <div class="hero-illustration">
-                <img class="hero-image" src="../images/hero-scene.png" data-i18n-alt="hero.imageAlt" alt="Jeu de boules speler tijdens een wedstrijd op het plein">
-            </div>
-        </section>
-
-        <section class="competitions-panel">
-            <div class="panel-heading">
-                <h2 data-i18n="competitions.heading">AANKOMENDE COMPETITIES</h2>
-                <div class="panel-actions">
-                    <span class="panel-admin-indicator" data-competition-admin-indicator hidden>
-                        <i class="fa-solid fa-pen-to-square"></i>
-                        <span data-i18n="competitions.adminMode">Admin-modus: beheer aankomende competities</span>
+                <div class="photo-toolbar">
+                    <span class="photo-admin-indicator" data-admin-indicator hidden>
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span data-i18n="photos.adminMode">Admin-modus: je kunt gedeelde foto's verwijderen</span>
                     </span>
+                    <input class="photo-input" data-photo-input type="file" accept="image/*">
                 </div>
             </div>
 
-            <div class="competition-cards" data-competition-grid></div>
+            <div class="photo-locked" data-photo-locked>
+                <i class="fa-solid fa-lock"></i>
+                <div class="photo-locked-copy">
+                    <h2 data-i18n="photos.lockedTitle">Log in om buurtfoto's te bekijken</h2>
+                    <p data-i18n="photos.lockedDescription">Als je bent ingelogd kun je foto's delen en foto's van andere spelers zien.</p>
+                </div>
+                <button type="button" class="button button-secondary" data-photo-login data-i18n="photos.lockedButton">Inloggen en foto's bekijken</button>
+            </div>
 
-            <div class="challenge-banner">
-                <div class="challenge-copy">
-                    <span class="challenge-boules" aria-hidden="true"></span>
+            <div class="photo-feed" data-photo-feed hidden>
+                <article class="photo-highlight">
                     <div>
-                        <h3 data-i18n="challenge.title">Klaar om de uitdaging aan te gaan?</h3>
-                        <p data-i18n="challenge.description">Meld je aan en laat zien wat je in huis hebt!</p>
+                        <h3 data-i18n="photos.highlightTitle">Laat de buurt meegenieten</h3>
+                        <p data-i18n="photos.highlightDescription">Upload een foto van jullie wedstrijd, training of toernooi. Andere ingelogde spelers zien hem direct terug.</p>
                     </div>
-                </div>
-                <div class="challenge-actions">
-                    <button type="button" class="button button-secondary" data-challenge-signup data-auth-open="signup"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
-                    <button type="button" class="button button-outline panel-admin-button" data-competition-create hidden>
-                        <i class="fa-solid fa-plus"></i>
-                        <span data-i18n="competitions.add">Competitie toevoegen</span>
+                    <button type="button" class="button button-outline" data-upload-trigger>
+                        <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                        <span data-i18n="photos.highlightButton">Upload foto</span>
                     </button>
-                </div>
+                </article>
+
+                <div class="photo-grid" data-photo-grid></div>
             </div>
         </section>
     </main>
@@ -160,7 +156,7 @@
                 <div class="auth-panel-copy">
                     <p class="photo-kicker" data-auth-kicker>WELKOM TERUG</p>
                     <h2 id="auth-modal-title" data-auth-title>Inloggen</h2>
-                    <p class="upload-description" data-auth-description>Log in om verder te gaan en de buurtcompetitie te openen.</p>
+                    <p class="upload-description" data-auth-description>Log in om verder te gaan.</p>
                 </div>
 
                 <form class="auth-popup-form is-active" data-auth-form="login">
@@ -177,7 +173,7 @@
                         </button>
                     </label>
 
-                    <a href="#competities" class="auth-inline-link" data-auth-forgot-password>Wachtwoord vergeten?</a>
+                    <a href="#photos" class="auth-inline-link" data-auth-forgot-password>Wachtwoord vergeten?</a>
                     <p class="auth-popup-feedback" data-auth-feedback="login" aria-live="polite"></p>
 
                     <button type="submit" class="button button-primary auth-popup-submit" data-auth-submit-login>Inloggen</button>
@@ -228,51 +224,49 @@
         </div>
     </div>
 
-    <div class="competition-modal" data-competition-modal hidden>
-        <div class="competition-modal-backdrop" data-competition-cancel></div>
-        <div class="competition-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="competition-modal-title">
-            <button type="button" class="competition-modal-close" data-competition-cancel data-i18n-aria-label="competitions.form.closeLabel" aria-label="Sluit competitievenster">
+    <div class="upload-modal" data-upload-modal hidden>
+        <div class="upload-modal-backdrop" data-upload-cancel></div>
+        <div class="upload-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
+            <button type="button" class="upload-modal-close" data-upload-cancel data-i18n-aria-label="upload.closeLabel" aria-label="Sluit uploadvenster">
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
-            <form class="competition-form" data-competition-form>
-                <p class="photo-kicker" data-competition-form-kicker data-i18n="competitions.form.addKicker">COMPETITIE TOEVOEGEN</p>
-                <h2 id="competition-modal-title" data-competition-form-title data-i18n="competitions.form.addTitle">Maak een aankomende competitie aan</h2>
-                <p class="upload-description" data-competition-form-description data-i18n="competitions.form.description">Vul de belangrijkste informatie in zodat spelers zich kunnen voorbereiden.</p>
-
-                <label class="upload-label">
-                    <span data-i18n="competitions.form.name">Naam</span>
-                    <input type="text" data-competition-name data-i18n-placeholder="competitions.form.namePlaceholder" placeholder="Bijvoorbeeld: Voorjaars Toernooi">
-                </label>
-
-                <label class="upload-label">
-                    <span data-i18n="competitions.form.type">Type</span>
-                    <input type="text" data-competition-type data-i18n-placeholder="competitions.form.typePlaceholder" placeholder="Bijvoorbeeld: Doublette | Vrije inschrijving">
-                </label>
-
-                <label class="upload-label">
-                    <span data-i18n="competitions.form.date">Startdatum</span>
-                    <input type="date" data-competition-date>
-                </label>
-
-                <label class="upload-label">
-                    <span data-i18n="competitions.form.style">Accentkleur</span>
-                    <select class="competition-select" data-competition-tone>
-                        <option value="green" data-i18n="competitions.form.styleGreen">Groen</option>
-                        <option value="yellow" data-i18n="competitions.form.styleYellow">Geel</option>
-                        <option value="red" data-i18n="competitions.form.styleRed">Rood</option>
-                        <option value="olive" data-i18n="competitions.form.styleOlive">Olijf</option>
-                    </select>
-                </label>
-
-                <div class="upload-actions">
-                    <button type="button" class="button button-ghost" data-competition-cancel data-i18n="competitions.form.cancel">Annuleren</button>
-                    <button type="submit" class="button button-primary">
-                        <i class="fa-solid fa-floppy-disk"></i>
-                        <span data-competition-submit-label data-i18n="competitions.form.save">Competitie opslaan</span>
-                    </button>
+            <div class="upload-modal-layout">
+                <div class="upload-preview-shell">
+                    <img src="" alt="" data-upload-preview>
                 </div>
-            </form>
+
+                <form class="upload-form" data-upload-form>
+                    <p class="photo-kicker" data-upload-kicker-text data-i18n="upload.kicker">FOTO PUBLICEREN</p>
+                    <h2 id="upload-modal-title" data-upload-title-text data-i18n="upload.title">Geef je foto een titel en beschrijving</h2>
+                    <p class="upload-description" data-upload-description-text data-i18n="upload.description">Pas eerst de titel en beschrijving aan voordat je de foto post.</p>
+
+                    <div class="upload-change-row">
+                        <button type="button" class="button button-outline upload-change-button" data-upload-change>
+                            <i class="fa-solid fa-images"></i>
+                            <span data-i18n="upload.changePhoto">Kies andere foto</span>
+                        </button>
+                    </div>
+
+                    <label class="upload-label">
+                        <span data-i18n="upload.photoTitle">Titel</span>
+                        <input type="text" data-upload-title data-i18n-placeholder="upload.photoTitlePlaceholder" placeholder="Bijvoorbeeld: Finale op het plein">
+                    </label>
+
+                    <label class="upload-label">
+                        <span data-i18n="upload.photoDescription">Beschrijving</span>
+                        <textarea rows="5" data-upload-description data-i18n-placeholder="upload.photoDescriptionPlaceholder" placeholder="Vertel kort wat er op deze foto te zien is"></textarea>
+                    </label>
+
+                    <div class="upload-actions">
+                        <button type="button" class="button button-ghost" data-upload-cancel data-i18n="upload.cancel">Annuleren</button>
+                        <button type="submit" class="button button-primary">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span data-upload-submit-label data-i18n="upload.submit">Publiceer foto</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
