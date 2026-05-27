@@ -1,0 +1,286 @@
+:root {
+    --bg: #f4efe7;
+    --card: #fffaf2;
+    --ink: #1f2321;
+    --muted: #6c665f;
+    --line: #ddd1c1;
+    --green: #566f35;
+    --red: #b9362d;
+    --white: #ffffff;
+    --shadow: 0 24px 70px rgba(55, 42, 27, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+    color: var(--ink);
+    background:
+        radial-gradient(circle at top left, rgba(86, 111, 53, 0.16), transparent 32%),
+        radial-gradient(circle at top right, rgba(185, 54, 45, 0.12), transparent 28%),
+        linear-gradient(180deg, #fbf7f0 0%, var(--bg) 100%);
+}
+
+button,
+input {
+    font: inherit;
+}
+
+/* Basis layout voor de losse leaderboard pagina. */
+.leaderboard-page {
+    width: min(100% - 32px, 1120px);
+    margin: 0 auto;
+    padding: 48px 0;
+}
+
+.leaderboard-card {
+    position: relative;
+    overflow: hidden;
+    padding: 28px;
+    border: 1px solid rgba(151, 126, 91, 0.18);
+    border-radius: 18px;
+    background: var(--card);
+    box-shadow: var(--shadow);
+}
+
+.leaderboard-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 6px;
+    background: linear-gradient(90deg, var(--green), #d6a73a, var(--red));
+}
+
+.leaderboard-header {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    color: var(--green);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(2.2rem, 5vw, 4.5rem);
+    line-height: 0.95;
+}
+
+.intro {
+    margin: 12px 0 0;
+    color: var(--muted);
+}
+
+.team-search {
+    display: grid;
+    gap: 8px;
+    min-width: min(100%, 280px);
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.team-search input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--white);
+    color: var(--ink);
+    outline: none;
+}
+
+.team-search input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(86, 111, 53, 0.12);
+}
+
+.message {
+    margin: 0;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.68);
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.message-error {
+    border-color: rgba(185, 54, 45, 0.28);
+    color: var(--red);
+    background: rgba(185, 54, 45, 0.08);
+}
+
+/* De tabel blijft simpel zodat hij makkelijk in de root pagina past. */
+.table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--white);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.leaderboard-table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+    padding: 16px 18px;
+    text-align: left;
+}
+
+.leaderboard-table th {
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: #f7efe4;
+}
+
+.leaderboard-table th:first-child {
+    width: 74px;
+}
+
+.leaderboard-table th[data-sort-key] {
+    cursor: pointer;
+    user-select: none;
+}
+
+.leaderboard-table th[data-sort-key]:hover {
+    color: var(--green);
+}
+
+.leaderboard-table tbody tr + tr {
+    border-top: 1px solid var(--line);
+}
+
+.leaderboard-table tbody tr:hover {
+    background: rgba(86, 111, 53, 0.06);
+}
+
+.leaderboard-table td {
+    font-weight: 700;
+}
+
+.leaderboard-table td:first-child {
+    width: 74px;
+    color: var(--green);
+    font-size: 0;
+    position: relative;
+}
+
+.leaderboard-table tbody td:first-child::before {
+    content: attr(data-rank);
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(86, 111, 53, 0.12);
+    color: var(--green);
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.leaderboard-table tbody tr:nth-child(1) td:first-child::before {
+    background: #d6a73a;
+    color: var(--white);
+}
+
+.leaderboard-table tbody tr:nth-child(2) td:first-child::before {
+    background: #8d9a75;
+    color: var(--white);
+}
+
+.leaderboard-table tbody tr:nth-child(3) td:first-child::before {
+    background: var(--red);
+    color: var(--white);
+}
+
+@media (max-width: 720px) {
+    .leaderboard-page {
+        width: min(100% - 20px, 1120px);
+        padding: 24px 0;
+    }
+
+    .leaderboard-card {
+        padding: 18px;
+        border-radius: 14px;
+    }
+
+    .leaderboard-header {
+        display: grid;
+        align-items: start;
+    }
+
+    .table-wrap {
+        border: 0;
+        background: transparent;
+        overflow: visible;
+    }
+
+    .leaderboard-table,
+    .leaderboard-table tbody,
+    .leaderboard-table tr,
+    .leaderboard-table td {
+        display: block;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .leaderboard-table thead {
+        display: none;
+    }
+
+    .leaderboard-table tbody {
+        display: grid;
+        gap: 12px;
+    }
+
+    .leaderboard-table tr {
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--white);
+    }
+
+    .leaderboard-table tbody tr + tr {
+        border-top: 1px solid var(--line);
+    }
+
+    .leaderboard-table td {
+        display: grid;
+        grid-template-columns: 110px minmax(0, 1fr);
+        gap: 12px;
+        padding: 8px 0;
+    }
+
+    .leaderboard-table td::before {
+        content: attr(data-label);
+        color: var(--muted);
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .leaderboard-table td:first-child {
+        width: auto;
+    }
+}
