@@ -1,7 +1,6 @@
 <?php
 include_once("includes/header.php");
 include_once("includes/footer.php");
-
 ?>
 
 
@@ -32,6 +31,7 @@ include_once("includes/footer.php");
                     of individueel en klim naar de top van het leaderboard.
                 </p>
 
+                <!--SIGNUP-->
                 <div class="hero-actions">
                     <button type="button" class="button button-primary button-large" data-auth-open="signup">
                         <span data-i18n="hero.ctaPrimary">Meld je aan</span>
