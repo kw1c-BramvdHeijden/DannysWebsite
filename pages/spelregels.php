@@ -51,14 +51,8 @@
         </div>
 
         <aside class="hero-panel">
-          <div class="illustration-card">
-            <div class="terrain">
-              <div class="throw-circle"></div>
-              <div class="cochonnet"></div>
-              <div class="boule boule-a"></div>
-              <div class="boule boule-b"></div>
-              <div class="boule boule-c"></div>
-            </div>
+            <div class="illustration-card">
+            <img src="/images/spelregels_hero.png" alt="jeudeboules">
             <div class="legend">
               <div class="legend-item">
                 <span class="legend-dot legend-circle"></span>
