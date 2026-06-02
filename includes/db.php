@@ -1,5 +1,6 @@
 <?php
 
+
 $host = "st1739531586.splsites.nl";
 $dbname = "st1739531586";
 $username = "st1739531586";
@@ -14,9 +15,6 @@ try {
 
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    echo "Database connected!";
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
-
-?>
