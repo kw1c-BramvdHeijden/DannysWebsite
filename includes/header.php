@@ -1,5 +1,5 @@
 <?php
-function render_site_header(string $activePage = "home", bool $isRoot = true): void
+function render_site_header(string $activePage = "home", bool $isRoot = true)
 {
     $indexHome = $isRoot ? "#home" : "../index.php#home";
     $indexOver = $isRoot ? "#over" : "../index.php#over";
@@ -7,7 +7,9 @@ function render_site_header(string $activePage = "home", bool $isRoot = true): v
     $rules = $isRoot ? "pages/spelregels.php" : "spelregels.php";
     $photos = $isRoot ? "pages/fotos.php" : "fotos.php";
 
-    $current = static fn (string $page): string => $activePage === $page ? ' class="is-current"' : "";
+    $current = function (string $page) use ($activePage): string {
+        return $activePage === $page ? ' class="is-current"' : "";
+    };
     ?>
     <header class="site-header">
         <a class="brand" href="<?= htmlspecialchars($indexHome) ?>" data-i18n-aria-label="nav.brandHome" aria-label="Boules Competities home">
