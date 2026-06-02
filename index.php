@@ -107,11 +107,11 @@ include_once("includes/footer.php");
             <article class="benefit"><span class="benefit-icon"><i class="fa-solid fa-bullseye"></i></span><div><h2 data-i18n="benefits.card4.title">Altijd een doel</h2><p data-i18n="benefits.card4.description">Blijf verbeteren en klim naar de top.</p></div></article>
         </section>
 
-        <section class="photo-hub" id="photos" data-photo-public data-photo-limit="5">
+        <section class="photo-hub" id="photos" data-photo-public data-photo-limit="3">
             <div class="photo-head">
                 <div class="photo-intro">
                     <p class="photo-kicker" data-i18n="photos.kicker">BUURT GALERIJ</p>
-                    <h2>De 5 nieuwste foto's uit de buurt.</h2>
+                    <h2>De 3 nieuwste foto's uit de buurt.</h2>
                     <p>
                         De nieuwste uploads verschijnen hier automatisch. Foto's plaatsen kan op
                         de fotopagina wanneer je bent ingelogd.
@@ -121,7 +121,7 @@ include_once("includes/footer.php");
                 <div class="photo-toolbar">
                     <span class="photo-visibility">
                         <i class="fa-solid fa-clock-rotate-left"></i>
-                        <span>5 meest recente foto's</span>
+                        <span>3 meest recente foto's</span>
                     </span>
                     <span class="photo-admin-indicator" data-admin-indicator hidden>
                         <i class="fa-solid fa-shield-halved"></i>
