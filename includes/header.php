@@ -2,7 +2,6 @@
 function render_site_header(string $activePage = "home", bool $isRoot = true)
 {
     $indexHome = $isRoot ? "#home" : "../index.php#home";
-    $indexOver = $isRoot ? "#over" : "../index.php#over";
     $competitions = $isRoot ? "pages/competities.php" : "competities.php";
     $rules = $isRoot ? "pages/spelregels.php" : "spelregels.php";
     $photos = $isRoot ? "pages/fotos.php" : "fotos.php";
@@ -35,10 +34,6 @@ function render_site_header(string $activePage = "home", bool $isRoot = true)
                 <a href="<?= htmlspecialchars($competitions) ?>"<?= $current("competitions") ?>>
                     <i class="fa-solid fa-trophy" aria-hidden="true"></i>
                     <span data-i18n="nav.competitions">Competities</span>
-                </a>
-                <a href="<?= htmlspecialchars($indexOver) ?>"<?= $current("about") ?>>
-                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-                    <span data-i18n="nav.about">Over ons</span>
                 </a>
                 <a href="<?= htmlspecialchars($rules) ?>"<?= $current("rules") ?>>
                     <i class="fa-solid fa-list-check" aria-hidden="true"></i>
