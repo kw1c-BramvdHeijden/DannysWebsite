@@ -1,8 +1,6 @@
 export const STORAGE_KEYS = {
     lang: "boules_language",
-    auth: "boules_logged_in",
-    role: "boules_role",
-    user: "boules_user",
+    auth: "boules_auth",
     photos: "boules_shared_photos",
     competitions: "boules_custom_competitions",
     leaderboard: "boules_leaderboard"

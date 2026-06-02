@@ -105,6 +105,17 @@ export function bindEvents({
         ui.setAccountMenuOpen(!refs.accountSwitcher?.classList.contains("is-open"));
     });
 
+    refs.roleOptions.forEach((option) => {
+        option.addEventListener("click", () => {
+            if (!state.loggedIn || option.disabled) {
+                return;
+            }
+
+            ui.setRole(option.dataset.roleOption);
+            ui.closeAccountMenu();
+        });
+    });
+
     refs.langOptions.forEach((option) => {
         option.addEventListener("click", () => {
             ui.setLanguage(option.dataset.langOption);

@@ -5,9 +5,8 @@ export function createUiModule({
     devAdminAccount,
     normalizeLanguage,
     normalizeRole,
+    saveAuth,
     saveLanguage,
-    saveAuthSession,
-    clearAuthSession,
     renderPhotos,
     renderCompetitions,
     renderLeaderboard,
@@ -200,9 +199,10 @@ export function createUiModule({
     function syncAccountUI() {
         const roleKey = state.role === "admin" ? "account.roleAdmin" : "account.rolePlayer";
 
-        if (refs.signupCta) {
-            refs.signupCta.hidden = state.loggedIn;
-        }
+        const signupCtas = refs.signupCtas || (refs.signupCta ? [refs.signupCta] : []);
+        signupCtas.forEach((cta) => {
+            cta.hidden = state.loggedIn;
+        });
 
         if (refs.accountSwitcher) {
             refs.accountSwitcher.hidden = !state.loggedIn;
@@ -232,12 +232,13 @@ export function createUiModule({
 
         refs.roleOptions.forEach((option) => {
             option.classList.toggle("is-active", normalizeRole(option.dataset.roleOption) === state.role);
-            option.disabled = true;
-            option.setAttribute("aria-disabled", "true");
+            option.disabled = !state.loggedIn;
+            option.setAttribute("aria-disabled", String(!state.loggedIn));
         });
 
         if (refs.adminIndicator) {
-            refs.adminIndicator.hidden = !(state.loggedIn && state.role === "admin");
+            const isPublicGallery = refs.photoHub?.hasAttribute("data-photo-public") === true;
+            refs.adminIndicator.hidden = isPublicGallery || !(state.loggedIn && state.role === "admin");
         }
     }
 
@@ -423,6 +424,14 @@ export function createUiModule({
             closeCompetitionModal();
         }
 
+        if (state.loggedIn && state.user) {
+            saveAuth({
+                loggedIn: true,
+                role: state.role,
+                user: state.user
+            });
+        }
+
         syncAccountUI();
         syncCompetitionAdminUI();
         renderCompetitions();
@@ -434,9 +443,9 @@ export function createUiModule({
         refs.body.classList.toggle("is-logged-in", state.loggedIn);
 
         if (!state.loggedIn) {
-            clearAuthSession();
             state.role = "player";
             state.user = null;
+            saveAuth(null);
             closeAuthModal();
             closeUploadModal();
             closeCompetitionModal();
@@ -448,6 +457,26 @@ export function createUiModule({
         renderLeaderboard();
         renderCompetitions();
         renderPhotos();
+    }
+
+    function setAuthenticatedUser(user, role = "player") {
+        const displayName = user?.name?.trim() || t("account.name");
+
+        state.role = normalizeRole(role);
+        state.user = {
+            id: user?.id || displayName.toLowerCase().replace(/\s+/g, "-"),
+            name: displayName,
+            initials: user?.initials || displayName.charAt(0).toUpperCase() || "A"
+        };
+
+        saveAuth({
+            loggedIn: true,
+            role: state.role,
+            user: state.user
+        });
+
+        setLoggedIn(true);
+        closeAuthModal();
     }
 
     function openAuthModal(mode = "login") {
@@ -559,27 +588,13 @@ export function createUiModule({
                 return;
             }
 
-            const matchesAdmin = identity.toLowerCase() === devAdminAccount.username.toLowerCase()
-                && password === devAdminAccount.password;
-
-            if (!matchesAdmin) {
-                if (feedback) {
-                    feedback.textContent = t("auth.modal.feedback.loginInvalid");
-                }
+            if (devAdminAccount && identity === devAdminAccount.username && password === devAdminAccount.password) {
+                setAuthenticatedUser(devAdminAccount.user, devAdminAccount.role);
                 return;
             }
 
-            state.user = { ...devAdminAccount.user };
-            state.role = devAdminAccount.role;
-            saveAuthSession({
-                role: state.role,
-                user: state.user
-            });
-            setLoggedIn(true);
-            closeAuthModal();
-
             if (feedback) {
-                feedback.textContent = "";
+                feedback.textContent = t("auth.modal.feedback.backendPending");
             }
             return;
         }

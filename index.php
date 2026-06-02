@@ -1,3 +1,10 @@
+<?php
+include_once("includes/header.php");
+include_once("includes/footer.php");
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -5,88 +12,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <title>Boules Competities</title>
+    <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/variables.css">
 </head>
-<body>
+<body data-competitions-href="pages/competities.php">
     <main class="page-shell">
-        <header class="site-header">
-            <a class="brand" href="#home" data-i18n-aria-label="nav.brandHome" aria-label="Boules Competities home">
-                <span class="brand-ball" aria-hidden="true"></span>
-                <span class="brand-copy">
-                    <strong>BOULES</strong>
-                    <small data-i18n="brand.subtitle">COMPETITIES</small>
-                </span>
-            </a>
-
-            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-i18n-aria-label="nav.menu" aria-label="Open menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-
-            <div class="nav-panel" id="site-nav">
-                <nav class="main-nav" data-i18n-aria-label="nav.primary" aria-label="Hoofdnavigatie">
-                    <a href="#home" class="is-current">
-                        <i class="fa-solid fa-house" aria-hidden="true"></i>
-                        <span data-i18n="nav.home">Home</span>
-                    </a>
-                    <a href="#competities">
-                        <i class="fa-solid fa-trophy" aria-hidden="true"></i>
-                        <span data-i18n="nav.competitions">Competities</span>
-                    </a>
-                    <a href="#over">
-                        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-                        <span data-i18n="nav.about">Over ons</span>
-                    </a>
-                    <a href="#werkt">
-                        <i class="fa-solid fa-list-check" aria-hidden="true"></i>
-                        <span data-i18n="nav.how">Hoe het werkt</span>
-                    </a>
-                    <a href="#photos">
-                        <i class="fa-solid fa-camera" aria-hidden="true"></i>
-                        <span data-i18n="nav.photos">Foto's</span>
-                    </a>
-                </nav>
-
-                <div class="header-actions">
-                    <div class="lang-switcher" data-lang-switcher>
-                        <button type="button" class="lang-toggle-button" data-lang-toggle aria-expanded="false" aria-haspopup="true">
-                            <i class="fa-solid fa-globe"></i>
-                            <span data-lang-current>NL</span>
-                            <i class="fa-solid fa-chevron-down lang-chevron"></i>
-                        </button>
-                        <div class="lang-menu" data-lang-menu hidden>
-                            <button type="button" class="lang-option is-active" data-lang-option="nl">Nederlands</button>
-                            <button type="button" class="lang-option" data-lang-option="en">English</button>
-                        </div>
-                    </div>
-
-                    <button type="button" class="button button-ghost auth-toggle" data-auth-toggle>Inloggen</button>
-                    <button type="button" class="button button-primary" data-signup-cta data-auth-open="signup"><span data-i18n="auth.signup">Aanmelden</span></button>
-                    <div class="account-switcher" data-account-switcher hidden>
-                        <button type="button" class="account-toggle-button" data-account-toggle aria-expanded="false" aria-haspopup="true">
-                            <span class="account-avatar" aria-hidden="true">A</span>
-                            <span class="account-copy">
-                                <strong data-account-name>Account</strong>
-                                <small data-account-role>Speler</small>
-                            </span>
-                            <i class="fa-solid fa-chevron-down account-chevron"></i>
-                        </button>
-                        <div class="account-menu" data-account-menu hidden>
-                            <button type="button" class="account-option is-active" data-role-option="player">
-                                <span class="account-option-title" data-i18n="account.rolePlayer">Speler</span>
-                                <span class="account-option-copy" data-i18n="account.rolePlayerDescription">Kan foto's delen en buurtfoto's bekijken.</span>
-                            </button>
-                            <button type="button" class="account-option" data-role-option="admin">
-                                <span class="account-option-title" data-i18n="account.roleAdmin">Admin</span>
-                                <span class="account-option-copy" data-i18n="account.roleAdminDescription">Kan gedeelde foto's beheren en verwijderen.</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <?php render_site_header("home", true); ?>
 
         <section class="hero-section" id="home">
             <div class="hero-copy">
@@ -105,7 +37,7 @@
                         <span data-i18n="hero.ctaPrimary">Meld je aan</span>
                         <span aria-hidden="true">-&gt;</span>
                     </button>
-                    <a href="#competities" class="button button-outline button-large">
+                    <a href="pages/competities.php" class="button button-outline button-large">
                         <span data-i18n="hero.ctaSecondary">Bekijk competities</span>
                         <span aria-hidden="true">-&gt;</span>
                     </a>
@@ -155,7 +87,7 @@
                         </div>
                     </div>
                     <div class="challenge-actions">
-                        <button type="button" class="button button-secondary" data-auth-open="signup"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
+                        <button type="button" class="button button-secondary" data-challenge-signup data-auth-open="signup"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
                         <button type="button" class="button button-outline panel-admin-button" data-competition-create hidden>
                             <i class="fa-solid fa-plus"></i>
                             <span data-i18n="competitions.add">Competitie toevoegen</span>
@@ -187,27 +119,26 @@
             <article class="benefit"><span class="benefit-icon"><i class="fa-solid fa-bullseye"></i></span><div><h2 data-i18n="benefits.card4.title">Altijd een doel</h2><p data-i18n="benefits.card4.description">Blijf verbeteren en klim naar de top.</p></div></article>
         </section>
 
-        <section class="photo-hub" id="photos">
+        <section class="photo-hub" id="photos" data-photo-public data-photo-limit="5">
             <div class="photo-head">
                 <div class="photo-intro">
                     <p class="photo-kicker" data-i18n="photos.kicker">BUURT GALERIJ</p>
-                    <h2 data-i18n="photos.heading">Publiceer foto's van wedstrijden en bekijk foto's van andere spelers.</h2>
-                    <p data-i18n="photos.description">
-                        Alleen ingelogde spelers kunnen foto's publiceren en zien. Deel momenten
-                        van trainingen, toernooien en gezellige buurtavonden.
+                    <h2>De 5 nieuwste foto's uit de buurt.</h2>
+                    <p>
+                        De nieuwste uploads verschijnen hier automatisch. Foto's plaatsen kan op
+                        de fotopagina wanneer je bent ingelogd.
                     </p>
                 </div>
 
                 <div class="photo-toolbar">
                     <span class="photo-visibility">
-                        <i class="fa-solid fa-user-lock"></i>
-                        <span data-i18n="photos.visibility">Alleen zichtbaar voor ingelogde spelers</span>
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span>5 meest recente foto's</span>
                     </span>
                     <span class="photo-admin-indicator" data-admin-indicator hidden>
                         <i class="fa-solid fa-shield-halved"></i>
                         <span data-i18n="photos.adminMode">Admin-modus: je kunt gedeelde foto's verwijderen</span>
                     </span>
-                    <input class="photo-input" data-photo-input type="file" accept="image/*">
                 </div>
             </div>
 
@@ -223,13 +154,13 @@
             <div class="photo-feed" data-photo-feed hidden>
                 <article class="photo-highlight">
                     <div>
-                        <h3 data-i18n="photos.highlightTitle">Laat de buurt meegenieten</h3>
-                        <p data-i18n="photos.highlightDescription">Upload een foto van jullie wedstrijd, training of toernooi. Andere ingelogde spelers zien hem direct terug.</p>
+                        <h3>Recente wedstrijdfoto's</h3>
+                        <p>Bekijk hier de nieuwste uploads. Foto's toevoegen doe je op de fotopagina.</p>
                     </div>
-                    <button type="button" class="button button-outline" data-upload-trigger>
-                        <i class="fa-solid fa-arrow-up-from-bracket"></i>
-                        <span data-i18n="photos.highlightButton">Upload foto</span>
-                    </button>
+                    <a class="button button-outline" href="pages/fotos.php">
+                        <i class="fa-solid fa-images"></i>
+                        <span>Alle foto's bekijken</span>
+                    </a>
                 </article>
 
                 <div class="photo-grid" data-photo-grid></div>
@@ -330,52 +261,6 @@
                         <span data-auth-switch-copy-signup>Heb je al een account?</span>
                         <button type="button" class="auth-switch-button" data-auth-switch="login">Inloggen</button>
                     </p>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="upload-modal" data-upload-modal hidden>
-        <div class="upload-modal-backdrop" data-upload-cancel></div>
-        <div class="upload-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
-            <button type="button" class="upload-modal-close" data-upload-cancel data-i18n-aria-label="upload.closeLabel" aria-label="Sluit uploadvenster">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <div class="upload-modal-layout">
-                <div class="upload-preview-shell">
-                    <img src="" alt="" data-upload-preview>
-                </div>
-
-                <form class="upload-form" data-upload-form>
-                    <p class="photo-kicker" data-upload-kicker-text data-i18n="upload.kicker">FOTO PUBLICEREN</p>
-                    <h2 id="upload-modal-title" data-upload-title-text data-i18n="upload.title">Geef je foto een titel en beschrijving</h2>
-                    <p class="upload-description" data-upload-description-text data-i18n="upload.description">Pas eerst de titel en beschrijving aan voordat je de foto post.</p>
-
-                    <div class="upload-change-row">
-                        <button type="button" class="button button-outline upload-change-button" data-upload-change>
-                            <i class="fa-solid fa-images"></i>
-                            <span data-i18n="upload.changePhoto">Kies andere foto</span>
-                        </button>
-                    </div>
-
-                    <label class="upload-label">
-                        <span data-i18n="upload.photoTitle">Titel</span>
-                        <input type="text" data-upload-title data-i18n-placeholder="upload.photoTitlePlaceholder" placeholder="Bijvoorbeeld: Finale op het plein">
-                    </label>
-
-                    <label class="upload-label">
-                        <span data-i18n="upload.photoDescription">Beschrijving</span>
-                        <textarea rows="5" data-upload-description data-i18n-placeholder="upload.photoDescriptionPlaceholder" placeholder="Vertel kort wat er op deze foto te zien is"></textarea>
-                    </label>
-
-                    <div class="upload-actions">
-                        <button type="button" class="button button-ghost" data-upload-cancel data-i18n="upload.cancel">Annuleren</button>
-                        <button type="submit" class="button button-primary">
-                            <i class="fa-solid fa-paper-plane"></i>
-                            <span data-upload-submit-label data-i18n="upload.submit">Publiceer foto</span>
-                        </button>
-                    </div>
                 </form>
             </div>
         </div>
