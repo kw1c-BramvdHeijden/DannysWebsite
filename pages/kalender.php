@@ -127,7 +127,6 @@ $aantalDagen = cal_days_in_month(
 </head>
 
 <body>
-
 <div class="kalender-wrapper">
 
     <div class="kalender">
