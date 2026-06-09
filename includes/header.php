@@ -19,10 +19,6 @@ function render_site_header($activePage = "home", $isRoot = true)
     ];
 
     $authForgotHref = isset($authForgotLinks[$activePage]) ? $authForgotLinks[$activePage] : $indexHome;
-
-    $authDescription = in_array($activePage, ["home", "competitions"], true)
-        ? "Log in om verder te gaan en de buurtcompetitie te openen."
-        : "Log in om verder te gaan.";
     ?>
     <header class="site-header">
         <a class="brand" href="<?= htmlspecialchars($indexHome) ?>" data-i18n-aria-label="nav.brandHome" aria-label="Boules Competities home">
@@ -121,7 +117,7 @@ function render_site_header($activePage = "home", $isRoot = true)
                 <div class="auth-panel-copy">
                     <p class="photo-kicker" data-auth-kicker>WELKOM TERUG</p>
                     <h2 id="auth-modal-title" data-auth-title>Inloggen</h2>
-                    <p class="upload-description" data-auth-description><?= htmlspecialchars($authDescription) ?></p>
+                    <p class="upload-description" data-auth-description>Inloggen om verder te gaan.</p>
                 </div>
 
                 <form class="auth-popup-form is-active" data-auth-form="login">
