@@ -15,9 +15,10 @@ body {
     min-height: 100vh;
     font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
     color: var(--ink);
-    background: radial-gradient(circle at top left, rgba(255, 242, 214, 0.95), transparent 35%),
-    radial-gradient(circle at top right, rgba(240, 205, 140, 0.35), transparent 30%),
-    linear-gradient(180deg, #f4ecdf 0%, #ece1cb 100%);
+    background:
+        radial-gradient(circle at top left, rgba(255, 242, 214, 0.95), transparent 35%),
+        radial-gradient(circle at top right, rgba(240, 205, 140, 0.35), transparent 30%),
+        linear-gradient(180deg, #f4ecdf 0%, #ece1cb 100%);
 }
 
 body.auth-modal-open,
@@ -1311,9 +1312,10 @@ body.nav-open .nav-toggle span:nth-child(3) {
     justify-self: end;
     width: 120px;
     height: 96px;
-    background: radial-gradient(circle at 25% 75%, rgba(123, 145, 81, 0.85), transparent 32%),
-    radial-gradient(circle at 55% 36%, rgba(123, 145, 81, 0.85), transparent 30%),
-    radial-gradient(circle at 80% 75%, rgba(123, 145, 81, 0.85), transparent 28%);
+    background:
+        radial-gradient(circle at 25% 75%, rgba(123, 145, 81, 0.85), transparent 32%),
+        radial-gradient(circle at 55% 36%, rgba(123, 145, 81, 0.85), transparent 30%),
+        radial-gradient(circle at 80% 75%, rgba(123, 145, 81, 0.85), transparent 28%);
 }
 
 .auth-modal {
@@ -1818,8 +1820,9 @@ body.nav-open .nav-toggle span:nth-child(3) {
     max-height: min(calc(100dvh - 48px), 920px);
     border: 1px solid rgba(255, 255, 255, 0.72);
     border-radius: 32px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0.18)),
-    rgba(251, 245, 236, 0.98);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0.18)),
+        rgba(251, 245, 236, 0.98);
     box-shadow: var(--shadow-strong);
     transform: translateY(24px) scale(0.98);
     transition: transform 240ms ease;
@@ -1963,13 +1966,16 @@ body.nav-open .nav-toggle span:nth-child(3) {
     padding: 10px 38px 10px 14px;
     border: 1px solid rgba(134, 109, 74, 0.16);
     border-radius: 14px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 238, 228, 0.96));
     color: var(--ink);
     font-size: 0.86rem;
     font-weight: 700;
     outline: none;
     appearance: none;
-    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 238, 228, 0.96)),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%23526833' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 238, 228, 0.96)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%23526833' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat, no-repeat;
     background-position: 0 0, right 12px center;
     background-size: auto, 14px;
