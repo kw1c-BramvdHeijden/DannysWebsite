@@ -1,31 +1,16 @@
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    background: #e8e3dc;
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
-}
-
 /* ===== WRAPPER ===== */
 
 .kalender-wrapper {
-    width: 92vw;
+    width: 100%;
     max-width: 1800px;
 
-    height: 88vh;
+    height: min(88vh, 900px);
 
-    margin: 25px auto;
+    margin: 25px 0;
 
     display: flex;
     gap: 16px;
     align-items: stretch;
-}
-.site-header {
-    width: calc(70% - 30px);
-    margin: 15px auto;
 }
 
 /* ===== KALENDER ===== */
