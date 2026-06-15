@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 
 /* ===== SESSION ===== */
@@ -107,12 +108,17 @@ $aantalDagen = cal_days_in_month(
 );
 
 ?>
+<?php require_once __DIR__ . "/../includes/header.php"; ?>
 
 <!DOCTYPE html>
 <html lang="nl">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/index.css">
+
+
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -127,6 +133,8 @@ $aantalDagen = cal_days_in_month(
 </head>
 
 <body>
+<?php render_site_header("competitions", false); ?>
+
 <div class="kalender-wrapper">
 
     <div class="kalender">

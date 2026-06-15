@@ -4,31 +4,28 @@
 
 body {
     margin: 0;
-    padding: 25px;
-
     background: #e8e3dc;
-
     font-family: Arial, sans-serif;
-
     min-height: 100vh;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 /* ===== WRAPPER ===== */
 
 .kalender-wrapper {
     width: 92vw;
+    max-width: 1800px;
 
     height: 88vh;
 
+    margin: 25px auto;
+
     display: flex;
-
     gap: 16px;
-
     align-items: stretch;
+}
+.site-header {
+    width: calc(70% - 30px);
+    margin: 15px auto;
 }
 
 /* ===== KALENDER ===== */
