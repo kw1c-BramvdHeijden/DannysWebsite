@@ -87,10 +87,10 @@ include_once("includes/leaderboard.php");
                     </div>
                     <div class="challenge-actions">
                         <button type="button" class="button button-secondary" data-challenge-signup data-auth-open="signup"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
-                        <button type="button" class="button button-outline panel-admin-button" data-competition-create hidden>
+                        <a href="pages/kalender.php" class="button button-outline panel-admin-button" data-competition-create hidden>
                             <i class="fa-solid fa-plus"></i>
-                            <span data-i18n="competitions.add">Competitie toevoegen</span>
-                        </button>
+                            <span>Competitie toevoegen</span>
+                        </a>
                     </div>
                 </div>
             </section>
