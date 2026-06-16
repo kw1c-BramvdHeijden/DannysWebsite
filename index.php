@@ -13,6 +13,8 @@ include_once("includes/leaderboard.php");
     <title>Boules Competities</title>
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
 </head>
 <body data-competitions-href="pages/competities.php">
     <main class="page-shell">
