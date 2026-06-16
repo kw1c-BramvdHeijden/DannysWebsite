@@ -8,6 +8,8 @@
     <title>Boules Competities | Foto's</title>
     <link rel="stylesheet" href="../css/variables.css">
     <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/footer.css">
 </head>
 <body data-competitions-href="competities.php">
     <main class="page-shell">
