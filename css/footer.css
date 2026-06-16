@@ -78,4 +78,14 @@ footer[id] {
     .footer-leaf {
         justify-self: center;
     }
+
+    .quote-inner {
+        gap: 20px;
+        text-align: center;
+        justify-items: center;
+    }
+
+    .panel-heading {
+        align-items: flex-start;
+    }
 }
