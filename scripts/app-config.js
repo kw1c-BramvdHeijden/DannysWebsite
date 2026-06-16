@@ -17,14 +17,3 @@ export const competitionToneMap = {
     red: "fa-trophy",
     olive: "fa-ranking-star"
 };
-
-export const devAdminAccount = {
-    username: "Danny",
-    password: "123",
-    role: "admin",
-    user: {
-        id: "admin-local",
-        name: "Danny",
-        initials: "D"
-    }
-};

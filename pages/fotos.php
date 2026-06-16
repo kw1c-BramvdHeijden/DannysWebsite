@@ -1,4 +1,10 @@
-<?php require_once __DIR__ . "/../includes/header.php"; ?>
+<?php
+require_once __DIR__ . "/../includes/db.php";
+require_once __DIR__ . "/../includes/bootstrap-data.php";
+require_once __DIR__ . "/../includes/header.php";
+
+$bootstrapData = boules_bootstrap_data($pdo, "competities.php", 100, "../");
+?>
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -106,6 +112,9 @@
         </div>
     </div>
 
+    <script>
+        window.__BOULES_BOOTSTRAP__ = <?= json_encode($bootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    </script>
     <script type="module" src="../scripts/index.js"></script>
 </body>
 </html>

@@ -1,6 +1,10 @@
 <?php
+include_once("includes/db.php");
+include_once("includes/bootstrap-data.php");
 include_once("includes/header.php");
 include_once("includes/leaderboard.php");
+
+$bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
 ?>
 
 
@@ -213,6 +217,9 @@ include_once("includes/leaderboard.php");
 
     <?php render_leaderboard_modal(); ?>
 
+    <script>
+        window.__BOULES_BOOTSTRAP__ = <?= json_encode($bootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    </script>
     <script type="module" src="scripts/index.js"></script>
 </body>
 </html>

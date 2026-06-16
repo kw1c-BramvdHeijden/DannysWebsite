@@ -10,6 +10,49 @@ export function createPhotosModule({
 }) {
     let uploadModalTimer = 0;
 
+    function getPhotosApiUrl() {
+        const script = document.querySelector("script[src$='scripts/index.js']");
+        return script ? new URL("../api/photos.php", script.src).toString() : "api/photos.php";
+    }
+
+    async function persistPhoto(photo) {
+        const response = await fetch(getPhotosApiUrl(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "create",
+                photo
+            })
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.photo) {
+            throw new Error(result.error || "Foto kon niet worden opgeslagen.");
+        }
+
+        return result.photo;
+    }
+
+    async function deletePersistedPhoto(photoId) {
+        const response = await fetch(getPhotosApiUrl(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "delete",
+                id: photoId
+            })
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.deleted !== true) {
+            throw new Error(result.error || "Foto kon niet worden verwijderd.");
+        }
+    }
+
     function canDeletePhoto(photo) {
         if (!state.loggedIn) {
             return false;
@@ -317,7 +360,7 @@ export function createPhotosModule({
         }, 220);
     }
 
-    function publishPendingPhoto(event) {
+    async function publishPendingPhoto(event) {
         event.preventDefault();
 
         if (!state.pendingUpload || !state.loggedIn || !state.user) {
@@ -345,7 +388,7 @@ export function createPhotosModule({
                     : photo
             ));
         } else {
-            state.photos.unshift({
+            const photo = {
                 id: generateRecordId(),
                 author: state.user.name,
                 ownerId: state.user.id,
@@ -353,7 +396,24 @@ export function createPhotosModule({
                 description,
                 createdAt: Date.now(),
                 image: state.pendingUpload.image
-            });
+            };
+
+            state.photos.unshift(photo);
+            savePhotos(state.photos);
+            renderPhotos();
+            closeUploadModal();
+
+            try {
+                const savedPhoto = await persistPhoto(photo);
+                state.photos = state.photos.map((entry) => (
+                    String(entry.id) === String(photo.id) ? savedPhoto : entry
+                ));
+                savePhotos(state.photos);
+                renderPhotos();
+            } catch (error) {
+                window.alert(error.message);
+            }
+            return;
         }
 
         savePhotos(state.photos);
@@ -361,7 +421,7 @@ export function createPhotosModule({
         closeUploadModal();
     }
 
-    function deletePhoto(photoId) {
+    async function deletePhoto(photoId) {
         const photo = getStoredPhotoById(photoId);
         if (!photo || !canDeletePhoto(photo)) {
             return;
@@ -371,9 +431,14 @@ export function createPhotosModule({
             return;
         }
 
-        state.photos = state.photos.filter((entry) => String(entry.id) !== String(photoId));
-        savePhotos(state.photos);
-        renderPhotos();
+        try {
+            await deletePersistedPhoto(photoId);
+            state.photos = state.photos.filter((entry) => String(entry.id) !== String(photoId));
+            savePhotos(state.photos);
+            renderPhotos();
+        } catch (error) {
+            window.alert(error.message);
+        }
     }
 
     return {
