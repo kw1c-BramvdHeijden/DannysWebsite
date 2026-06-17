@@ -276,7 +276,7 @@ export function createTeamsModule({ refs, state, t }) {
         refs.teamModal.hidden = false;
         refs.body.classList.add("team-modal-open");
         loadTeams();
-        loadUsers();
+        loadUsers(true);
 
         requestAnimationFrame(() => {
             refs.teamModal.classList.add("is-open");
