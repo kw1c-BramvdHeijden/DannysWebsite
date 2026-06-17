@@ -1,5 +1,5 @@
 <?php
-include_once("includes/db.php");
+require_once __DIR__ . '/includes/db.php';
 include_once("includes/bootstrap-data.php");
 include_once("includes/header.php");
 include_once("includes/leaderboard.php");

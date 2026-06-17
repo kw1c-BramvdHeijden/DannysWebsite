@@ -1,14 +1,14 @@
 <?php
-$host = "localhost";
-$dbname = "st1739531586";
-$username = "root";
-$password = "";
+//$host = "localhost";
+//$dbname = "dannyproject";
+//$username = "root";
+//$password = "";
 
-/*$host = "st1739531586.splsites.nl";
+$host = "st1739531586.splsites.nl";
 $dbname = "st1739531586";
 $username = "st1739531586";
 $password = "K6sBm9z1fabKwtj";
-*/
+
 try {
     $pdo = new PDO(
         "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
