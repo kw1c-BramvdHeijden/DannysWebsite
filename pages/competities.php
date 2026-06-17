@@ -1,4 +1,10 @@
-<?php require_once __DIR__ . "/../includes/header.php"; ?>
+<?php
+require_once __DIR__ . "/../includes/db.php";
+require_once __DIR__ . "/../includes/bootstrap-data.php";
+require_once __DIR__ . "/../includes/header.php";
+
+$bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
+?>
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -10,6 +16,9 @@
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/header.css">
     <link rel="stylesheet" href="../css/footer.css">
+    <link rel="stylesheet" href="../css/competities_fotos_kalender_spelregels.css">
+    <link rel="stylesheet" href="../css/index_competities.css">
+    <link rel="stylesheet" href="../css/competities.css">
 </head>
 <body data-competitions-href="#competities">
 <main class="page-shell">

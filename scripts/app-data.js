@@ -58,12 +58,15 @@ function normalizePhoto(photo) {
         return null;
     }
 
-    const createdAt = Number.isFinite(photo.createdAt) ? photo.createdAt : Date.now();
+    const createdAt = Number.isFinite(Number(photo.createdAt)) ? Number(photo.createdAt) : Date.now();
+    const ownerId = typeof photo.ownerId === "string" || typeof photo.ownerId === "number"
+        ? String(photo.ownerId).trim()
+        : "";
 
     return {
         id: typeof photo.id === "string" || typeof photo.id === "number" ? String(photo.id) : String(createdAt),
         author: typeof photo.author === "string" ? photo.author.trim() : "",
-        ownerId: typeof photo.ownerId === "string" && photo.ownerId.trim() ? photo.ownerId.trim() : null,
+        ownerId: ownerId || null,
         title: normalizeLocalizedField(photo.title ?? photo.caption),
         description: normalizeLocalizedField(photo.description),
         createdAt,
@@ -94,6 +97,7 @@ function normalizeCompetition(competition) {
         type,
         startDate,
         tone: normalizeCompetitionTone(competition.tone),
+        status: typeof competition.status === "string" ? competition.status.trim() : "",
         href: typeof competition.href === "string" && competition.href.trim() ? competition.href.trim() : "#competities"
     };
 }
@@ -168,6 +172,7 @@ function readStoredAuth() {
         return {
             loggedIn: true,
             role: normalizeRole(storedValue.role),
+            accountRole: normalizeRole(storedValue.accountRole || storedValue.role),
             user
         };
     } catch (error) {
@@ -224,9 +229,13 @@ export function createAppState() {
         lang: normalizeLanguage(localStorage.getItem(STORAGE_KEYS.lang)),
         loggedIn: Boolean(activeAuth),
         role: normalizeRole(activeAuth?.role),
+        accountRole: normalizeRole(activeAuth?.accountRole || activeAuth?.role),
         user: activeAuth?.user || null,
         photos: readList(bootstrap.photos, STORAGE_KEYS.photos, normalizePhoto),
         competitions: readList(bootstrap.competitions, STORAGE_KEYS.competitions, normalizeCompetition),
+        competitionRequests: [],
+        competitionRequestsLoaded: false,
+        competitionRequestsLoading: false,
         leaderboard: readList(bootstrap.leaderboard, STORAGE_KEYS.leaderboard, normalizeLeaderboardEntry),
         pendingUpload: null,
         pendingPhotoId: null,
@@ -248,6 +257,7 @@ export function saveAuth(auth) {
     localStorage.setItem(STORAGE_KEYS.auth, JSON.stringify({
         loggedIn: true,
         role: normalizeRole(auth.role),
+        accountRole: normalizeRole(auth.accountRole || auth.role),
         user: normalizeUser(auth.user)
     }));
 }

@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/header.css">
     <link rel="stylesheet" href="../css/footer.css">
+    <link rel="stylesheet" href="../css/competities_fotos_kalender_spelregels.css">
+    <link rel="stylesheet" href="../css/fotos.css">
 </head>
 <body data-competitions-href="competities.php">
     <main class="page-shell">
