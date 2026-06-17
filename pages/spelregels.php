@@ -18,6 +18,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "competities.php", 0, "../");
   <link rel="stylesheet" href="../css/footer.css">
   <link rel="stylesheet" href="../css/competities_fotos_kalender_spelregels.css">
   <link rel="stylesheet" href="../css/spelregels.css">
+  <link rel="stylesheet" href="../css/base.css">
 </head>
 <body data-competitions-href="competities.php">
   <main class="page-shell">
