@@ -64,13 +64,35 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
                 </div>
             </div>
             <div class="challenge-actions">
-                <button type="button" class="button button-secondary" data-challenge-signup data-auth-open="signup"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
-                <a href="../pages/kalender.php" class="button button-outline panel-admin-button" data-competition-create hidden>
+                <button type="button" class="button button-secondary" data-competition-request hidden><i class="fa-solid fa-paper-plane"></i><span data-i18n="challenge.cta">Aanvraag starten</span></button>
+                <button type="button" class="button button-outline panel-admin-button" data-competition-create hidden>
                     <i class="fa-solid fa-plus"></i>
                     <span>Competitie toevoegen</span>
-                </a>
+                </button>
             </div>
         </div>
+    </section>
+
+    <section class="competitions-panel competition-requests-panel" data-competition-requests-panel hidden>
+        <div class="panel-heading">
+            <h2 data-i18n="competitions.requests.heading">AANGEVRAAGDE COMPETITIES</h2>
+            <div class="panel-actions">
+                <span class="panel-admin-indicator">
+                    <i class="fa-solid fa-clock"></i>
+                    <span data-i18n="competitions.requests.adminOnly">Alleen zichtbaar voor admins</span>
+                </span>
+            </div>
+        </div>
+
+        <p class="competition-requests-status" data-competition-requests-status aria-live="polite"></p>
+        <div class="competition-request-header" aria-hidden="true">
+            <span data-i18n="competitions.requests.column.status">Status</span>
+            <span data-i18n="competitions.requests.column.name">Naam</span>
+            <span data-i18n="competitions.requests.column.location">Locatie</span>
+            <span data-i18n="competitions.requests.column.startDate">Startdatum</span>
+            <span></span>
+        </div>
+        <div class="competition-request-list" data-competition-requests-grid></div>
     </section>
 </main>
 
@@ -164,8 +186,59 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
     </div>
 </div>
 
+<div class="competition-modal" data-competition-modal hidden>
+    <div class="competition-modal-backdrop" data-competition-cancel></div>
+    <div class="competition-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="competition-modal-title">
+        <button type="button" class="competition-modal-close" data-competition-cancel data-i18n-aria-label="competitions.form.closeLabel" aria-label="Sluit competitievenster">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <form class="competition-form" data-competition-form>
+            <p class="photo-kicker" data-competition-form-kicker data-i18n="competitions.form.requestKicker">COMPETITIE AANVRAGEN</p>
+            <h2 id="competition-modal-title" data-competition-form-title data-i18n="competitions.form.requestTitle">Start een competitieaanvraag</h2>
+            <p class="upload-description" data-competition-form-description data-i18n="competitions.form.requestDescription">Vul je voorstel in. De aanvraag wordt opgeslagen en komt op pending te staan.</p>
+
+            <label class="upload-label">
+                <span data-i18n="competitions.form.name">Naam</span>
+                <input type="text" data-competition-name data-i18n-placeholder="competitions.form.namePlaceholder" placeholder="Bijvoorbeeld: Voorjaars Toernooi">
+            </label>
+
+            <label class="upload-label">
+                <span data-i18n="competitions.form.type">Locatie</span>
+                <input type="text" data-competition-type data-i18n-placeholder="competitions.form.typePlaceholder" placeholder="Bijvoorbeeld: Dorpsplein 4 of Baan 2">
+            </label>
+
+            <label class="upload-label">
+                <span data-i18n="competitions.form.date">Startdatum</span>
+                <input type="date" data-competition-date>
+            </label>
+
+            <label class="upload-label">
+                <span data-i18n="competitions.form.style">Accentkleur</span>
+                <select class="competition-select" data-competition-tone>
+                    <option value="green" data-i18n="competitions.form.styleGreen">Groen</option>
+                    <option value="yellow" data-i18n="competitions.form.styleYellow">Geel</option>
+                    <option value="red" data-i18n="competitions.form.styleRed">Rood</option>
+                    <option value="olive" data-i18n="competitions.form.styleOlive">Olijf</option>
+                </select>
+            </label>
+
+            <div class="upload-actions">
+                <button type="button" class="button button-ghost" data-competition-cancel data-i18n="competitions.form.cancel">Annuleren</button>
+                <button type="submit" class="button button-primary">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span data-competition-submit-label data-i18n="competitions.form.requestSubmit">Aanvraag versturen</span>
+                </button>
+            </div>
+            <p class="auth-popup-feedback" data-competition-feedback aria-live="polite"></p>
+        </form>
+    </div>
+</div>
 
 
+<script>
+    window.__BOULES_BOOTSTRAP__ = <?= json_encode($bootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+</script>
 <script type="module" src="../scripts/index.js"></script>
 </body>
 </html>
