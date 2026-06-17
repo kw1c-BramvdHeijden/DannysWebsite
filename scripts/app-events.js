@@ -181,6 +181,12 @@ export function bindEvents({
         competitions.openCompetitionModal();
     });
 
+    refs.competitionRequestButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            competitions.openCompetitionRequestModal();
+        });
+    });
+
     refs.competitionCancelButtons.forEach((button) => {
         button.addEventListener("click", () => {
             competitions.closeCompetitionModal();
@@ -227,6 +233,25 @@ export function bindEvents({
         const deleteButton = target.closest("[data-competition-delete]");
         if (deleteButton) {
             competitions.deleteCompetition(deleteButton.getAttribute("data-competition-delete"));
+        }
+    });
+
+    refs.competitionRequestsGrid?.addEventListener("click", (event) => {
+        const target = event.target;
+
+        if (!(target instanceof Element)) {
+            return;
+        }
+
+        const acceptButton = target.closest("[data-competition-request-accept]");
+        if (acceptButton) {
+            competitions.acceptCompetitionRequest(acceptButton.getAttribute("data-competition-request-accept"));
+            return;
+        }
+
+        const rejectButton = target.closest("[data-competition-request-reject]");
+        if (rejectButton) {
+            competitions.rejectCompetitionRequest(rejectButton.getAttribute("data-competition-request-reject"));
         }
     });
 

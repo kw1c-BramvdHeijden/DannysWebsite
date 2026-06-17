@@ -1,6 +1,10 @@
 <?php
+include_once("includes/db.php");
+include_once("includes/bootstrap-data.php");
 include_once("includes/header.php");
 include_once("includes/leaderboard.php");
+
+$bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
 ?>
 
 
@@ -15,6 +19,7 @@ include_once("includes/leaderboard.php");
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/index_competities.css">
 </head>
 <body data-competitions-href="pages/competities.php">
     <main class="page-shell">
@@ -89,10 +94,10 @@ include_once("includes/leaderboard.php");
                     </div>
                     <div class="challenge-actions">
                         <button type="button" class="button button-secondary" data-challenge-signup data-auth-open="signup"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
-                        <a href="pages/kalender.php" class="button button-outline panel-admin-button" data-competition-create hidden>
+                        <button type="button" class="button button-outline panel-admin-button" data-competition-create hidden>
                             <i class="fa-solid fa-plus"></i>
-                            <span>Competitie toevoegen</span>
-                        </a>
+                            <span data-i18n="competitions.add">Competitie toevoegen</span>
+                        </button>
                     </div>
                 </div>
             </section>
@@ -156,7 +161,13 @@ include_once("includes/leaderboard.php");
         </section>
     </main>
 
-    <?php include 'includes/footer.php';?>
+    <footer class="quote-footer" id="over">
+        <div class="quote-inner">
+            <div class="footer-boules" aria-hidden="true"><span></span><span></span><span class="small-red"></span></div>
+            <blockquote data-i18n-html="footer.quote">" Jeu de boules is meer dan een spel.<br>Het is samenzijn, strategie en plezier. "</blockquote>
+            <div class="footer-leaf" aria-hidden="true"></div>
+        </div>
+    </footer>
 
     <!-- Auth modal is rendered by includes/header.php. -->
     <div class="competition-modal" data-competition-modal hidden>
