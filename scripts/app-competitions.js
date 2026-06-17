@@ -39,6 +39,12 @@ export function createCompetitionsModule({
         refs.competitionFeedback.classList.toggle("is-success", isSuccess);
     }
 
+    function getCurrentUserId() {
+        return state.user && (typeof state.user.id === "string" || typeof state.user.id === "number")
+            ? String(state.user.id)
+            : "";
+    }
+
     async function requestCompetition(competitionData) {
         const response = await fetch(getCompetitionApiUrl(), {
             method: "POST",
@@ -47,6 +53,7 @@ export function createCompetitionsModule({
             },
             body: JSON.stringify({
                 action: "request",
+                userId: getCurrentUserId(),
                 competition: competitionData
             })
         });
@@ -67,6 +74,7 @@ export function createCompetitionsModule({
             },
             body: JSON.stringify({
                 action: "create",
+                userId: getCurrentUserId(),
                 competition: competitionData
             })
         });
@@ -77,6 +85,47 @@ export function createCompetitionsModule({
         }
 
         return result.competition;
+    }
+
+    async function updateAcceptedCompetition(competitionId, competitionData) {
+        const response = await fetch(getCompetitionApiUrl(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "update",
+                id: competitionId,
+                competition: competitionData
+            })
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.competition) {
+            throw new Error(result.error || t("competitions.form.createError"));
+        }
+
+        return result.competition;
+    }
+
+    async function deleteAcceptedCompetition(competitionId) {
+        const response = await fetch(getCompetitionApiUrl(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "delete",
+                id: competitionId
+            })
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.deleted !== true) {
+            throw new Error(result.error || t("competitions.requests.error"));
+        }
+
+        return result;
     }
 
     function normalizeCompetitionFromApi(competition) {
@@ -99,6 +148,7 @@ export function createCompetitionsModule({
             startDate,
             tone: competitionToneMap[competition.tone] ? competition.tone : "green",
             status: typeof competition.status === "string" ? competition.status : "",
+            requesterName: typeof competition.requesterName === "string" ? competition.requesterName.trim() : "",
             href: getDefaultCompetitionHref()
         };
     }
@@ -247,6 +297,10 @@ export function createCompetitionsModule({
         const type = document.createElement("p");
         type.textContent = getLocalizedText(competition.type, state.lang);
 
+        const requester = document.createElement("p");
+        requester.className = "competition-request-requester";
+        requester.textContent = competition.requesterName || "-";
+
         const date = document.createElement("p");
         date.textContent = formatCompetitionDate(competition.startDate);
 
@@ -270,7 +324,7 @@ export function createCompetitionsModule({
         rejectButton.innerHTML = `<i class="fa-solid fa-xmark"></i><span>${t("competitions.requests.reject")}</span>`;
 
         actions.append(acceptButton, rejectButton);
-        card.append(status, title, type, date, actions);
+        card.append(status, title, requester, type, date, actions);
         return card;
     }
 
@@ -497,12 +551,6 @@ export function createCompetitionsModule({
         }
 
         if (state.pendingCompetitionId) {
-            state.competitions = state.competitions.map((competition) => (
-                String(competition.id) === String(state.pendingCompetitionId)
-                    ? { ...competition, ...competitionData }
-                    : competition
-            ));
-        } else {
             const submitButton = refs.competitionForm?.querySelector("button[type='submit']");
 
             if (submitButton) {
@@ -510,11 +558,12 @@ export function createCompetitionsModule({
             }
 
             try {
-                const createdCompetition = await createAcceptedCompetition(competitionData);
-                state.competitions.unshift({
-                    ...competitionData,
-                    id: createdCompetition.id || generateRecordId()
-                });
+                const updatedCompetition = normalizeCompetitionFromApi(await updateAcceptedCompetition(state.pendingCompetitionId, competitionData));
+                state.competitions = state.competitions.map((competition) => (
+                    String(competition.id) === String(state.pendingCompetitionId)
+                        ? (updatedCompetition || { ...competition, ...competitionData })
+                        : competition
+                ));
             } catch (error) {
                 setCompetitionFeedback(error.message || t("competitions.form.createError"));
                 if (submitButton) {
@@ -532,12 +581,35 @@ export function createCompetitionsModule({
             return;
         }
 
+        const submitButton = refs.competitionForm?.querySelector("button[type='submit']");
+
+        if (submitButton) {
+            submitButton.disabled = true;
+        }
+
+        try {
+            const createdCompetition = await createAcceptedCompetition(competitionData);
+            state.competitions.unshift(normalizeCompetitionFromApi(createdCompetition) || {
+                ...competitionData,
+                id: createdCompetition.id || generateRecordId()
+            });
+        } catch (error) {
+            setCompetitionFeedback(error.message || t("competitions.form.createError"));
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
+            return;
+        }
+
+        if (submitButton) {
+            submitButton.disabled = false;
+        }
         saveCompetitions(state.competitions);
         renderCompetitions();
         closeCompetitionModal();
     }
 
-    function deleteCompetition(competitionId) {
+    async function deleteCompetition(competitionId) {
         if (!canManageCompetitions()) {
             return;
         }
@@ -551,9 +623,14 @@ export function createCompetitionsModule({
             return;
         }
 
-        state.competitions = state.competitions.filter((entry) => String(entry.id) !== String(competitionId));
-        saveCompetitions(state.competitions);
-        renderCompetitions();
+        try {
+            await deleteAcceptedCompetition(competitionId);
+            state.competitions = state.competitions.filter((entry) => String(entry.id) !== String(competitionId));
+            saveCompetitions(state.competitions);
+            renderCompetitions();
+        } catch (error) {
+            window.alert(error.message || t("competitions.requests.error"));
+        }
     }
 
     async function updateCompetitionRequest(competitionId, action) {
