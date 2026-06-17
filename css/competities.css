@@ -2,6 +2,14 @@
     margin-top: 22px;
 }
 
+.teams-panel {
+    margin-bottom: 22px;
+}
+
+.teams-panel .challenge-banner {
+    margin-top: 0;
+}
+
 .competition-request-list {
     display: grid;
     gap: 14px;

@@ -13,6 +13,8 @@ export function createUiModule({
     syncCompetitionFormUI,
     closeUploadModal,
     closeCompetitionModal,
+    closeTeamModal,
+    syncTeamButtons,
     closeLeaderboardModal,
     canManageCompetitions
 }) {
@@ -297,6 +299,7 @@ export function createUiModule({
 
         syncAccountUI();
         syncCompetitionAdminUI();
+        syncTeamButtons();
     }
 
     function setAuthMode(mode) {
@@ -503,6 +506,7 @@ export function createUiModule({
             closeAuthModal();
             closeUploadModal();
             closeCompetitionModal();
+            closeTeamModal();
             closeLeaderboardModal();
             closeAccountMenu();
         }

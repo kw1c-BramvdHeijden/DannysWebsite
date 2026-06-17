@@ -42,6 +42,24 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
         </div>
     </section>
 
+    <section class="teams-panel">
+        <div class="challenge-banner">
+            <div class="challenge-copy">
+                <span class="challenge-boules" aria-hidden="true"></span>
+                <div>
+                    <p class="photo-kicker" data-i18n="teams.blockKicker">TEAMS</p>
+                    <h3 data-i18n="teams.blockTitle">Team aanmelden of bekijken</h3>
+                    <p data-i18n="teams.blockDescription">Log in om teams te bekijken en je eigen team aan te melden voor de competitie.</p>
+                </div>
+            </div>
+            <div class="challenge-actions">
+                <button type="button" class="button button-secondary" data-team-open hidden>
+                    <i class="fa-solid fa-user-group"></i>
+                    <span data-i18n="teams.open">Teams bekijken</span>
+                </button>
+            </div>
+        </div>
+    </section>
     <section class="competitions-panel">
         <div class="panel-heading">
             <h2 data-i18n="competitions.heading">AANKOMENDE COMPETITIES</h2>
@@ -232,6 +250,58 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
             </div>
             <p class="auth-popup-feedback" data-competition-feedback aria-live="polite"></p>
         </form>
+    </div>
+</div>
+
+<div class="team-modal" data-team-modal hidden>
+    <div class="team-modal-backdrop" data-team-close></div>
+    <div class="team-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="team-modal-title">
+        <button type="button" class="team-modal-close" data-team-close data-i18n-aria-label="teams.closeLabel" aria-label="Sluit teamvenster">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="team-modal-shell">
+            <form class="team-form" data-team-form>
+                <p class="photo-kicker" data-i18n="teams.kicker">TEAM AANMELDEN</p>
+                <h2 id="team-modal-title" data-i18n="teams.title">Meld je team aan</h2>
+                <p class="upload-description" data-i18n="teams.description">Vul je teamnaam en spelers in. Het team komt direct in het overzicht.</p>
+
+                <label class="upload-label">
+                    <span data-i18n="teams.form.name">Teamnaam</span>
+                    <input type="text" data-team-name data-i18n-placeholder="teams.form.namePlaceholder" placeholder="Bijvoorbeeld: De Pleinwerpers">
+                </label>
+
+                <div class="team-user-picker">
+                    <span class="team-user-picker-label" data-i18n="teams.form.members">Gebruikers</span>
+                    <button type="button" class="team-user-picker-toggle" data-team-user-toggle aria-expanded="false">
+                        <span data-team-user-summary data-i18n="teams.form.membersPlaceholder">Selecteer gebruikers</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="team-user-menu" data-team-user-menu hidden>
+                        <p class="team-user-menu-status" data-team-user-status data-i18n="teams.users.loading">Gebruikers laden...</p>
+                        <div class="team-user-options" data-team-user-options></div>
+                    </div>
+                </div>
+
+                <div class="upload-actions">
+                    <button type="button" class="button button-ghost" data-team-close data-i18n="teams.cancel">Annuleren</button>
+                    <button type="submit" class="button button-primary">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span data-i18n="teams.submit">Team aanmelden</span>
+                    </button>
+                </div>
+                <p class="auth-popup-feedback" data-team-feedback aria-live="polite"></p>
+            </form>
+
+            <section class="team-overview" aria-labelledby="team-overview-title">
+                <div class="team-overview-head">
+                    <p class="photo-kicker" data-i18n="teams.overviewKicker">BESTAANDE TEAMS</p>
+                    <h3 id="team-overview-title" data-i18n="teams.overviewTitle">Teamoverzicht</h3>
+                </div>
+                <p class="team-overview-status" data-team-status aria-live="polite"></p>
+                <div class="team-list" data-team-list></div>
+            </section>
+        </div>
     </div>
 </div>
 
