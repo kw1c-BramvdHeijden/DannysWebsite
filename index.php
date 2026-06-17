@@ -17,6 +17,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
     <title>Boules Competities</title>
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/index_competities.css">
 </head>
 <body data-competitions-href="pages/competities.php">
     <main class="page-shell">
@@ -90,7 +91,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
                         </div>
                     </div>
                     <div class="challenge-actions">
-                        <button type="button" class="button button-secondary" data-challenge-signup data-auth-open="signup"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
+                        <button type="button" class="button button-secondary" data-competition-request><i class="fa-solid fa-paper-plane"></i><span data-i18n="challenge.cta">Aanvraag starten</span></button>
                         <button type="button" class="button button-outline panel-admin-button" data-competition-create hidden>
                             <i class="fa-solid fa-plus"></i>
                             <span data-i18n="competitions.add">Competitie toevoegen</span>
@@ -185,8 +186,8 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
                 </label>
 
                 <label class="upload-label">
-                    <span data-i18n="competitions.form.type">Type</span>
-                    <input type="text" data-competition-type data-i18n-placeholder="competitions.form.typePlaceholder" placeholder="Bijvoorbeeld: Doublette | Vrije inschrijving">
+                    <span data-i18n="competitions.form.type">Locatie</span>
+                    <input type="text" data-competition-type data-i18n-placeholder="competitions.form.typePlaceholder" placeholder="Bijvoorbeeld: Dorpsplein 4 of Baan 2">
                 </label>
 
                 <label class="upload-label">
@@ -211,6 +212,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
                         <span data-competition-submit-label data-i18n="competitions.form.save">Competitie opslaan</span>
                     </button>
                 </div>
+                <p class="auth-popup-feedback" data-competition-feedback aria-live="polite"></p>
             </form>
         </div>
     </div>

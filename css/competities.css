@@ -1,0 +1,118 @@
+.competition-requests-panel {
+    margin-top: 22px;
+}
+
+.competition-request-list {
+    display: grid;
+    gap: 14px;
+}
+
+.competition-request-header {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1.1fr) minmax(160px, 0.75fr) minmax(180px, 0.8fr) auto;
+    align-items: center;
+    justify-items: start;
+    gap: 14px;
+    padding: 0 18px 10px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.competition-request-header span,
+.competition-request-card > * {
+    justify-self: start;
+    text-align: left;
+}
+
+.competition-request-header span:first-child {
+    padding-left: 12px;
+}
+
+.competition-request-card {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1.1fr) minmax(160px, 0.75fr) minmax(180px, 0.8fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid rgba(134, 109, 74, 0.12);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.66);
+}
+
+.competition-request-card h3,
+.competition-request-card p {
+    margin: 0;
+}
+
+.competition-request-card h3 {
+    font-size: 1.12rem;
+}
+
+.competition-request-card p {
+    color: var(--muted);
+}
+
+.competition-request-status {
+    justify-self: start;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(240, 196, 88, 0.26);
+    color: #6d5414;
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.competition-request-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    justify-self: end;
+    gap: 10px;
+}
+
+.competition-requests-status {
+    min-height: 1.4em;
+    margin: -4px 0 14px;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+@media (max-width: 1120px) {
+    .competition-request-card {
+        grid-template-columns: minmax(0, 1fr) minmax(180px, auto);
+    }
+
+    .competition-request-header {
+        display: none;
+    }
+
+    .competition-request-card .competition-request-status {
+        grid-column: 1 / -1;
+    }
+
+    .competition-request-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+        justify-self: start;
+    }
+}
+
+@media (max-width: 700px) {
+    .competition-request-card {
+        grid-template-columns: 1fr;
+    }
+
+    .competition-request-actions {
+        display: grid;
+        width: 100%;
+    }
+
+    .competition-request-actions .button {
+        width: 100%;
+    }
+}

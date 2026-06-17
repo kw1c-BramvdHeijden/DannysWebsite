@@ -97,6 +97,7 @@ function normalizeCompetition(competition) {
         type,
         startDate,
         tone: normalizeCompetitionTone(competition.tone),
+        status: typeof competition.status === "string" ? competition.status.trim() : "",
         href: typeof competition.href === "string" && competition.href.trim() ? competition.href.trim() : "#competities"
     };
 }
@@ -232,6 +233,9 @@ export function createAppState() {
         user: activeAuth?.user || null,
         photos: readList(bootstrap.photos, STORAGE_KEYS.photos, normalizePhoto),
         competitions: readList(bootstrap.competitions, STORAGE_KEYS.competitions, normalizeCompetition),
+        competitionRequests: [],
+        competitionRequestsLoaded: false,
+        competitionRequestsLoading: false,
         leaderboard: readList(bootstrap.leaderboard, STORAGE_KEYS.leaderboard, normalizeLeaderboardEntry),
         pendingUpload: null,
         pendingPhotoId: null,

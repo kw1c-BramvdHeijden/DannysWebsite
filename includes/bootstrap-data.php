@@ -86,9 +86,10 @@ function boules_fetch_competitions($pdo, $competitionHref)
     $columns = boules_table_columns($pdo, $table);
     $id = boules_first_existing_column($columns, array("id", "tournament_id", "competition_id"));
     $title = boules_first_existing_column($columns, array("title", "name", "naam", "tournament_name"));
-    $type = boules_first_existing_column($columns, array("type", "competition_type", "soort", "format"));
+    $type = boules_first_existing_column($columns, array("type", "competition_type", "soort", "format", "location"));
     $startDate = boules_first_existing_column($columns, array("startDate", "start_date", "startdatum", "date", "datum"));
     $tone = boules_first_existing_column($columns, array("tone", "kleur", "color", "accent"));
+    $status = boules_first_existing_column($columns, array("status", "state", "aanvraag_status", "approval_status"));
 
     if (!$title || !$startDate) {
         return array();
@@ -101,7 +102,13 @@ function boules_fetch_competitions($pdo, $competitionHref)
         boules_select_alias($startDate, "startDate", "''"),
         boules_select_alias($tone, "tone", "'green'"),
         $pdo->quote($competitionHref) . " AS `href`",
-    )) . " FROM `$table` ORDER BY `$startDate` ASC";
+    )) . " FROM `$table`";
+
+    if ($status) {
+        $sql .= " WHERE `$status` IS NULL OR LOWER(`$status`) NOT IN ('pending', 'in afwachting', 'aangevraagd', 'rejected', 'denied', 'afgewezen')";
+    }
+
+    $sql .= " ORDER BY `$startDate` ASC";
 
     return $pdo->query($sql)->fetchAll();
 }

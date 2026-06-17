@@ -273,6 +273,10 @@ export function createUiModule({
         if (refs.competitionCreateButton) {
             refs.competitionCreateButton.hidden = !canManage;
         }
+
+        refs.competitionRequestButtons.forEach((button) => {
+            button.hidden = canManage;
+        });
     }
 
     function syncAuthUI() {
