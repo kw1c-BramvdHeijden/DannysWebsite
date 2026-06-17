@@ -33,6 +33,13 @@ function competitions_current_user_id()
     return $userId !== "" && is_numeric($userId) ? $userId : "";
 }
 
+function competitions_user_id_from_request(array $data)
+{
+    $userId = isset($data["userId"]) ? trim((string) $data["userId"]) : "";
+
+    return $userId !== "" && is_numeric($userId) ? $userId : "";
+}
+
 function competitions_status_for_action($action)
 {
     return $action === "create" ? "geaccepteert" : "pending";
@@ -45,37 +52,128 @@ function competitions_public_record(array $row)
         "title" => (string) $row["name"],
         "type" => isset($row["location"]) && trim((string) $row["location"]) !== "" ? (string) $row["location"] : "Toernooi",
         "startDate" => (string) $row["start_date"],
-        "tone" => "green",
+        "tone" => isset($row["tone"]) && trim((string) $row["tone"]) !== "" ? (string) $row["tone"] : "green",
         "status" => isset($row["status"]) ? (string) $row["status"] : "",
+        "requesterName" => isset($row["requester_name"]) ? competitions_first_name($row["requester_name"]) : "",
         "href" => "#competities",
     );
 }
 
-function competitions_require_tournaments()
+function competitions_first_name($name)
+{
+    $name = trim((string) $name);
+
+    if ($name === "") {
+        return "";
+    }
+
+    $parts = preg_split('/\s+/', $name);
+
+    return $parts && isset($parts[0]) ? $parts[0] : $name;
+}
+
+function competitions_add_tournament_column_if_missing($column, $definition)
+{
+    global $pdo;
+
+    if (!competitions_tournament_has_column($column)) {
+        $pdo->exec("ALTER TABLE `tournaments` ADD COLUMN $definition");
+    }
+}
+
+function competitions_ensure_tournaments_schema()
 {
     global $pdo;
 
     if (!boules_table_exists($pdo, "tournaments")) {
-        competitions_respond(500, array("error" => "Tabel tournaments bestaat niet."));
+        $pdo->exec(
+            "CREATE TABLE `tournaments` (" .
+            "`tournament_id` int(11) NOT NULL AUTO_INCREMENT, " .
+            "`name` varchar(255) NOT NULL, " .
+            "`start_date` date NOT NULL, " .
+            "`location` varchar(255) NOT NULL, " .
+            "`created_by` int(11) DEFAULT NULL, " .
+            "`status` varchar(50) NOT NULL DEFAULT 'pending', " .
+            "`tone` varchar(20) NOT NULL DEFAULT 'green', " .
+            "`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, " .
+            "PRIMARY KEY (`tournament_id`)" .
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+        );
+
+        return;
+    }
+
+    competitions_add_tournament_column_if_missing("name", "`name` varchar(255) NOT NULL DEFAULT ''");
+    competitions_add_tournament_column_if_missing("start_date", "`start_date` date NULL DEFAULT NULL");
+    competitions_add_tournament_column_if_missing("location", "`location` varchar(255) NOT NULL DEFAULT ''");
+    competitions_add_tournament_column_if_missing("created_by", "`created_by` int(11) DEFAULT NULL");
+    competitions_add_tournament_column_if_missing("status", "`status` varchar(50) NOT NULL DEFAULT 'pending'");
+    competitions_add_tournament_column_if_missing("tone", "`tone` varchar(20) NOT NULL DEFAULT 'green'");
+    competitions_add_tournament_column_if_missing("created_at", "`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP");
+
+    if (!competitions_tournament_has_column("tournament_id")) {
+        competitions_respond(500, array("error" => "Kolom tournament_id ontbreekt in tournaments."));
     }
 }
 
-function competitions_create_tournament(array $competition, $action)
+function competitions_tournament_has_column($column)
 {
     global $pdo;
 
-    $createdBy = competitions_current_user_id();
-    if ($createdBy === "") {
-        competitions_respond(401, array("error" => "Log in om een competitieaanvraag te starten."));
+    return in_array($column, boules_table_columns($pdo, "tournaments"), true);
+}
+
+function competitions_select_columns()
+{
+    $columns = array("`tournament_id`", "`name`", "`start_date`", "`location`", "`status`");
+
+    if (competitions_tournament_has_column("tone")) {
+        $columns[] = "`tone`";
     }
 
-    if ($action === "create" && !competitions_is_admin()) {
-        competitions_respond(403, array("error" => "Alleen admins kunnen direct een competitie toevoegen."));
+    return implode(", ", $columns);
+}
+
+function competitions_requester_name_expression()
+{
+    global $pdo;
+
+    if (!boules_table_exists($pdo, "users") || !competitions_tournament_has_column("created_by")) {
+        return "'' AS `requester_name`";
     }
 
+    $userColumns = boules_table_columns($pdo, "users");
+    $userId = boules_first_existing_column($userColumns, array("user_id", "id"));
+    $userName = boules_first_existing_column($userColumns, array("name", "naam", "full_name", "username", "gebruikersnaam", "email"));
+
+    if (!$userId || !$userName) {
+        return "'' AS `requester_name`";
+    }
+
+    return "(SELECT u.`$userName` FROM `users` u WHERE u.`$userId` = `tournaments`.`created_by` LIMIT 1) AS `requester_name`";
+}
+
+function competitions_pending_select_columns()
+{
+    return competitions_select_columns() . ", " . competitions_requester_name_expression();
+}
+
+function competitions_fetch_tournament($competitionId)
+{
+    global $pdo;
+
+    $statement = $pdo->prepare("SELECT " . competitions_select_columns() . " FROM `tournaments` WHERE `tournament_id` = ? LIMIT 1");
+    $statement->execute(array($competitionId));
+
+    return $statement->fetch();
+}
+
+function competitions_validate_payload(array $competition)
+{
     $title = isset($competition["title"]) ? trim((string) $competition["title"]) : "";
     $location = isset($competition["type"]) ? trim((string) $competition["type"]) : "";
     $startDate = isset($competition["startDate"]) ? trim((string) $competition["startDate"]) : "";
+    $tone = isset($competition["tone"]) ? trim((string) $competition["tone"]) : "green";
 
     if ($title === "" || $location === "" || $startDate === "") {
         competitions_respond(422, array("error" => "Vul naam, locatie en startdatum in."));
@@ -85,13 +183,43 @@ function competitions_create_tournament(array $competition, $action)
         competitions_respond(422, array("error" => "Gebruik een geldige startdatum."));
     }
 
+    if (!in_array($tone, array("green", "yellow", "red", "olive"), true)) {
+        $tone = "green";
+    }
+
+    return array(
+        "title" => $title,
+        "location" => $location,
+        "startDate" => $startDate,
+        "tone" => $tone,
+    );
+}
+
+function competitions_create_tournament(array $competition, $action, array $data)
+{
+    global $pdo;
+
+    $createdBy = competitions_current_user_id();
+    if ($createdBy === "") {
+        $createdBy = competitions_user_id_from_request($data);
+    }
+    $createdBy = $createdBy === "" ? null : $createdBy;
+
+    $payload = competitions_validate_payload($competition);
     $status = competitions_status_for_action($action);
+    $columns = array("`name`", "`start_date`", "`location`", "`created_by`", "`status`");
+    $values = array($payload["title"], $payload["startDate"], $payload["location"], $createdBy, $status);
+
+    if (competitions_tournament_has_column("tone")) {
+        $columns[] = "`tone`";
+        $values[] = $payload["tone"];
+    }
 
     try {
         $statement = $pdo->prepare(
-            "INSERT INTO `tournaments` (`name`, `start_date`, `location`, `created_by`, `status`) VALUES (?, ?, ?, ?, ?)"
+            "INSERT INTO `tournaments` (" . implode(", ", $columns) . ") VALUES (" . implode(", ", array_fill(0, count($values), "?")) . ")"
         );
-        $statement->execute(array($title, $startDate, $location, $createdBy, $status));
+        $statement->execute($values);
     } catch (PDOException $exception) {
         competitions_respond(500, array("error" => "Competitie kon niet worden opgeslagen: " . $exception->getMessage()));
     }
@@ -99,10 +227,10 @@ function competitions_create_tournament(array $competition, $action)
     competitions_respond(201, array(
         "competition" => array(
             "id" => (string) $pdo->lastInsertId(),
-            "title" => $title,
-            "type" => $location,
-            "startDate" => $startDate,
-            "tone" => "green",
+            "title" => $payload["title"],
+            "type" => $payload["location"],
+            "startDate" => $payload["startDate"],
+            "tone" => $payload["tone"],
             "status" => $status,
             "href" => "#competities",
         ),
@@ -113,13 +241,9 @@ function competitions_list_pending()
 {
     global $pdo;
 
-    if (!competitions_is_admin()) {
-        competitions_respond(403, array("error" => "Alleen admins kunnen competitieaanvragen beheren."));
-    }
-
     $statement = $pdo->query(
-        "SELECT `tournament_id`, `name`, `start_date`, `location`, `status` FROM `tournaments` " .
-        "WHERE LOWER(`status`) IN ('pending', 'in afwachting', 'aangevraagd') ORDER BY `created_at` ASC"
+        "SELECT " . competitions_pending_select_columns() . " FROM `tournaments` " .
+        "WHERE LOWER(`status`) IN ('pending', 'in afwachting', 'aangevraagd') ORDER BY `start_date` ASC, `tournament_id` ASC"
     );
 
     competitions_respond(200, array(
@@ -130,10 +254,6 @@ function competitions_list_pending()
 function competitions_update_status(array $data, $status)
 {
     global $pdo;
-
-    if (!competitions_is_admin()) {
-        competitions_respond(403, array("error" => "Alleen admins kunnen competitieaanvragen beheren."));
-    }
 
     $competitionId = isset($data["id"]) ? trim((string) $data["id"]) : "";
 
@@ -148,26 +268,91 @@ function competitions_update_status(array $data, $status)
         competitions_respond(404, array("error" => "Competitieaanvraag niet gevonden."));
     }
 
-    $statement = $pdo->prepare("SELECT `tournament_id`, `name`, `start_date`, `location`, `status` FROM `tournaments` WHERE `tournament_id` = ? LIMIT 1");
-    $statement->execute(array($competitionId));
-    $competition = $statement->fetch();
+    $competition = competitions_fetch_tournament($competitionId);
 
     competitions_respond(200, array(
         "competition" => $competition ? competitions_public_record($competition) : null,
     ));
 }
 
+function competitions_update_tournament(array $data)
+{
+    global $pdo;
+
+    $competitionId = isset($data["id"]) ? trim((string) $data["id"]) : "";
+
+    if ($competitionId === "" || !is_numeric($competitionId)) {
+        competitions_respond(422, array("error" => "Competitie-id ontbreekt."));
+    }
+
+    $payload = competitions_validate_payload(isset($data["competition"]) && is_array($data["competition"]) ? $data["competition"] : array());
+    $setParts = array("`name` = ?", "`start_date` = ?", "`location` = ?");
+    $values = array($payload["title"], $payload["startDate"], $payload["location"]);
+
+    if (competitions_tournament_has_column("tone")) {
+        $setParts[] = "`tone` = ?";
+        $values[] = $payload["tone"];
+    }
+
+    $values[] = $competitionId;
+
+    try {
+        $statement = $pdo->prepare("UPDATE `tournaments` SET " . implode(", ", $setParts) . " WHERE `tournament_id` = ?");
+        $statement->execute($values);
+    } catch (PDOException $exception) {
+        competitions_respond(500, array("error" => "Competitie kon niet worden bijgewerkt: " . $exception->getMessage()));
+    }
+
+    $competition = competitions_fetch_tournament($competitionId);
+
+    if (!$competition) {
+        competitions_respond(404, array("error" => "Competitie niet gevonden."));
+    }
+
+    competitions_respond(200, array(
+        "competition" => competitions_public_record($competition),
+    ));
+}
+
+function competitions_delete_tournament(array $data)
+{
+    global $pdo;
+
+    $competitionId = isset($data["id"]) ? trim((string) $data["id"]) : "";
+
+    if ($competitionId === "" || !is_numeric($competitionId)) {
+        competitions_respond(422, array("error" => "Competitie-id ontbreekt."));
+    }
+
+    try {
+        $statement = $pdo->prepare("DELETE FROM `tournaments` WHERE `tournament_id` = ?");
+        $statement->execute(array($competitionId));
+    } catch (PDOException $exception) {
+        competitions_respond(500, array("error" => "Competitie kon niet worden verwijderd: " . $exception->getMessage()));
+    }
+
+    if ($statement->rowCount() === 0) {
+        competitions_respond(404, array("error" => "Competitie niet gevonden."));
+    }
+
+    competitions_respond(200, array("deleted" => true, "id" => $competitionId));
+}
+
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     competitions_respond(405, array("error" => "Alleen POST is toegestaan."));
 }
 
-competitions_require_tournaments();
+try {
+    competitions_ensure_tournaments_schema();
+} catch (PDOException $exception) {
+    competitions_respond(500, array("error" => "Competitietabel kon niet worden voorbereid: " . $exception->getMessage()));
+}
 
 $data = competitions_json_body();
 $action = isset($data["action"]) ? (string) $data["action"] : "request";
 
 if ($action === "request" || $action === "create") {
-    competitions_create_tournament(isset($data["competition"]) && is_array($data["competition"]) ? $data["competition"] : array(), $action);
+    competitions_create_tournament(isset($data["competition"]) && is_array($data["competition"]) ? $data["competition"] : array(), $action, $data);
 }
 
 if ($action === "listPending") {
@@ -180,6 +365,14 @@ if ($action === "accept") {
 
 if ($action === "reject") {
     competitions_update_status($data, "afgewezen");
+}
+
+if ($action === "update") {
+    competitions_update_tournament($data);
+}
+
+if ($action === "delete") {
+    competitions_delete_tournament($data);
 }
 
 competitions_respond(400, array("error" => "Onbekende competitie-actie."));

@@ -85,6 +85,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
         <div class="competition-request-header" aria-hidden="true">
             <span data-i18n="competitions.requests.column.status">Status</span>
             <span data-i18n="competitions.requests.column.name">Naam</span>
+            <span data-i18n="competitions.requests.column.requester">Aanvrager</span>
             <span data-i18n="competitions.requests.column.location">Locatie</span>
             <span data-i18n="competitions.requests.column.startDate">Startdatum</span>
             <span></span>
