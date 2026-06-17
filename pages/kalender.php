@@ -1,112 +1,184 @@
 <?php
 
+// Start een nieuwe PHP-sessie of hervat een bestaande om gegevens (zoals geselecteerde datums) te onthouden tussen pagina-aanvragen.
 session_start();
+
+
 
 /* ===== SESSION ===== */
 
+
+
+// Controleer of de sessievariabele 'gekozen_datums' nog niet bestaat.
 if (!isset($_SESSION['gekozen_datums'])) {
+    // Als deze niet bestaat, maak er dan een lege array van om fouten later te voorkomen.
     $_SESSION['gekozen_datums'] = [];
 }
 
+
+
+// Definieer een functie om te controleren of een invoerdatum het juiste kalenderformaat (YYYY-MM-DD) heeft.
 function is_valid_calendar_date_input($datum)
 {
+    // Controleer of de invoer een tekstreeks (string) is én voldoet aan de reguliere expressie voor 4 cijfers, een streepje, 2 cijfers, een streepje, en weer 2 cijfers.
     return is_string($datum) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $datum);
 }
 
+
+
 /* ===== DATUMS OPSLAAN ===== */
 
+
+
+// Controleer of de pagina is geladen via een POST-verzoek (dus of het formulier is verzonden).
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Filter de array met datums van de huidige maand die via POST zijn meegestuurd, zodat alleen geldige datums overblijven.
     $maandDatums = array_filter(
-        $_POST['maand_datums'] ?? [],
-        'is_valid_calendar_date_input'
+        $_POST['maand_datums'] ?? [], // Als 'maand_datums' niet bestaat in POST, gebruik dan een lege array.
+        'is_valid_calendar_date_input' // Gebruik de eerder gemaakte validatiefunctie als filter.
     );
 
+    // Filter de array met daadwerkelijk aangevinkte datums die via POST zijn meegestuurd op geldigheid.
     $geselecteerd = array_filter(
-        $_POST['datums'] ?? [],
-        'is_valid_calendar_date_input'
+        $_POST['datums'] ?? [], // Als 'datums' niet bestaat in POST (bijv. alles uitgevinkt), gebruik dan een lege array.
+        'is_valid_calendar_date_input' // Gebruik de validatiefunctie als filter.
     );
 
+    // Verwijder alle datums van de huidige getoonde maand uit de sessie om verouderde vinkjes weg te halen.
     $_SESSION['gekozen_datums'] = array_diff(
-        $_SESSION['gekozen_datums'],
-        $maandDatums
+        $_SESSION['gekozen_datums'], // De huidige lijst met opgeslagen datums.
+        $maandDatums // De lijst met alle datums die bij deze maand horen.
     );
 
+    // Voeg de nieuw geselecteerde vinkjes samen met de overgebleven sessiedatums en verwijder eventuele dubbelingen.
     $_SESSION['gekozen_datums'] = array_unique(
-        array_merge($_SESSION['gekozen_datums'], $geselecteerd)
+        array_merge($_SESSION['gekozen_datums'], $geselecteerd) // Voeg de arrays samen.
     );
 }
 
+
+
 /* ===== DATUM VERWIJDEREN ===== */
 
+
+
+// Controleer of er een 'remove' parameter in de URL (GET-variabele) aanwezig is om een datum te wissen via de sidebar.
 if (isset($_GET['remove'])) {
+    // Sla de te verwijderen datum op in een variabele.
     $removeDatum = $_GET['remove'];
 
+    // Verwijder deze specifieke datum uit de sessie-array met behulp van array_diff.
     $_SESSION['gekozen_datums'] = array_diff(
-        $_SESSION['gekozen_datums'],
-        [$removeDatum]
+        $_SESSION['gekozen_datums'], // De huidige lijst.
+        [$removeDatum] // De specifieke datum om te wissen in een nieuwe array.
     );
 
+    // Bepaal naar welke maand de pagina moet teruglinken (gebruik de GET-waarde, of de huidige maand als back-up).
     $redirectMaand = isset($_GET['maand'])
-        ? (int)$_GET['maand']
-        : (int)date('m');
+        ? (int)$_GET['maand'] // Zet om naar een heel getal (integer).
+        : (int)date('m'); // Huidige maand van het systeem.
 
+    // Bepaal naar welk jaar de pagina moet teruglinken (gebruik de GET-waarde, of het huidige jaar als back-up).
     $redirectJaar = isset($_GET['jaar'])
-        ? (int)$_GET['jaar']
-        : (int)date('Y');
+        ? (int)$_GET['jaar'] // Zet om naar een heel getal (integer).
+        : (int)date('Y'); // Huidig jaar van het systeem.
 
+    // Controleer of de maandwaarde buiten het geldige bereik (1 t/m 12) valt.
     if ($redirectMaand < 1 || $redirectMaand > 12) {
+        // Indien ongeldig, val terug op de huidige maand.
         $redirectMaand = (int)date('m');
     }
 
+    // Controleer of het jaar buiten een realistisch bereik (1900 t/m 2100) valt.
     if ($redirectJaar < 1900 || $redirectJaar > 2100) {
+        // Indien ongeldig, val terug op het huidige jaar.
         $redirectJaar = (int)date('Y');
     }
 
+    // Stuur een HTTP-header om de browser te herladen naar de kalenderpagina met de juiste maand en jaar, zodat de URL schoon blijft.
     header(
         "Location: kalender.php?maand=$redirectMaand&jaar=$redirectJaar"
     );
 
+    // Stop de uitvoering van het PHP-script direct na het verzenden van de redirect-header.
     exit;
 }
 
+
+
 /* ===== HUIDIGE MAAND ===== */
 
+
+
+// Bepaal het weer te geven jaar op basis van de URL (GET) of kies het huidige jaar als er geen waarde is meegegeven.
 $jaar = isset($_GET['jaar'])
-    ? (int)$_GET['jaar']
-    : (int)date('Y');
+    ? (int)$_GET['jaar'] // Zet om naar een integer voor de veiligheid.
+    : (int)date('Y'); // Huidig jaar.
 
+
+
+// Bepaal de weer te geven maand op basis van de URL (GET) of kies de huidige maand als er geen waarde is meegegeven.
 $maand = isset($_GET['maand'])
-    ? (int)$_GET['maand']
-    : (int)date('m');
+    ? (int)$_GET['maand'] // Zet om naar een integer voor de veiligheid.
+    : (int)date('m'); // Huidige maand.
 
+
+
+// Controleer of de gevraagde maand buiten het geldige bereik (1 t/m 12) valt.
 if ($maand < 1 || $maand > 12) {
+    // Reset naar de huidige maand bij een ongeldige waarde.
     $maand = (int)date('m');
 }
 
+
+
+// Controleer of het gevraagde jaar buiten het geldige bereik (1900 t/m 2100) valt.
 if ($jaar < 1900 || $jaar > 2100) {
+    // Reset naar het huidige jaar bij een ongeldige waarde.
     $jaar = (int)date('Y');
 }
 
+
+
 /* ===== VORIGE / VOLGENDE ===== */
 
+
+
+// Bereken de waarde van de vorige maand door 1 van de huidige maand af te trekken.
 $vorigeMaand = $maand - 1;
+// Het jaar voor de vorige maand is standaard hetzelfde jaar.
 $vorigeJaar = $jaar;
 
+
+
+// Als de vorige maand kleiner is dan 1 (dus 0 wordt na januari), gaan we terug naar december van het vorige jaar.
 if ($vorigeMaand < 1) {
-    $vorigeMaand = 12;
-    $vorigeJaar--;
+    $vorigeMaand = 12; // Zet de maand op december.
+    $vorigeJaar--; // Trek 1 jaar af van het huidige jaar.
 }
 
+
+
+// Bereken de waarde van de volgende maand door 1 bij de huidige maand op te tellen.
 $volgendeMaand = $maand + 1;
+// Het jaar voor de volgende maand is standaard hetzelfde jaar.
 $volgendeJaar = $jaar;
 
+
+
+// Als de volgende maand groter is dan 12 (dus 13 wordt na december), gaan we naar januari van het volgende jaar.
 if ($volgendeMaand > 12) {
-    $volgendeMaand = 1;
-    $volgendeJaar++;
+    $volgendeMaand = 1; // Zet de maand op januari.
+    $volgendeJaar++; // Tel 1 jaar op bij het huidige jaar.
 }
+
+
 
 /* ===== MAANDNAMEN ===== */
 
+
+
+// Maak een associatieve array aan om de numerieke maandwaarden te koppelen aan de Nederlandse maandnamen.
 $maanden = [
     1 => 'Januari',
     2 => 'Februari',
@@ -122,19 +194,34 @@ $maanden = [
     12 => 'December',
 ];
 
+
+
+// Haal de juiste Nederlandse naam op voor de geselecteerde maand.
 $maandNaam = $maanden[$maand];
+// Sla de datum van vandaag op in het YYYY-MM-DD formaat om later te vergelijken.
 $vandaag = date('Y-m-d');
+
+
 
 /* ===== KALENDER ===== */
 
+
+
+// Bereken op welke dag van de week de eerste dag van de geselecteerde maand valt (1 = maandag, 7 = zondag).
 $eersteDag = date('N', strtotime("$jaar-$maand-01"));
 
+
+
+// Bereken het totaal aantal dagen dat de specifieke maand in dat specifieke jaar heeft (bijv. 28, 29, 30 of 31 dagen).
 $aantalDagen = cal_days_in_month(
-    CAL_GREGORIAN,
+    CAL_GREGORIAN, // Gebruik de standaard Gregoriaanse kalender.
     $maand,
     $jaar
 );
 
+
+
+// Laad het externe PHP-bestand in dat de header van de website bevat/regelt.
 require_once __DIR__ . "/../includes/header.php";
 ?>
 
@@ -152,33 +239,46 @@ require_once __DIR__ . "/../includes/header.php";
     <link rel="stylesheet" href="../css/footer.css">
 </head>
 
+
+
 <body data-competitions-href="competities.php">
 <main class="page-shell">
-    <?php render_site_header("competitions", false); ?>
+    <?php
+    // Roep een PHP-functie aan (gedefinieerd in header.php) om de website-header te renderen met specifieke parameters.
+    render_site_header("competitions", false);
+    ?>
+
+
 
     <section class="kalender-wrapper" id="competities">
         <div class="kalender">
             <div class="header">
                 <a
-                    class="arrow"
-                    href="?maand=<?php echo $vorigeMaand; ?>&amp;jaar=<?php echo $vorigeJaar; ?>"
-                    aria-label="Vorige maand"
+                        class="arrow"
+                        href="?maand=<?php echo $vorigeMaand; ?>&amp;jaar=<?php echo $vorigeJaar; ?>"
+                        aria-label="Vorige maand"
                 >
                     <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
                 </a>
+
+
 
                 <h1>
                     <?php echo htmlspecialchars($maandNaam . ' ' . $jaar); ?>
                 </h1>
 
+
+
                 <a
-                    class="arrow"
-                    href="?maand=<?php echo $volgendeMaand; ?>&amp;jaar=<?php echo $volgendeJaar; ?>"
-                    aria-label="Volgende maand"
+                        class="arrow"
+                        href="?maand=<?php echo $volgendeMaand; ?>&amp;jaar=<?php echo $volgendeJaar; ?>"
+                        aria-label="Volgende maand"
                 >
                     <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                 </a>
             </div>
+
+
 
             <form method="POST" class="kalender-form">
                 <div class="grid">
@@ -190,12 +290,23 @@ require_once __DIR__ . "/../includes/header.php";
                     <div class="weekdag">Za</div>
                     <div class="weekdag">Zo</div>
 
-                    <?php for ($i = 1; $i < $eersteDag; $i++): ?>
+
+
+                    <?php
+                    // Loop om lege cellen te genereren vóór de eerste dag van de maand, zodat de 1e van de maand op de juiste weekdag start.
+                    for ($i = 1; $i < $eersteDag; $i++):
+                        ?>
                         <div class="leeg"></div>
                     <?php endfor; ?>
 
-                    <?php for ($dag = 1; $dag <= $aantalDagen; $dag++): ?>
+
+
+                    <?php
+                    // Loop om door alle genummerde dagen van de huidige maand te lopen (bijv. dag 1 t/m 31).
+                    for ($dag = 1; $dag <= $aantalDagen; $dag++):
+                        ?>
                         <?php
+                        // Formatteer de huidige dag om naar een volwaardige YYYY-MM-DD string (bijv. 2024-05-01).
                         $datum = sprintf(
                             '%04d-%02d-%02d',
                             $jaar,
@@ -203,30 +314,40 @@ require_once __DIR__ . "/../includes/header.php";
                             $dag
                         );
 
+
+
+                        // Controleer of deze specifieke datum gelijk is aan vandaag.
                         $isVandaag = $datum === $vandaag;
+                        // Controleer of de datum in het verleden ligt door de timestamps te vergelijken.
                         $isVerleden = strtotime($datum) < strtotime($vandaag);
+                        // Controleer of deze datum voorkomt in de lijst met gekozen datums in de sessie.
                         $checked = in_array(
                             $datum,
                             $_SESSION['gekozen_datums']
                         );
                         ?>
 
+
+
                         <input
-                            type="hidden"
-                            name="maand_datums[]"
-                            value="<?php echo htmlspecialchars($datum); ?>"
+                                type="hidden"
+                                name="maand_datums[]"
+                                value="<?php echo htmlspecialchars($datum); ?>"
                         >
+
+
 
                         <label class="dag<?php echo $checked ? ' selected' : ''; ?><?php echo $isVandaag ? ' vandaag' : ''; ?><?php echo $isVerleden ? ' verleden' : ''; ?>">
                             <input
-                                type="checkbox"
-                                name="datums[]"
-                                value="<?php echo htmlspecialchars($datum); ?>"
-                                <?php echo $checked ? 'checked' : ''; ?>
-                                <?php echo ($isVandaag || $isVerleden) ? 'disabled' : ''; ?>
-                                <?php echo $isVandaag ? 'checked' : ''; ?>
-                                onchange="this.form.submit()"
-                            >
+                                    type="checkbox"
+                                    name="datums[]"
+                                    value="<?php echo htmlspecialchars($datum); ?>"
+                                <?php echo $checked ? 'checked' : ''; // Voeg 'checked' toe als de datum in de sessie staat ?>
+                                <?php echo ($isVandaag || $isVerleden) ? 'disabled' : ''; // Schakel de checkbox uit als het vandaag of in het verleden is ?>
+                                <?php echo $isVandaag ? 'checked' : ''; // Vink vandaag automatisch aan (visueel) ?>
+                                    onchange="this.form.submit()" >
+
+
 
                             <span>
                                 <?php echo $dag; ?>
@@ -237,14 +358,25 @@ require_once __DIR__ . "/../includes/header.php";
             </form>
         </div>
 
+
+
         <aside class="sidebar">
             <h2>Geselecteerde datums</h2>
 
-            <?php if (!empty($_SESSION['gekozen_datums'])): ?>
+
+
+            <?php
+            // Controleer of er datums zijn opgeslagen in de sessie.
+            if (!empty($_SESSION['gekozen_datums'])):
+                ?>
                 <ul>
                     <?php
+                    // Sorteer de geselecteerde datums chronologisch (van oud naar nieuw).
                     sort($_SESSION['gekozen_datums']);
 
+
+
+                    // Loop door alle opgeslagen datums heen om ze afzonderlijk te tonen.
                     foreach ($_SESSION['gekozen_datums'] as $datum):
                         ?>
                         <li>
@@ -252,10 +384,12 @@ require_once __DIR__ . "/../includes/header.php";
                                 <?php echo htmlspecialchars(date('d-m-Y', strtotime($datum))); ?>
                             </span>
 
+
+
                             <a
-                                class="remove-btn"
-                                href="?maand=<?php echo $maand; ?>&amp;jaar=<?php echo $jaar; ?>&amp;remove=<?php echo urlencode($datum); ?>"
-                                aria-label="Verwijder <?php echo htmlspecialchars(date('d-m-Y', strtotime($datum))); ?>"
+                                    class="remove-btn"
+                                    href="?maand=<?php echo $maand; ?>&amp;jaar=<?php echo $jaar; ?>&amp;remove=<?php echo urlencode($datum); ?>"
+                                    aria-label="Verwijder <?php echo htmlspecialchars(date('d-m-Y', strtotime($datum))); ?>"
                             >
                                 <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                             </a>
@@ -270,6 +404,8 @@ require_once __DIR__ . "/../includes/header.php";
         </aside>
     </section>
 </main>
+
+
 
 <script type="module" src="../scripts/index.js"></script>
 </body>
