@@ -22,9 +22,9 @@ function render_site_header($activePage = "home", $isRoot = true)
     ?>
     <header class="site-header">
         <a class="brand" href="<?= htmlspecialchars($indexHome) ?>" data-i18n-aria-label="nav.brandHome" aria-label="Boules Competities home">
-            <span class="brand-ball" aria-hidden="true"></span>
+            <img src="../images/jeudeboules.png" alt="logo" class="logo">
             <span class="brand-copy">
-                <strong>BOULES</strong>
+                <strong>Jeu de Dabs</strong>
                 <small data-i18n="brand.subtitle">COMPETITIES</small>
             </span>
         </a>
