@@ -72,47 +72,19 @@ function competitions_first_name($name)
     return $parts && isset($parts[0]) ? $parts[0] : $name;
 }
 
-function competitions_add_tournament_column_if_missing($column, $definition)
-{
-    global $pdo;
-
-    if (!competitions_tournament_has_column($column)) {
-        $pdo->exec("ALTER TABLE `tournaments` ADD COLUMN $definition");
-    }
-}
-
 function competitions_ensure_tournaments_schema()
 {
     global $pdo;
 
     if (!boules_table_exists($pdo, "tournaments")) {
-        $pdo->exec(
-            "CREATE TABLE `tournaments` (" .
-            "`tournament_id` int(11) NOT NULL AUTO_INCREMENT, " .
-            "`name` varchar(255) NOT NULL, " .
-            "`start_date` date NOT NULL, " .
-            "`location` varchar(255) NOT NULL, " .
-            "`created_by` int(11) DEFAULT NULL, " .
-            "`status` varchar(50) NOT NULL DEFAULT 'pending', " .
-            "`tone` varchar(20) NOT NULL DEFAULT 'green', " .
-            "`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, " .
-            "PRIMARY KEY (`tournament_id`)" .
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
-        );
-
-        return;
+        competitions_respond(500, array("error" => "Tabel tournaments ontbreekt. Gebruik de bestaande database-tabellen."));
     }
 
-    competitions_add_tournament_column_if_missing("name", "`name` varchar(255) NOT NULL DEFAULT ''");
-    competitions_add_tournament_column_if_missing("start_date", "`start_date` date NULL DEFAULT NULL");
-    competitions_add_tournament_column_if_missing("location", "`location` varchar(255) NOT NULL DEFAULT ''");
-    competitions_add_tournament_column_if_missing("created_by", "`created_by` int(11) DEFAULT NULL");
-    competitions_add_tournament_column_if_missing("status", "`status` varchar(50) NOT NULL DEFAULT 'pending'");
-    competitions_add_tournament_column_if_missing("tone", "`tone` varchar(20) NOT NULL DEFAULT 'green'");
-    competitions_add_tournament_column_if_missing("created_at", "`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP");
-
-    if (!competitions_tournament_has_column("tournament_id")) {
-        competitions_respond(500, array("error" => "Kolom tournament_id ontbreekt in tournaments."));
+    $requiredColumns = array("tournament_id", "name", "start_date", "location", "created_by", "status");
+    foreach ($requiredColumns as $column) {
+        if (!competitions_tournament_has_column($column)) {
+            competitions_respond(500, array("error" => "Kolom $column ontbreekt in tournaments."));
+        }
     }
 }
 

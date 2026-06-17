@@ -336,7 +336,9 @@ body.team-modal-open {
 .team-modal-dialog {
     position: relative;
     width: min(100%, 980px);
+    height: min(720px, calc(100vh - 48px));
     max-height: calc(100vh - 48px);
+    overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.72);
     border-radius: 30px;
     background: rgba(251, 245, 236, 0.98);
@@ -376,6 +378,8 @@ body.team-modal-open {
     display: grid;
     grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
     gap: 20px;
+    height: 100%;
+    min-height: 0;
     padding: 34px 30px 30px;
 }
 
@@ -383,6 +387,7 @@ body.team-modal-open {
     display: grid;
     align-content: start;
     gap: 18px;
+    min-height: 0;
 }
 
 .team-form h2 {
@@ -461,6 +466,7 @@ body.team-modal-open {
 
 .team-overview {
     display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
     min-height: 0;
     gap: 12px;
     padding: 18px;
@@ -483,8 +489,10 @@ body.team-modal-open {
 
 .team-list {
     display: grid;
+    align-content: start;
     gap: 10px;
-    max-height: 360px;
+    min-height: 0;
+    max-height: none;
     overflow-y: auto;
     padding-right: 6px;
 }
@@ -530,6 +538,7 @@ body.team-modal-open {
 
     .team-modal-shell {
         grid-template-columns: 1fr;
+        overflow-y: auto;
     }
 
     .team-list {
