@@ -16,6 +16,7 @@ import {
 import { createPhotosModule } from "./app-photos.js";
 import { createCompetitionsModule } from "./app-competitions.js";
 import { createLeaderboardModule } from "./app-leaderboard.js";
+import { createTeamsModule } from "./app-teams.js";
 import { createUiModule } from "./app-ui.js";
 import { bindEvents } from "./app-events.js";
 
@@ -51,6 +52,12 @@ export function createApp() {
         t
     });
 
+    const teams = createTeamsModule({
+        refs,
+        state,
+        t
+    });
+
     const ui = createUiModule({
         refs,
         state,
@@ -66,6 +73,8 @@ export function createApp() {
         syncCompetitionFormUI: competitions.syncCompetitionFormUI,
         closeUploadModal: photos.closeUploadModal,
         closeCompetitionModal: competitions.closeCompetitionModal,
+        closeTeamModal: teams.closeTeamModal,
+        syncTeamButtons: teams.syncTeamButtons,
         closeLeaderboardModal: leaderboard.closeLeaderboardModal,
         canManageCompetitions: competitions.canManageCompetitions
     });
@@ -75,6 +84,7 @@ export function createApp() {
         state,
         photos,
         competitions,
+        teams,
         leaderboard,
         ui,
         t
@@ -85,8 +95,13 @@ export function createApp() {
     ui.setLanguageMenuOpen(false);
     ui.setAccountMenuOpen(false);
     competitions.closeCompetitionModal();
+    teams.closeTeamModal();
     leaderboard.closeLeaderboardModal();
     ui.setAuthMode("login");
     ui.syncNavToggleLabel();
     ui.updateActiveNavLink();
+
+    if (refs.teamUserOptions && window.location.pathname.indexOf("competities") !== -1) {
+        teams.preloadUsers();
+    }
 }
