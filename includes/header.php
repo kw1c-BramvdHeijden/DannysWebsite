@@ -47,7 +47,7 @@ function render_site_header($activePage = "home", $isRoot = true)
                 </a>
                 <a href="<?= htmlspecialchars($rules) ?>"<?= $current("rules") ?>>
                     <i class="fa-solid fa-list-check" aria-hidden="true"></i>
-                    <span data-i18n="nav.how">Hoe het werkt</span>
+                    <span data-i18n="nav.how">Spelregels</span>
                 </a>
                 <a href="<?= htmlspecialchars($photos) ?>"<?= $current("photos") ?>>
                     <i class="fa-solid fa-camera" aria-hidden="true"></i>

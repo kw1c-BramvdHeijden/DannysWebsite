@@ -144,6 +144,36 @@ body::before {
   margin-top: 28px;
 }
 
+.hero-copy > * {
+  opacity: 0;
+  animation: reveal-up 720ms both;
+}
+
+.hero-copy h1 {
+  margin: 0;
+  font-size: clamp(4rem, 8vw, 6.9rem);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  animation-delay: 100ms;
+}
+
+.hero-copy h1 span {
+  display: block;
+}
+
+.hero-copy h1 .accent {
+  color: var(--red);
+}
+
+.hero-copy p {
+  max-width: 36rem;
+  margin: 24px 0 0;
+  color: var(--muted);
+  font-size: 1.08rem;
+  line-height: 1.75;
+  animation-delay: 180ms;
+}
+
 .highlights {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
