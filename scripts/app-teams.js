@@ -289,6 +289,14 @@ export function createTeamsModule({ refs, state, t }) {
         }, 120);
     }
 
+    function preloadUsers() {
+        if (!refs.teamUserOptions || !state.loggedIn) {
+            return;
+        }
+
+        loadUsers(true);
+    }
+
     function closeTeamModal() {
         if (!refs.teamModal || refs.teamModal.hidden) {
             return;
@@ -395,6 +403,7 @@ export function createTeamsModule({ refs, state, t }) {
 
     return {
         openTeamModal,
+        preloadUsers,
         closeTeamModal,
         submitTeam,
         toggleUserMenu,

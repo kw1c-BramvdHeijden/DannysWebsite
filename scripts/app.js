@@ -100,4 +100,8 @@ export function createApp() {
     ui.setAuthMode("login");
     ui.syncNavToggleLabel();
     ui.updateActiveNavLink();
+
+    if (refs.teamUserOptions && window.location.pathname.indexOf("competities") !== -1) {
+        teams.preloadUsers();
+    }
 }

@@ -14,6 +14,11 @@ export function bindEvents({
 
     refs.navLinks.forEach((link) => {
         link.addEventListener("click", () => {
+            const href = link.getAttribute("href") || "";
+            if (href.indexOf("competities") !== -1) {
+                teams.preloadUsers();
+            }
+
             const targetId = link.getAttribute("href")?.replace("#", "");
             if (targetId) {
                 ui.setCurrentNavLink(targetId);
