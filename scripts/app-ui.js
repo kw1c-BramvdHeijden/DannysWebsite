@@ -275,7 +275,7 @@ export function createUiModule({
         }
 
         refs.competitionRequestButtons.forEach((button) => {
-            button.hidden = canManage;
+            button.hidden = !state.loggedIn || canManage;
         });
     }
 

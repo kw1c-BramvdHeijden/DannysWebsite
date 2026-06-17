@@ -64,7 +64,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
                 </div>
             </div>
             <div class="challenge-actions">
-                <button type="button" class="button button-secondary" data-competition-request><i class="fa-solid fa-paper-plane"></i><span data-i18n="challenge.cta">Aanvraag starten</span></button>
+                <button type="button" class="button button-secondary" data-competition-request hidden><i class="fa-solid fa-paper-plane"></i><span data-i18n="challenge.cta">Aanvraag starten</span></button>
                 <button type="button" class="button button-outline panel-admin-button" data-competition-create hidden>
                     <i class="fa-solid fa-plus"></i>
                     <span>Competitie toevoegen</span>
