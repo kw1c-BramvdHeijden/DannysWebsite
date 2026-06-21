@@ -104,6 +104,12 @@ body.team-modal-open {
     font-weight: 700;
 }
 
+.competition-start-button {
+    justify-content: center;
+    width: 100%;
+    margin-top: 14px;
+}
+
 .competition-card-actions {
     position: absolute;
     top: 14px;
@@ -402,6 +408,10 @@ body.team-modal-open {
     gap: 8px;
 }
 
+.competition-abbreviation-label {
+    max-width: 220px;
+}
+
 .team-user-picker-label {
     color: var(--muted);
     font-size: 0.86rem;
@@ -441,6 +451,28 @@ body.team-modal-open {
     color: var(--muted);
     font-size: 0.9rem;
     font-weight: 700;
+}
+
+.team-user-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(134, 109, 74, 0.16);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.86);
+    color: var(--muted);
+}
+
+.team-user-search input {
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
 }
 
 .team-user-options {
@@ -523,6 +555,27 @@ body.team-modal-open {
     color: var(--green-deep);
     font-size: 0.84rem;
     font-weight: 700;
+}
+
+.team-delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 6px;
+    padding: 9px 10px;
+    border: 1px solid rgba(171, 46, 39, 0.24);
+    border-radius: 10px;
+    background: rgba(171, 46, 39, 0.08);
+    color: #8f241e;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.team-delete-button:hover,
+.team-delete-button:focus-visible {
+    background: rgba(171, 46, 39, 0.14);
 }
 
 .team-empty {

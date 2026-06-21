@@ -17,12 +17,55 @@ export function createCompetitionsModule({
 
     function buildCompetitionCollection() {
         return state.competitions
+            .filter(isVisibleCompetition)
             .slice()
             .sort((left, right) => left.startDate.localeCompare(right.startDate));
     }
 
+    function isVisibleCompetition(competition) {
+        const status = competition && typeof competition.status === "string"
+            ? competition.status.trim().toLowerCase()
+            : "";
+
+        return ["pending", "in afwachting", "aangevraagd", "rejected", "denied", "afgewezen"].indexOf(status) === -1;
+    }
+
+    function isPendingCompetition(competition) {
+        const status = competition && typeof competition.status === "string"
+            ? competition.status.trim().toLowerCase()
+            : "";
+
+        return ["pending", "in afwachting", "aangevraagd"].indexOf(status) !== -1;
+    }
+
+    function splitCompetitionTitle(title) {
+        const value = typeof title === "string" ? title.trim() : "";
+        const match = value.match(/^(.+?)\s*\(([^()]+)\)$/);
+
+        return {
+            name: match ? match[1].trim() : value,
+            abbreviation: match ? match[2].trim() : ""
+        };
+    }
+
     function getDefaultCompetitionHref() {
         return document.body.dataset.competitionsHref || "pages/competities.php";
+    }
+
+    function isCompetitionPage() {
+        return getDefaultCompetitionHref() === "#competities";
+    }
+
+    function canShowStartButton(competition) {
+        if (!canManageCompetitions() || !isCompetitionPage() || !competition.startDate) {
+            return false;
+        }
+
+        const today = new Date();
+        const todayValue = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+        const startValue = new Date(`${competition.startDate}T00:00:00`).getTime();
+
+        return Number.isFinite(startValue) && startValue < todayValue;
     }
 
     function getCompetitionApiUrl() {
@@ -249,11 +292,23 @@ export function createCompetitionsModule({
         const date = document.createElement("p");
         date.textContent = formatCompetitionDate(competition.startDate);
 
+        const startButton = document.createElement("button");
+        startButton.type = "button";
+        startButton.className = "button button-secondary competition-start-button";
+        startButton.dataset.competitionStart = String(competition.id);
+        startButton.innerHTML = `<i class="fa-solid fa-play"></i><span>${t("competitions.start")}</span>`;
+
         const link = document.createElement("a");
         link.href = competition.href || getDefaultCompetitionHref();
         link.innerHTML = `<span>${t("competitions.more")}</span> <span aria-hidden="true">-&gt;</span>`;
 
-        card.append(icon, title, type, date, link);
+        card.append(icon, title, type, date);
+
+        if (canShowStartButton(competition)) {
+            card.appendChild(startButton);
+        }
+
+        card.appendChild(link);
         return card;
     }
 
@@ -412,7 +467,7 @@ export function createCompetitionsModule({
     }
 
     function openCompetitionModal(competitionId = null) {
-        if (!canManageCompetitions() || !refs.competitionModal || !refs.competitionNameInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionToneInput) {
+        if (!canManageCompetitions() || !refs.competitionModal || !refs.competitionNameInput || !refs.competitionAbbreviationInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionToneInput) {
             return;
         }
 
@@ -424,7 +479,9 @@ export function createCompetitionsModule({
 
         const competition = state.pendingCompetitionId ? getCompetitionById(state.pendingCompetitionId) : null;
 
-        refs.competitionNameInput.value = competition ? getLocalizedText(competition.title, state.lang) : "";
+        const titleParts = splitCompetitionTitle(competition ? getLocalizedText(competition.title, state.lang) : "");
+        refs.competitionNameInput.value = titleParts.name;
+        refs.competitionAbbreviationInput.value = titleParts.abbreviation;
         refs.competitionTypeInput.value = competition ? getLocalizedText(competition.type, state.lang) : "";
         refs.competitionDateInput.value = competition?.startDate || "";
         refs.competitionToneInput.value = competition?.tone || "green";
@@ -447,7 +504,7 @@ export function createCompetitionsModule({
     }
 
     function openCompetitionRequestModal() {
-        if (!refs.competitionModal || !refs.competitionNameInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionToneInput) {
+        if (!refs.competitionModal || !refs.competitionNameInput || !refs.competitionAbbreviationInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionToneInput) {
             return;
         }
 
@@ -495,18 +552,24 @@ export function createCompetitionsModule({
         event.preventDefault();
 
         const isRequesting = competitionFormMode === "request";
-        if ((!isRequesting && !canManageCompetitions()) || !refs.competitionNameInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionToneInput) {
+        if ((!isRequesting && !canManageCompetitions()) || !refs.competitionNameInput || !refs.competitionAbbreviationInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionToneInput) {
             closeCompetitionModal();
             return;
         }
 
         const title = refs.competitionNameInput.value.trim();
+        const abbreviation = refs.competitionAbbreviationInput.value.trim();
         const type = refs.competitionTypeInput.value.trim();
         const startDate = refs.competitionDateInput.value;
         const tone = refs.competitionToneInput.value;
 
         if (!title) {
             refs.competitionNameInput.focus();
+            return;
+        }
+
+        if (!abbreviation) {
+            refs.competitionAbbreviationInput.focus();
             return;
         }
 
@@ -522,6 +585,7 @@ export function createCompetitionsModule({
 
         const competitionData = {
             title,
+            abbreviation,
             type,
             startDate,
             tone: competitionToneMap[tone] ? tone : "green",
@@ -589,10 +653,18 @@ export function createCompetitionsModule({
 
         try {
             const createdCompetition = await createAcceptedCompetition(competitionData);
-            state.competitions.unshift(normalizeCompetitionFromApi(createdCompetition) || {
+            const normalizedCompetition = normalizeCompetitionFromApi(createdCompetition) || {
                 ...competitionData,
                 id: createdCompetition.id || generateRecordId()
-            });
+            };
+
+            if (isPendingCompetition(normalizedCompetition)) {
+                state.competitionRequests = state.competitionRequests.filter((entry) => String(entry.id) !== String(normalizedCompetition.id));
+                state.competitionRequests.unshift(normalizedCompetition);
+                state.competitionRequestsLoaded = true;
+            } else {
+                state.competitions.unshift(normalizedCompetition);
+            }
         } catch (error) {
             setCompetitionFeedback(error.message || t("competitions.form.createError"));
             if (submitButton) {

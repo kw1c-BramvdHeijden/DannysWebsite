@@ -55,7 +55,8 @@ export function createApp() {
     const teams = createTeamsModule({
         refs,
         state,
-        t
+        t,
+        getLocalizedText
     });
 
     const ui = createUiModule({

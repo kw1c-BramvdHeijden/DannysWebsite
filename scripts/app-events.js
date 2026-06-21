@@ -215,6 +215,11 @@ export function bindEvents({
         teams.toggleUserMenu();
     });
 
+    refs.teamUserSearch?.addEventListener("input", (event) => {
+        const input = event.target;
+        teams.filterUsers(input instanceof HTMLInputElement ? input.value : "");
+    });
+
     refs.leaderboardOpenButton?.addEventListener("click", () => {
         leaderboard.openLeaderboardModal();
     });
@@ -241,6 +246,19 @@ export function bindEvents({
 
     refs.teamForm?.addEventListener("submit", (event) => {
         teams.submitTeam(event);
+    });
+
+    refs.teamList?.addEventListener("click", (event) => {
+        const target = event.target;
+
+        if (!(target instanceof Element)) {
+            return;
+        }
+
+        const deleteButton = target.closest("[data-team-delete]");
+        if (deleteButton) {
+            teams.deleteTeam(deleteButton.getAttribute("data-team-delete"));
+        }
     });
 
     refs.competitionGrid?.addEventListener("click", (event) => {

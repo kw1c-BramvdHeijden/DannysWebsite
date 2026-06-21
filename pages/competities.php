@@ -222,6 +222,11 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
                 <input type="text" data-competition-name data-i18n-placeholder="competitions.form.namePlaceholder" placeholder="Bijvoorbeeld: Voorjaars Toernooi">
             </label>
 
+            <label class="upload-label competition-abbreviation-label">
+                <span data-i18n="competitions.form.abbreviation">Afkorting</span>
+                <input type="text" data-competition-abbreviation data-i18n-placeholder="competitions.form.abbreviationPlaceholder" placeholder="VT">
+            </label>
+
             <label class="upload-label">
                 <span data-i18n="competitions.form.type">Locatie</span>
                 <input type="text" data-competition-type data-i18n-placeholder="competitions.form.typePlaceholder" placeholder="Bijvoorbeeld: Dorpsplein 4 of Baan 2">
@@ -269,7 +274,14 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
 
                 <label class="upload-label">
                     <span data-i18n="teams.form.name">Teamnaam</span>
-                    <input type="text" data-team-name data-i18n-placeholder="teams.form.namePlaceholder" placeholder="Bijvoorbeeld: De Pleinwerpers">
+                    <input type="text" data-team-name maxlength="35" data-i18n-placeholder="teams.form.namePlaceholder" placeholder="Bijvoorbeeld: De Pleinwerpers">
+                </label>
+
+                <label class="upload-label">
+                    <span data-i18n="teams.form.competition">Competitie</span>
+                    <select class="competition-select" data-team-tournament>
+                        <option value="" data-i18n="teams.form.competitionPlaceholder">Selecteer competitie</option>
+                    </select>
                 </label>
 
                 <div class="team-user-picker">
@@ -279,6 +291,10 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
                         <i class="fa-solid fa-chevron-down"></i>
                     </button>
                     <div class="team-user-menu" data-team-user-menu hidden>
+                        <label class="team-user-search">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                            <input type="search" data-team-user-search data-i18n-placeholder="teams.form.membersSearch" placeholder="Zoek op naam">
+                        </label>
                         <p class="team-user-menu-status" data-team-user-status data-i18n="teams.users.loading">Gebruikers laden...</p>
                         <div class="team-user-options" data-team-user-options></div>
                     </div>

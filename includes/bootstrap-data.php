@@ -43,6 +43,20 @@ function boules_first_existing_column(array $columns, array $columnNames)
     return null;
 }
 
+function boules_ensure_tournament_status_column($pdo)
+{
+    if (!boules_table_exists($pdo, "tournaments")) {
+        return;
+    }
+
+    if (in_array("status", boules_table_columns($pdo, "tournaments"), true)) {
+        $pdo->exec("ALTER TABLE `tournaments` ALTER `status` SET DEFAULT 'pending'");
+        return;
+    }
+
+    $pdo->exec("ALTER TABLE `tournaments` ADD COLUMN `status` VARCHAR(32) NOT NULL DEFAULT 'pending'");
+}
+
 function boules_select_alias($column, $alias, $fallback)
 {
     return $column ? "`$column` AS `$alias`" : "$fallback AS `$alias`";
@@ -81,6 +95,10 @@ function boules_fetch_competitions($pdo, $competitionHref)
     $table = boules_first_existing_table($pdo, array("tournaments", "competitions"));
     if (!$table) {
         return array();
+    }
+
+    if ($table === "tournaments") {
+        boules_ensure_tournament_status_column($pdo);
     }
 
     $columns = boules_table_columns($pdo, $table);

@@ -190,6 +190,11 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
                     <input type="text" data-competition-name data-i18n-placeholder="competitions.form.namePlaceholder" placeholder="Bijvoorbeeld: Voorjaars Toernooi">
                 </label>
 
+                <label class="upload-label competition-abbreviation-label">
+                    <span data-i18n="competitions.form.abbreviation">Afkorting</span>
+                    <input type="text" data-competition-abbreviation data-i18n-placeholder="competitions.form.abbreviationPlaceholder" placeholder="VT">
+                </label>
+
                 <label class="upload-label">
                     <span data-i18n="competitions.form.type">Type</span>
                     <input type="text" data-competition-type data-i18n-placeholder="competitions.form.typePlaceholder" placeholder="Bijvoorbeeld: Doublette | Vrije inschrijving">
@@ -223,6 +228,9 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
 
     <?php render_leaderboard_modal(); ?>
 
+    <script>
+        window.__BOULES_BOOTSTRAP__ = <?= json_encode($bootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    </script>
     <script type="module" src="scripts/index.js"></script>
 </body>
 </html>

@@ -42,7 +42,7 @@ function competitions_user_id_from_request(array $data)
 
 function competitions_status_for_action($action)
 {
-    return $action === "create" ? "geaccepteert" : "pending";
+    return "pending";
 }
 
 function competitions_public_record(array $row)
@@ -80,12 +80,14 @@ function competitions_ensure_tournaments_schema()
         competitions_respond(500, array("error" => "Tabel tournaments ontbreekt. Gebruik de bestaande database-tabellen."));
     }
 
-    $requiredColumns = array("tournament_id", "name", "start_date", "location", "created_by", "status");
+    $requiredColumns = array("tournament_id", "name", "start_date", "location", "created_by");
     foreach ($requiredColumns as $column) {
         if (!competitions_tournament_has_column($column)) {
             competitions_respond(500, array("error" => "Kolom $column ontbreekt in tournaments."));
         }
     }
+
+    competitions_ensure_status_column();
 }
 
 function competitions_tournament_has_column($column)
@@ -93,6 +95,11 @@ function competitions_tournament_has_column($column)
     global $pdo;
 
     return in_array($column, boules_table_columns($pdo, "tournaments"), true);
+}
+
+function competitions_ensure_status_column()
+{
+    boules_ensure_tournament_status_column($GLOBALS["pdo"]);
 }
 
 function competitions_select_columns()
@@ -143,12 +150,13 @@ function competitions_fetch_tournament($competitionId)
 function competitions_validate_payload(array $competition)
 {
     $title = isset($competition["title"]) ? trim((string) $competition["title"]) : "";
+    $abbreviation = isset($competition["abbreviation"]) ? competitions_clean_abbreviation($competition["abbreviation"]) : "";
     $location = isset($competition["type"]) ? trim((string) $competition["type"]) : "";
     $startDate = isset($competition["startDate"]) ? trim((string) $competition["startDate"]) : "";
     $tone = isset($competition["tone"]) ? trim((string) $competition["tone"]) : "green";
 
-    if ($title === "" || $location === "" || $startDate === "") {
-        competitions_respond(422, array("error" => "Vul naam, locatie en startdatum in."));
+    if ($title === "" || $abbreviation === "" || $location === "" || $startDate === "") {
+        competitions_respond(422, array("error" => "Vul naam, afkorting, locatie en startdatum in."));
     }
 
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDate)) {
@@ -160,11 +168,25 @@ function competitions_validate_payload(array $competition)
     }
 
     return array(
-        "title" => $title,
+        "title" => competitions_format_tournament_name($title, $abbreviation),
+        "abbreviation" => $abbreviation,
         "location" => $location,
         "startDate" => $startDate,
         "tone" => $tone,
     );
+}
+
+function competitions_format_tournament_name($title, $abbreviation)
+{
+    $title = trim(preg_replace('/\s*\([^()]+\)\s*$/', '', (string) $title));
+    $abbreviation = competitions_clean_abbreviation($abbreviation);
+
+    return $title . " (" . $abbreviation . ")";
+}
+
+function competitions_clean_abbreviation($abbreviation)
+{
+    return trim(str_replace(array("(", ")"), "", (string) $abbreviation));
 }
 
 function competitions_create_tournament(array $competition, $action, array $data)

@@ -1,4 +1,4 @@
-export function createTeamsModule({ refs, state, t }) {
+export function createTeamsModule({ refs, state, t, getLocalizedText }) {
     let teamModalTimer = 0;
     let teamsLoaded = false;
     let teamsLoading = false;
@@ -6,6 +6,8 @@ export function createTeamsModule({ refs, state, t }) {
     let usersLoading = false;
     let teams = [];
     let users = [];
+    let userSearchTerm = "";
+    let selectedUserIds = [];
 
     function getTeamApiUrl() {
         const script = document.querySelector("script[src$='scripts/index.js']");
@@ -96,13 +98,7 @@ export function createTeamsModule({ refs, state, t }) {
     }
 
     function getSelectedUserIds() {
-        if (!refs.teamUserOptions) {
-            return [];
-        }
-
-        return Array.from(refs.teamUserOptions.querySelectorAll("input[type='checkbox']:checked"))
-            .map((input) => input.value)
-            .filter(Boolean);
+        return selectedUserIds.slice();
     }
 
     function syncUserSummary() {
@@ -132,6 +128,60 @@ export function createTeamsModule({ refs, state, t }) {
 
         refs.teamUserMenu.hidden = !isOpen;
         refs.teamUserToggle.setAttribute("aria-expanded", String(isOpen));
+
+        if (isOpen && refs.teamUserSearch) {
+            window.setTimeout(() => {
+                refs.teamUserSearch.focus();
+            }, 0);
+        }
+    }
+
+    function resetUserPicker() {
+        selectedUserIds = [];
+        userSearchTerm = "";
+
+        if (refs.teamUserSearch) {
+            refs.teamUserSearch.value = "";
+        }
+
+        renderUsers();
+    }
+
+    function isVisibleCompetition(competition) {
+        const status = competition && typeof competition.status === "string"
+            ? competition.status.trim().toLowerCase()
+            : "";
+
+        return ["pending", "in afwachting", "aangevraagd", "rejected", "denied", "afgewezen"].indexOf(status) === -1;
+    }
+
+    function renderTournamentOptions() {
+        if (!refs.teamTournamentInput) {
+            return;
+        }
+
+        const selectedValue = refs.teamTournamentInput.value;
+        refs.teamTournamentInput.innerHTML = "";
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = t("teams.form.competitionPlaceholder");
+        refs.teamTournamentInput.appendChild(placeholder);
+
+        state.competitions
+            .filter(isVisibleCompetition)
+            .slice()
+            .sort((left, right) => left.startDate.localeCompare(right.startDate))
+            .forEach((competition) => {
+                const option = document.createElement("option");
+                option.value = String(competition.id);
+                option.textContent = getLocalizedText(competition.title, state.lang);
+                refs.teamTournamentInput.appendChild(option);
+            });
+
+        if (selectedValue && Array.from(refs.teamTournamentInput.options).some((option) => option.value === selectedValue)) {
+            refs.teamTournamentInput.value = selectedValue;
+        }
     }
 
     function createTeamCard(team) {
@@ -152,6 +202,16 @@ export function createTeamsModule({ refs, state, t }) {
         meta.textContent = team.createdByName ? `${t("teams.createdBy")} ${team.createdByName}` : t("teams.createdByUnknown");
 
         card.append(title, players, meta);
+
+        if (state.loggedIn && state.role === "admin") {
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "team-delete-button";
+            deleteButton.dataset.teamDelete = String(team.id);
+            deleteButton.innerHTML = `<i class="fa-solid fa-trash"></i><span>${t("teams.delete")}</span>`;
+            card.appendChild(deleteButton);
+        }
+
         return card;
     }
 
@@ -172,20 +232,41 @@ export function createTeamsModule({ refs, state, t }) {
             return;
         }
 
+        const visibleUsers = userSearchTerm
+            ? users.filter((user) => user.name.toLowerCase().indexOf(userSearchTerm) !== -1)
+            : users;
+
+        if (visibleUsers.length === 0) {
+            setUserStatus(t("teams.users.noResults"));
+            syncUserSummary();
+            return;
+        }
+
         setUserStatus("");
 
-        users.forEach((user) => {
+        visibleUsers.forEach((user) => {
             const label = document.createElement("label");
             label.className = "team-user-option";
 
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.value = user.id;
+            checkbox.checked = selectedUserIds.indexOf(user.id) !== -1;
 
             const text = document.createElement("span");
             text.textContent = user.name;
 
-            checkbox.addEventListener("change", syncUserSummary);
+            checkbox.addEventListener("change", () => {
+                if (checkbox.checked && selectedUserIds.indexOf(user.id) === -1) {
+                    selectedUserIds.push(user.id);
+                }
+
+                if (!checkbox.checked) {
+                    selectedUserIds = selectedUserIds.filter((selectedId) => selectedId !== user.id);
+                }
+
+                syncUserSummary();
+            });
             label.append(checkbox, text);
             refs.teamUserOptions.appendChild(label);
         });
@@ -275,6 +356,7 @@ export function createTeamsModule({ refs, state, t }) {
         setTeamFeedback();
         refs.teamModal.hidden = false;
         refs.body.classList.add("team-modal-open");
+        renderTournamentOptions();
         loadTeams();
         loadUsers(true);
 
@@ -311,13 +393,8 @@ export function createTeamsModule({ refs, state, t }) {
             if (refs.teamForm) {
                 refs.teamForm.reset();
             }
-            if (refs.teamUserOptions) {
-                refs.teamUserOptions.querySelectorAll("input[type='checkbox']").forEach((input) => {
-                    input.checked = false;
-                });
-            }
+            resetUserPicker();
             setUserMenuOpen(false);
-            syncUserSummary();
             setTeamFeedback();
         }, 220);
     }
@@ -325,15 +402,22 @@ export function createTeamsModule({ refs, state, t }) {
     async function submitTeam(event) {
         event.preventDefault();
 
-        if (!state.loggedIn || !refs.teamNameInput) {
+        if (!state.loggedIn || !refs.teamNameInput || !refs.teamTournamentInput) {
             return;
         }
 
         const name = refs.teamNameInput.value.trim();
+        const tournamentId = refs.teamTournamentInput.value;
         const memberIds = getSelectedUserIds();
 
         if (!name) {
             refs.teamNameInput.focus();
+            return;
+        }
+
+        if (!tournamentId) {
+            setTeamFeedback(t("teams.form.competitionRequired"));
+            refs.teamTournamentInput.focus();
             return;
         }
 
@@ -354,6 +438,7 @@ export function createTeamsModule({ refs, state, t }) {
                 userId: getCurrentUserId(),
                 team: {
                     name,
+                    tournamentId,
                     memberIds
                 }
             });
@@ -365,13 +450,8 @@ export function createTeamsModule({ refs, state, t }) {
             if (refs.teamForm) {
                 refs.teamForm.reset();
             }
-            if (refs.teamUserOptions) {
-                refs.teamUserOptions.querySelectorAll("input[type='checkbox']").forEach((input) => {
-                    input.checked = false;
-                });
-            }
+            resetUserPicker();
             setUserMenuOpen(false);
-            syncUserSummary();
             setTeamFeedback(t("teams.success"), true);
             renderTeams();
         } catch (error) {
@@ -401,6 +481,35 @@ export function createTeamsModule({ refs, state, t }) {
         setUserMenuOpen(false);
     }
 
+    function filterUsers(value) {
+        userSearchTerm = typeof value === "string" ? value.trim().toLowerCase() : "";
+        renderUsers();
+    }
+
+    async function deleteTeam(teamId) {
+        if (!state.loggedIn || state.role !== "admin" || !teamId) {
+            return;
+        }
+
+        if (!window.confirm(t("teams.deleteConfirm"))) {
+            return;
+        }
+
+        try {
+            await requestTeams({
+                action: "delete",
+                id: teamId,
+                userId: getCurrentUserId()
+            });
+            teams = teams.filter((team) => String(team.id) !== String(teamId));
+            teamsLoaded = true;
+            renderTeams();
+            setTeamFeedback(t("teams.deleteSuccess"), true);
+        } catch (error) {
+            setTeamFeedback(error.message || t("teams.error"));
+        }
+    }
+
     return {
         openTeamModal,
         preloadUsers,
@@ -408,6 +517,8 @@ export function createTeamsModule({ refs, state, t }) {
         submitTeam,
         toggleUserMenu,
         closeUserMenu,
+        filterUsers,
+        deleteTeam,
         syncTeamButtons
     };
 }
