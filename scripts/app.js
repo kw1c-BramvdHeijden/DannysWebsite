@@ -16,6 +16,7 @@ import {
 import { createPhotosModule } from "./app-photos.js";
 import { createCompetitionsModule } from "./app-competitions.js";
 import { createLeaderboardModule } from "./app-leaderboard.js";
+import { createTeamsModule } from "./app-teams.js";
 import { createUiModule } from "./app-ui.js";
 import { bindEvents } from "./app-events.js";
 
@@ -34,7 +35,20 @@ export function createApp() {
         savePhotos
     });
 
-    const competitions = createCompetitionsModule({
+    let competitions = null;
+
+    const teams = createTeamsModule({
+        refs,
+        state,
+        t,
+        onTeamsChanged: () => {
+            if (competitions) {
+                competitions.renderCompetitions();
+            }
+        }
+    });
+
+    competitions = createCompetitionsModule({
         refs,
         state,
         t,
@@ -42,8 +56,23 @@ export function createApp() {
         competitionToneMap,
         getLocalizedText,
         generateRecordId,
-        saveCompetitions
+        saveCompetitions,
+        getCurrentUserTeams: teams.getCurrentUserTeams,
+        getCurrentUserTeamsStatus: teams.getCurrentUserTeamsStatus,
+        loadCurrentUserTeams: teams.loadCurrentUserTeams
     });
+
+    function isCompetitionsPage() {
+        return Boolean(refs.competitionGrid) && window.location.pathname.indexOf("competities") !== -1;
+    }
+
+    function preloadCompetitionPageTeams(force = false) {
+        if (!isCompetitionsPage()) {
+            return;
+        }
+
+        teams.preloadCurrentUserTeams(force);
+    }
 
     const leaderboard = createLeaderboardModule({
         refs,
@@ -66,8 +95,13 @@ export function createApp() {
         syncCompetitionFormUI: competitions.syncCompetitionFormUI,
         closeUploadModal: photos.closeUploadModal,
         closeCompetitionModal: competitions.closeCompetitionModal,
+        closeTeamModal: teams.closeTeamModal,
+        syncTeamButtons: teams.syncTeamButtons,
         closeLeaderboardModal: leaderboard.closeLeaderboardModal,
-        canManageCompetitions: competitions.canManageCompetitions
+        canManageCompetitions: competitions.canManageCompetitions,
+        onAuthStateChanged: () => {
+            preloadCompetitionPageTeams(true);
+        }
     });
 
     bindEvents({
@@ -75,6 +109,7 @@ export function createApp() {
         state,
         photos,
         competitions,
+        teams,
         leaderboard,
         ui,
         t
@@ -85,8 +120,11 @@ export function createApp() {
     ui.setLanguageMenuOpen(false);
     ui.setAccountMenuOpen(false);
     competitions.closeCompetitionModal();
+    teams.closeTeamModal();
     leaderboard.closeLeaderboardModal();
     ui.setAuthMode("login");
     ui.syncNavToggleLabel();
     ui.updateActiveNavLink();
+
+    preloadCompetitionPageTeams(true);
 }

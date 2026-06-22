@@ -13,6 +13,7 @@ require_once __DIR__ . "/../includes/header.php";
     <link rel="stylesheet" href="../css/header.css">
     <link rel="stylesheet" href="../css/footer.css">
     <link rel="stylesheet" href="../css/scoreboard.css">
+    <link rel="stylesheet" href="../css/base.css">
 </head>
 <body data-scoreboard-api="../api/scoreboard.php">
 <main class="page-shell scoreboard-page">

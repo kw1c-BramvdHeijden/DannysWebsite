@@ -20,6 +20,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/index_competities.css">
+    <link rel="stylesheet" href="css/base.css">
 </head>
 <body data-competitions-href="pages/competities.php">
     <main class="page-shell">
@@ -164,13 +165,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
         </section>
     </main>
 
-    <footer class="quote-footer" id="over">
-        <div class="quote-inner">
-            <div class="footer-boules" aria-hidden="true"><span></span><span></span><span class="small-red"></span></div>
-            <blockquote data-i18n-html="footer.quote">" Jeu de boules is meer dan een spel.<br>Het is samenzijn, strategie en plezier. "</blockquote>
-            <div class="footer-leaf" aria-hidden="true"></div>
-        </div>
-    </footer>
+    <?php include 'includes/footer.php';?>
 
     <!-- Auth modal is rendered by includes/header.php. -->
     <div class="competition-modal" data-competition-modal hidden>

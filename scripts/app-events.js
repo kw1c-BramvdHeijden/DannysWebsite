@@ -3,6 +3,7 @@ export function bindEvents({
     state,
     photos,
     competitions,
+    teams,
     leaderboard,
     ui,
     t
@@ -13,6 +14,11 @@ export function bindEvents({
 
     refs.navLinks.forEach((link) => {
         link.addEventListener("click", () => {
+            const href = link.getAttribute("href") || "";
+            if (href.indexOf("competities") !== -1) {
+                teams.preloadCurrentUserTeams(true);
+            }
+
             const targetId = link.getAttribute("href")?.replace("#", "");
             if (targetId) {
                 ui.setCurrentNavLink(targetId);
@@ -193,6 +199,27 @@ export function bindEvents({
         });
     });
 
+    refs.teamOpenButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            teams.openTeamModal();
+        });
+    });
+
+    refs.teamCloseButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            teams.closeTeamModal();
+        });
+    });
+
+    refs.teamUserToggle?.addEventListener("click", () => {
+        teams.toggleUserMenu();
+    });
+
+    refs.teamUserSearch?.addEventListener("input", (event) => {
+        const value = event.target instanceof HTMLInputElement ? event.target.value : "";
+        teams.filterUsers(value);
+    });
+
     refs.leaderboardOpenButton?.addEventListener("click", () => {
         leaderboard.openLeaderboardModal();
     });
@@ -217,6 +244,10 @@ export function bindEvents({
         competitions.saveCompetition(event);
     });
 
+    refs.teamForm?.addEventListener("submit", (event) => {
+        teams.submitTeam(event);
+    });
+
     refs.competitionGrid?.addEventListener("click", (event) => {
         const target = event.target;
 
@@ -233,6 +264,12 @@ export function bindEvents({
         const deleteButton = target.closest("[data-competition-delete]");
         if (deleteButton) {
             competitions.deleteCompetition(deleteButton.getAttribute("data-competition-delete"));
+            return;
+        }
+
+        const registerButton = target.closest("[data-competition-team-register]");
+        if (registerButton) {
+            competitions.registerSelectedTeam(registerButton.getAttribute("data-competition-team-register"));
         }
     });
 
@@ -298,6 +335,14 @@ export function bindEvents({
             }
         }
 
+        if (refs.teamModal && !refs.teamModal.hidden && refs.teamUserMenu && refs.teamUserToggle) {
+            const clickedInMenu = refs.teamUserMenu.contains(target);
+            const clickedToggle = refs.teamUserToggle.contains(target);
+            if (!clickedInMenu && !clickedToggle) {
+                teams.closeUserMenu();
+            }
+        }
+
         if (window.innerWidth <= 920 && refs.siteHeader && !refs.siteHeader.contains(target) && refs.body.classList.contains("nav-open")) {
             ui.closeMobileMenu();
         }
@@ -315,6 +360,11 @@ export function bindEvents({
 
         if (refs.competitionModal && !refs.competitionModal.hidden) {
             competitions.closeCompetitionModal();
+            return;
+        }
+
+        if (refs.teamModal && !refs.teamModal.hidden) {
+            teams.closeTeamModal();
             return;
         }
 

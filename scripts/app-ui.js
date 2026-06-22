@@ -13,8 +13,11 @@ export function createUiModule({
     syncCompetitionFormUI,
     closeUploadModal,
     closeCompetitionModal,
+    closeTeamModal,
+    syncTeamButtons,
     closeLeaderboardModal,
-    canManageCompetitions
+    canManageCompetitions,
+    onAuthStateChanged = () => {}
 }) {
     let languageMenuTimer = 0;
     let accountMenuTimer = 0;
@@ -42,7 +45,7 @@ export function createUiModule({
         .filter(Boolean);
 
     function getAuthApiUrl() {
-        const script = document.querySelector("script[src$='scripts/index.js']");
+        const script = document.querySelector("script[type='module'][src*='scripts/']");
         return script ? new URL("../api/auth.php", script.src).toString() : "api/auth.php";
     }
 
@@ -297,6 +300,7 @@ export function createUiModule({
 
         syncAccountUI();
         syncCompetitionAdminUI();
+        syncTeamButtons();
     }
 
     function setAuthMode(mode) {
@@ -503,6 +507,7 @@ export function createUiModule({
             closeAuthModal();
             closeUploadModal();
             closeCompetitionModal();
+            closeTeamModal();
             closeLeaderboardModal();
             closeAccountMenu();
         }
@@ -511,6 +516,7 @@ export function createUiModule({
         renderLeaderboard();
         renderCompetitions();
         renderPhotos();
+        onAuthStateChanged(state.loggedIn);
     }
 
     function setAuthenticatedUser(user, role = "player") {
