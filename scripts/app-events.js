@@ -16,7 +16,7 @@ export function bindEvents({
         link.addEventListener("click", () => {
             const href = link.getAttribute("href") || "";
             if (href.indexOf("competities") !== -1) {
-                teams.preloadUsers();
+                teams.preloadCurrentUserTeams(true);
             }
 
             const targetId = link.getAttribute("href")?.replace("#", "");
@@ -215,6 +215,11 @@ export function bindEvents({
         teams.toggleUserMenu();
     });
 
+    refs.teamUserSearch?.addEventListener("input", (event) => {
+        const value = event.target instanceof HTMLInputElement ? event.target.value : "";
+        teams.filterUsers(value);
+    });
+
     refs.leaderboardOpenButton?.addEventListener("click", () => {
         leaderboard.openLeaderboardModal();
     });
@@ -259,6 +264,12 @@ export function bindEvents({
         const deleteButton = target.closest("[data-competition-delete]");
         if (deleteButton) {
             competitions.deleteCompetition(deleteButton.getAttribute("data-competition-delete"));
+            return;
+        }
+
+        const registerButton = target.closest("[data-competition-team-register]");
+        if (registerButton) {
+            competitions.registerSelectedTeam(registerButton.getAttribute("data-competition-team-register"));
         }
     });
 

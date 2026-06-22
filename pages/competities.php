@@ -233,13 +233,13 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
             </label>
 
             <label class="upload-label">
-                <span data-i18n="competitions.form.style">Accentkleur</span>
-                <select class="competition-select" data-competition-tone>
-                    <option value="green" data-i18n="competitions.form.styleGreen">Groen</option>
-                    <option value="yellow" data-i18n="competitions.form.styleYellow">Geel</option>
-                    <option value="red" data-i18n="competitions.form.styleRed">Rood</option>
-                    <option value="olive" data-i18n="competitions.form.styleOlive">Olijf</option>
-                </select>
+                <span data-i18n="competitions.form.endDate">Einddatum</span>
+                <input type="date" data-competition-end-date>
+            </label>
+
+            <label class="upload-label">
+                <span data-i18n="competitions.form.style">Kleur</span>
+                <input type="color" class="competition-color-picker" data-competition-tone value="#7b9151">
             </label>
 
             <div class="upload-actions">
@@ -279,6 +279,10 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
                         <i class="fa-solid fa-chevron-down"></i>
                     </button>
                     <div class="team-user-menu" data-team-user-menu hidden>
+                        <label class="team-user-search">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                            <input type="search" data-team-user-search data-i18n-placeholder="teams.form.membersSearch" placeholder="Zoek op naam">
+                        </label>
                         <p class="team-user-menu-status" data-team-user-status data-i18n="teams.users.loading">Gebruikers laden...</p>
                         <div class="team-user-options" data-team-user-options></div>
                     </div>

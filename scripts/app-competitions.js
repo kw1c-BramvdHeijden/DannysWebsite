@@ -6,7 +6,10 @@ export function createCompetitionsModule({
     competitionToneMap,
     getLocalizedText,
     generateRecordId,
-    saveCompetitions
+    saveCompetitions,
+    getCurrentUserTeams = () => [],
+    getCurrentUserTeamsStatus = () => ({ loaded: true, loading: false, error: "" }),
+    loadCurrentUserTeams = () => {}
 }) {
     let competitionModalTimer = 0;
     let competitionFormMode = "admin";
@@ -30,6 +33,22 @@ export function createCompetitionsModule({
         return script ? new URL("../api/competitions.php", script.src).toString() : "api/competitions.php";
     }
 
+    function isHexColor(value) {
+        return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
+    }
+
+    function normalizeCompetitionTone(tone) {
+        if (isHexColor(tone)) {
+            return tone.toLowerCase();
+        }
+
+        return competitionToneMap[tone] ? tone : "#7b9151";
+    }
+
+    function competitionIconForTone(tone) {
+        return competitionToneMap[tone] || "fa-calendar-days";
+    }
+
     function setCompetitionFeedback(message = "", isSuccess = false) {
         if (!refs.competitionFeedback) {
             return;
@@ -37,12 +56,6 @@ export function createCompetitionsModule({
 
         refs.competitionFeedback.textContent = message;
         refs.competitionFeedback.classList.toggle("is-success", isSuccess);
-    }
-
-    function getCurrentUserId() {
-        return state.user && (typeof state.user.id === "string" || typeof state.user.id === "number")
-            ? String(state.user.id)
-            : "";
     }
 
     async function requestCompetition(competitionData) {
@@ -53,7 +66,6 @@ export function createCompetitionsModule({
             },
             body: JSON.stringify({
                 action: "request",
-                userId: getCurrentUserId(),
                 competition: competitionData
             })
         });
@@ -74,7 +86,6 @@ export function createCompetitionsModule({
             },
             body: JSON.stringify({
                 action: "create",
-                userId: getCurrentUserId(),
                 competition: competitionData
             })
         });
@@ -136,6 +147,7 @@ export function createCompetitionsModule({
         const title = typeof competition.title === "string" ? competition.title.trim() : "";
         const type = typeof competition.type === "string" ? competition.type.trim() : "";
         const startDate = typeof competition.startDate === "string" ? competition.startDate.trim() : "";
+        const endDate = typeof competition.endDate === "string" ? competition.endDate.trim() : "";
 
         if (!title || !type || !startDate) {
             return null;
@@ -146,9 +158,11 @@ export function createCompetitionsModule({
             title,
             type,
             startDate,
-            tone: competitionToneMap[competition.tone] ? competition.tone : "green",
+            endDate,
+            tone: normalizeCompetitionTone(competition.tone),
             status: typeof competition.status === "string" ? competition.status : "",
             requesterName: typeof competition.requesterName === "string" ? competition.requesterName.trim() : "",
+            registeredTeamIds: Array.isArray(competition.registeredTeamIds) ? competition.registeredTeamIds.map(String) : [],
             href: getDefaultCompetitionHref()
         };
     }
@@ -168,6 +182,16 @@ export function createCompetitionsModule({
         }
 
         return result;
+    }
+
+    async function registerTeamForCompetition(competitionId, teamId) {
+        const result = await requestCompetitionApi({
+            action: "registerTeam",
+            competitionId,
+            teamId
+        });
+
+        return result.competition;
     }
 
     async function loadCompetitionRequests() {
@@ -209,6 +233,19 @@ export function createCompetitionsModule({
         return `${t("competitions.datePrefix")}: ${formattedDate}`;
     }
 
+    function formatPlainDate(dateValue) {
+        if (!dateValue) {
+            return "-";
+        }
+
+        const date = new Date(`${dateValue}T12:00:00`);
+        return new Intl.DateTimeFormat(localeMap[state.lang], {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        }).format(date);
+    }
+
     function createCompetitionCard(competition) {
         const card = document.createElement("article");
         card.className = "competition-card";
@@ -236,24 +273,90 @@ export function createCompetitionsModule({
         }
 
         const icon = document.createElement("div");
-        const tone = competitionToneMap[competition.tone] ? competition.tone : "green";
-        icon.className = `competition-icon ${tone}`;
-        icon.innerHTML = `<i class="fa-solid ${competitionToneMap[tone]}"></i>`;
+        const tone = normalizeCompetitionTone(competition.tone);
+        icon.className = `competition-icon ${competitionToneMap[tone] ? tone : "custom"}`;
+        if (isHexColor(tone)) {
+            icon.style.backgroundColor = tone;
+        }
+        icon.innerHTML = `<i class="fa-solid ${competitionIconForTone(tone)}"></i>`;
 
         const title = document.createElement("h3");
         title.textContent = getLocalizedText(competition.title, state.lang);
 
-        const type = document.createElement("p");
-        type.textContent = getLocalizedText(competition.type, state.lang);
+        const details = document.createElement("dl");
+        details.className = "competition-details";
 
-        const date = document.createElement("p");
-        date.textContent = formatCompetitionDate(competition.startDate);
+        [
+            [t("competitions.detail.name"), getLocalizedText(competition.title, state.lang)],
+            [t("competitions.detail.location"), getLocalizedText(competition.type, state.lang)],
+            [t("competitions.detail.startDate"), formatPlainDate(competition.startDate)],
+            [t("competitions.detail.endDate"), formatPlainDate(competition.endDate)]
+        ].forEach(([label, value]) => {
+            const term = document.createElement("dt");
+            term.textContent = label;
+            const description = document.createElement("dd");
+            description.textContent = value || "-";
+            details.append(term, description);
+        });
 
-        const link = document.createElement("a");
-        link.href = competition.href || getDefaultCompetitionHref();
-        link.innerHTML = `<span>${t("competitions.more")}</span> <span aria-hidden="true">-&gt;</span>`;
+        card.append(icon, title, details);
 
-        card.append(icon, title, type, date, link);
+        const userTeams = state.loggedIn ? getCurrentUserTeams() : [];
+        const userTeamsStatus = state.loggedIn
+            ? getCurrentUserTeamsStatus()
+            : { loaded: true, loading: false, error: "" };
+        const registeredTeamIds = Array.isArray(competition.registeredTeamIds)
+            ? competition.registeredTeamIds.map(String)
+            : [];
+        const availableTeams = userTeams.filter((team) => registeredTeamIds.indexOf(String(team.id)) === -1);
+        const alreadyRegisteredTeams = userTeams.filter((team) => registeredTeamIds.indexOf(String(team.id)) !== -1);
+
+        const signup = document.createElement("div");
+        signup.className = "competition-team-signup";
+
+        if (!state.loggedIn) {
+            const message = document.createElement("p");
+            message.textContent = t("competitions.teamSignup.loginRequired");
+            signup.appendChild(message);
+        } else if (userTeamsStatus.error) {
+            const message = document.createElement("p");
+            message.textContent = userTeamsStatus.error;
+            signup.appendChild(message);
+        } else if (userTeamsStatus.loading || !userTeamsStatus.loaded) {
+            const message = document.createElement("p");
+            message.textContent = t("teams.loading");
+            signup.appendChild(message);
+        } else if (alreadyRegisteredTeams.length > 0 && availableTeams.length === 0) {
+            const message = document.createElement("p");
+            message.textContent = `${t("competitions.teamSignup.alreadyRegistered")}: ${alreadyRegisteredTeams.map((team) => team.name).join(", ")}`;
+            signup.appendChild(message);
+        } else if (availableTeams.length === 0) {
+            const message = document.createElement("p");
+            message.textContent = t("competitions.teamSignup.noTeams");
+            signup.appendChild(message);
+        } else {
+            const select = document.createElement("select");
+            select.className = "competition-select";
+            select.dataset.competitionTeamSelect = String(competition.id);
+            select.setAttribute("aria-label", t("competitions.teamSignup.selectLabel"));
+
+            availableTeams.forEach((team) => {
+                const option = document.createElement("option");
+                option.value = String(team.id);
+                option.textContent = team.name;
+                select.appendChild(option);
+            });
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "button button-secondary";
+            button.dataset.competitionTeamRegister = String(competition.id);
+            button.innerHTML = `<i class="fa-solid fa-user-plus"></i><span>${t("competitions.teamSignup.submit")}</span>`;
+
+            signup.append(select, button);
+        }
+
+        card.appendChild(signup);
         return card;
     }
 
@@ -395,6 +498,7 @@ export function createCompetitionsModule({
         if (refs.competitionSubmitLabel) {
             refs.competitionSubmitLabel.textContent = t(isRequesting ? "competitions.form.requestSubmit" : "competitions.form.save");
         }
+
     }
 
     function resetCompetitionForm() {
@@ -407,12 +511,12 @@ export function createCompetitionsModule({
         }
 
         if (refs.competitionToneInput) {
-            refs.competitionToneInput.value = "green";
+            refs.competitionToneInput.value = "#7b9151";
         }
     }
 
     function openCompetitionModal(competitionId = null) {
-        if (!canManageCompetitions() || !refs.competitionModal || !refs.competitionNameInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionToneInput) {
+        if (!canManageCompetitions() || !refs.competitionModal || !refs.competitionNameInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionEndDateInput || !refs.competitionToneInput) {
             return;
         }
 
@@ -427,7 +531,8 @@ export function createCompetitionsModule({
         refs.competitionNameInput.value = competition ? getLocalizedText(competition.title, state.lang) : "";
         refs.competitionTypeInput.value = competition ? getLocalizedText(competition.type, state.lang) : "";
         refs.competitionDateInput.value = competition?.startDate || "";
-        refs.competitionToneInput.value = competition?.tone || "green";
+        refs.competitionEndDateInput.value = competition?.endDate || "";
+        refs.competitionToneInput.value = competition && isHexColor(competition.tone) ? competition.tone : "#7b9151";
 
         syncCompetitionFormUI();
 
@@ -447,7 +552,7 @@ export function createCompetitionsModule({
     }
 
     function openCompetitionRequestModal() {
-        if (!refs.competitionModal || !refs.competitionNameInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionToneInput) {
+        if (!refs.competitionModal || !refs.competitionNameInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionEndDateInput || !refs.competitionToneInput) {
             return;
         }
 
@@ -455,7 +560,7 @@ export function createCompetitionsModule({
         competitionFormMode = "request";
         state.pendingCompetitionId = null;
         refs.competitionForm?.reset();
-        refs.competitionToneInput.value = "green";
+        refs.competitionToneInput.value = "#7b9151";
         setCompetitionFeedback();
         syncCompetitionFormUI();
 
@@ -495,7 +600,7 @@ export function createCompetitionsModule({
         event.preventDefault();
 
         const isRequesting = competitionFormMode === "request";
-        if ((!isRequesting && !canManageCompetitions()) || !refs.competitionNameInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionToneInput) {
+        if ((!isRequesting && !canManageCompetitions()) || !refs.competitionNameInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionEndDateInput || !refs.competitionToneInput) {
             closeCompetitionModal();
             return;
         }
@@ -503,7 +608,8 @@ export function createCompetitionsModule({
         const title = refs.competitionNameInput.value.trim();
         const type = refs.competitionTypeInput.value.trim();
         const startDate = refs.competitionDateInput.value;
-        const tone = refs.competitionToneInput.value;
+        const endDate = refs.competitionEndDateInput.value;
+        const tone = normalizeCompetitionTone(refs.competitionToneInput.value);
 
         if (!title) {
             refs.competitionNameInput.focus();
@@ -520,11 +626,23 @@ export function createCompetitionsModule({
             return;
         }
 
+        if (!endDate) {
+            refs.competitionEndDateInput.focus();
+            return;
+        }
+
+        if (endDate < startDate) {
+            setCompetitionFeedback(t("competitions.form.endDateBeforeStart"));
+            refs.competitionEndDateInput.focus();
+            return;
+        }
+
         const competitionData = {
             title,
             type,
             startDate,
-            tone: competitionToneMap[tone] ? tone : "green",
+            endDate,
+            tone,
             href: getDefaultCompetitionHref()
         };
 
@@ -633,6 +751,52 @@ export function createCompetitionsModule({
         }
     }
 
+    async function registerSelectedTeam(competitionId) {
+        if (!state.loggedIn || !competitionId) {
+            return;
+        }
+
+        const select = refs.competitionGrid?.querySelector(`[data-competition-team-select="${competitionId}"]`);
+        const teamId = select instanceof HTMLSelectElement ? select.value : "";
+        if (!teamId) {
+            return;
+        }
+
+        const button = refs.competitionGrid?.querySelector(`[data-competition-team-register="${competitionId}"]`);
+        if (button) {
+            button.disabled = true;
+        }
+
+        try {
+            const userTeams = await loadCurrentUserTeams(true);
+            const canUseSelectedTeam = Array.isArray(userTeams) && userTeams.some((team) => String(team.id) === String(teamId));
+            if (!canUseSelectedTeam) {
+                renderCompetitions();
+                window.alert(t("competitions.teamSignup.error"));
+                return;
+            }
+
+            const updatedCompetition = normalizeCompetitionFromApi(await registerTeamForCompetition(competitionId, teamId));
+            state.competitions = state.competitions.map((competition) => (
+                String(competition.id) === String(competitionId)
+                    ? (updatedCompetition || {
+                        ...competition,
+                        registeredTeamIds: Array.from(new Set([...(competition.registeredTeamIds || []).map(String), String(teamId)]))
+                    })
+                    : competition
+            ));
+            saveCompetitions(state.competitions);
+            renderCompetitions();
+        } catch (error) {
+            window.alert(error.message || t("competitions.teamSignup.error"));
+        } finally {
+            if (button) {
+                button.disabled = false;
+            }
+        }
+    }
+
+
     async function updateCompetitionRequest(competitionId, action) {
         if (!canManageCompetitions() || !competitionId) {
             return;
@@ -679,6 +843,7 @@ export function createCompetitionsModule({
         closeCompetitionModal,
         saveCompetition,
         deleteCompetition,
+        registerSelectedTeam,
         acceptCompetitionRequest,
         rejectCompetitionRequest
     };

@@ -75,7 +75,11 @@ function normalizePhoto(photo) {
 }
 
 function normalizeCompetitionTone(tone) {
-    return competitionToneMap[tone] ? tone : "green";
+    if (typeof tone === "string" && /^#[0-9a-f]{6}$/i.test(tone)) {
+        return tone.toLowerCase();
+    }
+
+    return competitionToneMap[tone] ? tone : "#7b9151";
 }
 
 function normalizeCompetition(competition) {
@@ -84,6 +88,7 @@ function normalizeCompetition(competition) {
     }
 
     const startDate = typeof competition.startDate === "string" ? competition.startDate : "";
+    const endDate = typeof competition.endDate === "string" ? competition.endDate : "";
     const title = normalizeLocalizedField(competition.title);
     const type = normalizeLocalizedField(competition.type);
 
@@ -96,8 +101,10 @@ function normalizeCompetition(competition) {
         title,
         type,
         startDate,
+        endDate,
         tone: normalizeCompetitionTone(competition.tone),
         status: typeof competition.status === "string" ? competition.status.trim() : "",
+        registeredTeamIds: Array.isArray(competition.registeredTeamIds) ? competition.registeredTeamIds.map(String) : [],
         href: typeof competition.href === "string" && competition.href.trim() ? competition.href.trim() : "#competities"
     };
 }
@@ -214,16 +221,18 @@ export function generateRecordId() {
 export function createAppState() {
     const bootstrap = getBootstrapData();
     const auth = bootstrap.auth && typeof bootstrap.auth === "object" ? bootstrap.auth : {};
+    const hasBootstrapAuth = Object.prototype.hasOwnProperty.call(bootstrap, "auth");
     const storedAuth = readStoredAuth();
     const bootstrapUser = normalizeUser(bootstrap.user ?? auth.user);
     const bootstrapAuth = auth.loggedIn === true && bootstrapUser
         ? {
             loggedIn: true,
             role: normalizeRole(auth.role),
+            accountRole: normalizeRole(auth.accountRole || auth.role),
             user: bootstrapUser
         }
         : null;
-    const activeAuth = bootstrapAuth || storedAuth;
+    const activeAuth = bootstrapAuth || (hasBootstrapAuth ? null : storedAuth);
 
     return {
         lang: normalizeLanguage(localStorage.getItem(STORAGE_KEYS.lang)),
