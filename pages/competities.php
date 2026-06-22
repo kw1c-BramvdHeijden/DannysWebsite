@@ -113,6 +113,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
         </div>
         <div class="competition-request-list" data-competition-requests-grid></div>
     </section>
+
 </main>
 
 <div class="auth-modal" data-auth-modal hidden>
@@ -256,6 +257,22 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
             </div>
             <p class="auth-popup-feedback" data-competition-feedback aria-live="polite"></p>
         </form>
+    </div>
+</div>
+
+<div class="match-modal" data-competition-matches-modal hidden>
+    <div class="match-modal-backdrop" data-competition-matches-close></div>
+    <div class="match-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="competition-matches-title">
+        <button type="button" class="match-modal-close" data-competition-matches-close data-i18n-aria-label="competitions.matches.close" aria-label="Sluit wedstrijdoverzicht">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="match-modal-content">
+            <p class="photo-kicker" data-i18n="competitions.matches.adminOnly">Gegenereerd via de startknop</p>
+            <h2 id="competition-matches-title" data-competition-matches-title data-i18n="competitions.matches.heading">WEDSTRIJDOVERZICHT</h2>
+            <p class="competition-matches-status" data-competition-matches-status aria-live="polite"></p>
+            <div class="competition-match-list" data-competition-matches-grid></div>
+        </div>
     </div>
 </div>
 

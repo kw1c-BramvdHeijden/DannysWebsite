@@ -9,7 +9,9 @@ export function createCompetitionsModule({
     saveCompetitions
 }) {
     let competitionModalTimer = 0;
+    let competitionMatchesModalTimer = 0;
     let competitionFormMode = "admin";
+    let generatedMatchResults = {};
 
     function canManageCompetitions() {
         return state.loggedIn && state.role === "admin";
@@ -58,6 +60,10 @@ export function createCompetitionsModule({
 
     function canShowStartButton(competition) {
         if (!canManageCompetitions() || !isCompetitionPage() || !competition.startDate) {
+            return false;
+        }
+
+        if (competition.started === true || generatedMatchResults[String(competition.id)]) {
             return false;
         }
 
@@ -171,6 +177,47 @@ export function createCompetitionsModule({
         return result;
     }
 
+    async function requestStartCompetition(competitionId) {
+        const response = await fetch(getCompetitionApiUrl(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "start",
+                id: competitionId,
+                userId: getCurrentUserId()
+            })
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !Array.isArray(result.matches)) {
+            throw new Error(result.error || t("competitions.matches.error"));
+        }
+
+        return result;
+    }
+
+    async function requestStoredCompetitionMatches(competitionId) {
+        const response = await fetch(getCompetitionApiUrl(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "matches",
+                id: competitionId
+            })
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !Array.isArray(result.matches)) {
+            throw new Error(result.error || t("competitions.matches.error"));
+        }
+
+        return result;
+    }
+
     function normalizeCompetitionFromApi(competition) {
         if (!competition || typeof competition !== "object") {
             return null;
@@ -191,6 +238,7 @@ export function createCompetitionsModule({
             startDate,
             tone: competitionToneMap[competition.tone] ? competition.tone : "green",
             status: typeof competition.status === "string" ? competition.status : "",
+            started: competition.started === true,
             requesterName: typeof competition.requesterName === "string" ? competition.requesterName.trim() : "",
             href: getDefaultCompetitionHref()
         };
@@ -300,6 +348,7 @@ export function createCompetitionsModule({
 
         const link = document.createElement("a");
         link.href = competition.href || getDefaultCompetitionHref();
+        link.dataset.competitionMore = String(competition.id);
         link.innerHTML = `<span>${t("competitions.more")}</span> <span aria-hidden="true">-&gt;</span>`;
 
         card.append(icon, title, type, date);
@@ -424,6 +473,104 @@ export function createCompetitionsModule({
 
         state.competitionRequests.forEach((competition) => {
             refs.competitionRequestsGrid.appendChild(createCompetitionRequestCard(competition));
+        });
+    }
+
+    function getCalendarUrl(match) {
+        const basePath = window.location.pathname.indexOf("/pages/") !== -1
+            ? "kalender.php"
+            : "pages/kalender.php";
+
+        if (!match.id) {
+            return basePath;
+        }
+
+        const params = new URLSearchParams();
+        params.set("wedstrijd_id", String(match.id));
+
+        return `${basePath}?${params.toString()}`;
+    }
+
+    function openCompetitionMatchesModal() {
+        if (!refs.competitionMatchesModal) {
+            return;
+        }
+
+        clearTimeout(competitionMatchesModalTimer);
+        refs.competitionMatchesModal.hidden = false;
+        refs.body.classList.add("match-modal-open");
+
+        requestAnimationFrame(() => {
+            refs.competitionMatchesModal.classList.add("is-open");
+        });
+    }
+
+    function closeCompetitionMatchesModal() {
+        if (!refs.competitionMatchesModal || refs.competitionMatchesModal.hidden) {
+            return;
+        }
+
+        clearTimeout(competitionMatchesModalTimer);
+        refs.competitionMatchesModal.classList.remove("is-open");
+        refs.body.classList.remove("match-modal-open");
+
+        competitionMatchesModalTimer = window.setTimeout(() => {
+            refs.competitionMatchesModal.hidden = true;
+        }, 220);
+    }
+
+    function renderCompetitionMatches(result) {
+        if (!refs.competitionMatchesModal || !refs.competitionMatchesGrid) {
+            return;
+        }
+
+        openCompetitionMatchesModal();
+        refs.competitionMatchesGrid.innerHTML = "";
+
+        const competition = normalizeCompetitionFromApi(result.competition);
+        const title = competition ? getLocalizedText(competition.title, state.lang) : "";
+
+        if (refs.competitionMatchesTitle) {
+            refs.competitionMatchesTitle.textContent = title
+                ? `${t("competitions.matches.heading")}: ${title}`
+                : t("competitions.matches.heading");
+        }
+
+        if (refs.competitionMatchesStatus) {
+            refs.competitionMatchesStatus.textContent = t("competitions.matches.summary")
+                .replace("{teams}", String(Array.isArray(result.teams) ? result.teams.length : 0))
+                .replace("{matches}", String(result.matches.length));
+        }
+
+        result.matches.forEach((match) => {
+            const card = document.createElement("article");
+            card.className = "competition-match-card";
+
+            const roundLabel = document.createElement("span");
+            roundLabel.className = "competition-match-round-label";
+            roundLabel.textContent = `${t("competitions.matches.round")} ${match.round || 1}`;
+
+            const teams = document.createElement("div");
+            teams.className = "competition-match-teams";
+
+            const home = document.createElement("strong");
+            home.textContent = match.homeTeamName || "-";
+
+            const versus = document.createElement("span");
+            versus.className = "competition-match-vs";
+            versus.textContent = "vs";
+
+            const away = document.createElement("strong");
+            away.textContent = match.awayTeamName || "-";
+
+            const scheduleLink = document.createElement("a");
+            scheduleLink.className = "button button-secondary competition-match-schedule";
+            scheduleLink.href = getCalendarUrl(match);
+            scheduleLink.innerHTML = `<i class="fa-solid fa-calendar-days"></i><span>${t("competitions.matches.schedule")}</span>`;
+
+            teams.append(home, versus, away);
+            card.append(roundLabel, teams, scheduleLink);
+            refs.competitionMatchesGrid.appendChild(card);
         });
     }
 
@@ -705,6 +852,79 @@ export function createCompetitionsModule({
         }
     }
 
+    async function startCompetition(competitionId) {
+        if (!canManageCompetitions() || !competitionId) {
+            return;
+        }
+
+        try {
+            const result = await requestStartCompetition(competitionId);
+            generatedMatchResults[String(competitionId)] = result;
+            const updatedCompetition = normalizeCompetitionFromApi(result.competition);
+            if (updatedCompetition) {
+                state.competitions = state.competitions.map((competition) => (
+                    String(competition.id) === String(competitionId)
+                        ? updatedCompetition
+                        : competition
+                ));
+                saveCompetitions(state.competitions);
+            }
+            renderCompetitions();
+            window.alert(t("competitions.matches.generated"));
+        } catch (error) {
+            openCompetitionMatchesModal();
+            if (refs.competitionMatchesGrid) {
+                refs.competitionMatchesGrid.innerHTML = "";
+            }
+            if (refs.competitionMatchesTitle) {
+                refs.competitionMatchesTitle.textContent = t("competitions.matches.heading");
+            }
+            if (refs.competitionMatchesStatus) {
+                refs.competitionMatchesStatus.textContent = error.message || t("competitions.matches.error");
+            } else {
+                window.alert(error.message || t("competitions.matches.error"));
+            }
+        }
+    }
+
+    function showCompetitionInfo(competitionId) {
+        const result = generatedMatchResults[String(competitionId)];
+
+        if (result) {
+            renderCompetitionMatches(result);
+            return true;
+        }
+
+        const competition = getCompetitionById(competitionId);
+        if (!competition || competition.started !== true) {
+            return false;
+        }
+
+        openCompetitionMatchesModal();
+        if (refs.competitionMatchesGrid) {
+            refs.competitionMatchesGrid.innerHTML = "";
+        }
+        if (refs.competitionMatchesTitle) {
+            refs.competitionMatchesTitle.textContent = t("competitions.matches.heading");
+        }
+        if (refs.competitionMatchesStatus) {
+            refs.competitionMatchesStatus.textContent = t("competitions.matches.loading");
+        }
+
+        requestStoredCompetitionMatches(competitionId)
+            .then((storedResult) => {
+                generatedMatchResults[String(competitionId)] = storedResult;
+                renderCompetitionMatches(storedResult);
+            })
+            .catch((error) => {
+                if (refs.competitionMatchesStatus) {
+                    refs.competitionMatchesStatus.textContent = error.message || t("competitions.matches.error");
+                }
+            });
+
+        return true;
+    }
+
     async function updateCompetitionRequest(competitionId, action) {
         if (!canManageCompetitions() || !competitionId) {
             return;
@@ -749,8 +969,11 @@ export function createCompetitionsModule({
         openCompetitionModal,
         openCompetitionRequestModal,
         closeCompetitionModal,
+        closeCompetitionMatchesModal,
         saveCompetition,
         deleteCompetition,
+        startCompetition,
+        showCompetitionInfo,
         acceptCompetitionRequest,
         rejectCompetitionRequest
     };

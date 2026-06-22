@@ -367,6 +367,7 @@ function teams_create(array $data)
         $statement->execute($values);
         $teamId = $pdo->lastInsertId();
         teams_save_members($teamId, $memberIds, $requesterId);
+        teams_save_tournament_registration($tournamentId, $teamId);
         $pdo->commit();
     } catch (PDOException $exception) {
         if ($pdo->inTransaction()) {
@@ -440,6 +441,71 @@ function teams_text_length($value)
     return function_exists("mb_strlen")
         ? mb_strlen($value, "UTF-8")
         : strlen($value);
+}
+
+function teams_save_tournament_registration($tournamentId, $teamId)
+{
+    global $pdo;
+
+    if (!$teamId || $tournamentId === "" || !boules_table_exists($pdo, "tournament_registrations")) {
+        return;
+    }
+
+    $columns = boules_table_columns($pdo, "tournament_registrations");
+    $tournamentColumn = boules_first_existing_column($columns, array("tournament_id", "competition_id", "id_tournament", "id_competition"));
+    $teamColumn = boules_first_existing_column($columns, array("team_id", "id_team"));
+
+    if (!$tournamentColumn || !$teamColumn) {
+        return;
+    }
+
+    $check = $pdo->prepare("SELECT COUNT(*) FROM `tournament_registrations` WHERE `$tournamentColumn` = ? AND `$teamColumn` = ?");
+    $check->execute(array($tournamentId, $teamId));
+
+    if ((int) $check->fetchColumn() > 0) {
+        return;
+    }
+
+    $insertColumns = array("`$tournamentColumn`", "`$teamColumn`");
+    $values = array($tournamentId, $teamId);
+
+    $statusColumn = boules_first_existing_column($columns, array("status", "state"));
+    if ($statusColumn && teams_registration_status_accepts($statusColumn, "accepted")) {
+        $insertColumns[] = "`$statusColumn`";
+        $values[] = "accepted";
+    }
+
+    $registeredAtColumn = boules_first_existing_column($columns, array("registered_at", "created_at", "aangemaakt_op"));
+    if ($registeredAtColumn) {
+        $insertColumns[] = "`$registeredAtColumn`";
+        $values[] = date("Y-m-d H:i:s");
+    }
+
+    $statement = $pdo->prepare(
+        "INSERT INTO `tournament_registrations` (" . implode(", ", $insertColumns) . ") VALUES (" . implode(", ", array_fill(0, count($values), "?")) . ")"
+    );
+    $statement->execute($values);
+}
+
+function teams_registration_status_accepts($statusColumn, $status)
+{
+    global $pdo;
+
+    $statement = $pdo->prepare("SHOW COLUMNS FROM `tournament_registrations` LIKE ?");
+    $statement->execute(array($statusColumn));
+    $column = $statement->fetch();
+
+    if (!$column || !isset($column["Type"])) {
+        return false;
+    }
+
+    $type = (string) $column["Type"];
+
+    if (stripos($type, "enum(") !== 0 && stripos($type, "set(") !== 0) {
+        return true;
+    }
+
+    return strpos($type, "'" . str_replace("'", "\\'", $status) . "'") !== false;
 }
 
 function teams_format_name_for_tournament($name, $tournamentId)

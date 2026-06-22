@@ -6,6 +6,10 @@ body.team-modal-open {
     overflow: hidden;
 }
 
+body.match-modal-open {
+    overflow: hidden;
+}
+
 .competitions-panel {
     padding: 22px;
     border: 1px solid rgba(255, 255, 255, 0.68);

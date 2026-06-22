@@ -62,6 +62,33 @@ function boules_select_alias($column, $alias, $fallback)
     return $column ? "`$column` AS `$alias`" : "$fallback AS `$alias`";
 }
 
+function boules_tournament_has_matches($pdo, $tournamentId)
+{
+    if (!boules_table_exists($pdo, "poules") || !boules_table_exists($pdo, "wedstrijden")) {
+        return false;
+    }
+
+    $pouleColumns = boules_table_columns($pdo, "poules");
+    $pouleId = boules_first_existing_column($pouleColumns, array("poule_id", "id"));
+    $pouleTournamentId = boules_first_existing_column($pouleColumns, array("tournament_id", "competition_id"));
+
+    $matchColumns = boules_table_columns($pdo, "wedstrijden");
+    $matchPouleId = boules_first_existing_column($matchColumns, array("poule_id", "id_poule"));
+
+    if (!$pouleId || !$pouleTournamentId || !$matchPouleId) {
+        return false;
+    }
+
+    $statement = $pdo->prepare(
+        "SELECT COUNT(*) FROM `wedstrijden` w " .
+        "INNER JOIN `poules` p ON p.`$pouleId` = w.`$matchPouleId` " .
+        "WHERE p.`$pouleTournamentId` = ?"
+    );
+    $statement->execute(array($tournamentId));
+
+    return (int) $statement->fetchColumn() > 0;
+}
+
 function boules_user_name_expression($pdo, $photoTable, $ownerColumn)
 {
     if (!$ownerColumn || !boules_table_exists($pdo, "users")) {
@@ -128,7 +155,13 @@ function boules_fetch_competitions($pdo, $competitionHref)
 
     $sql .= " ORDER BY `$startDate` ASC";
 
-    return $pdo->query($sql)->fetchAll();
+    $competitions = $pdo->query($sql)->fetchAll();
+
+    foreach ($competitions as $index => $competition) {
+        $competitions[$index]["started"] = $id ? boules_tournament_has_matches($pdo, $competition["id"]) : false;
+    }
+
+    return $competitions;
 }
 
 function boules_fetch_leaderboard($pdo)

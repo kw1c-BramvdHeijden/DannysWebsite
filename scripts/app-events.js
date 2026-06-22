@@ -199,6 +199,12 @@ export function bindEvents({
         });
     });
 
+    refs.competitionMatchesCloseButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            competitions.closeCompetitionMatchesModal();
+        });
+    });
+
     refs.teamOpenButtons.forEach((button) => {
         button.addEventListener("click", () => {
             teams.openTeamModal();
@@ -265,6 +271,18 @@ export function bindEvents({
         const target = event.target;
 
         if (!(target instanceof Element)) {
+            return;
+        }
+
+        const startButton = target.closest("[data-competition-start]");
+        if (startButton) {
+            competitions.startCompetition(startButton.getAttribute("data-competition-start"));
+            return;
+        }
+
+        const moreLink = target.closest("[data-competition-more]");
+        if (moreLink && competitions.showCompetitionInfo(moreLink.getAttribute("data-competition-more"))) {
+            event.preventDefault();
             return;
         }
 
@@ -367,6 +385,11 @@ export function bindEvents({
 
         if (refs.competitionModal && !refs.competitionModal.hidden) {
             competitions.closeCompetitionModal();
+            return;
+        }
+
+        if (refs.competitionMatchesModal && !refs.competitionMatchesModal.hidden) {
+            competitions.closeCompetitionMatchesModal();
             return;
         }
 

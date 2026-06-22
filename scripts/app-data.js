@@ -98,6 +98,7 @@ function normalizeCompetition(competition) {
         startDate,
         tone: normalizeCompetitionTone(competition.tone),
         status: typeof competition.status === "string" ? competition.status.trim() : "",
+        started: competition.started === true,
         href: typeof competition.href === "string" && competition.href.trim() ? competition.href.trim() : "#competities"
     };
 }
