@@ -3,6 +3,7 @@ function render_site_header($activePage = "home", $isRoot = true)
 {
     $indexHome = $isRoot ? "#home" : "../index.php#home";
     $competitions = $isRoot ? "pages/competities.php" : "competities.php";
+    $scoreboard = $isRoot ? "pages/scoreboard.php" : "scoreboard.php";
     $rules = $isRoot ? "pages/spelregels.php" : "spelregels.php";
     $photos = $isRoot ? "pages/fotos.php" : "fotos.php";
 
@@ -14,6 +15,7 @@ function render_site_header($activePage = "home", $isRoot = true)
     $authForgotLinks = [
         "home" => "#home",
         "competitions" => "#competities",
+        "scoreboard" => "#scoreboard",
         "photos" => "#photos",
         "rules" => "#regels",
     ];
@@ -44,6 +46,10 @@ function render_site_header($activePage = "home", $isRoot = true)
                 <a href="<?= htmlspecialchars($competitions) ?>"<?= $current("competitions") ?>>
                     <i class="fa-solid fa-trophy" aria-hidden="true"></i>
                     <span data-i18n="nav.competitions">Competities</span>
+                </a>
+                <a href="<?= htmlspecialchars($scoreboard) ?>"<?= $current("scoreboard") ?>>
+                    <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
+                    <span data-i18n="nav.scoreboard">Scoreboard</span>
                 </a>
                 <a href="<?= htmlspecialchars($rules) ?>"<?= $current("rules") ?>>
                     <i class="fa-solid fa-list-check" aria-hidden="true"></i>
