@@ -317,6 +317,33 @@ export function bindEvents({
         }
     });
 
+    refs.competitionMatchesGrid?.addEventListener("click", (event) => {
+        const target = event.target;
+
+        if (!(target instanceof Element)) {
+            return;
+        }
+
+        const approveButton = target.closest("[data-match-approve]");
+        if (approveButton) {
+            competitions.verifyCompetitionMatch(
+                approveButton.getAttribute("data-competition-id"),
+                approveButton.getAttribute("data-match-approve"),
+                true
+            );
+            return;
+        }
+
+        const rejectButton = target.closest("[data-match-reject]");
+        if (rejectButton) {
+            competitions.verifyCompetitionMatch(
+                rejectButton.getAttribute("data-competition-id"),
+                rejectButton.getAttribute("data-match-reject"),
+                false
+            );
+        }
+    });
+
     refs.photoGrid?.addEventListener("click", (event) => {
         const target = event.target;
 

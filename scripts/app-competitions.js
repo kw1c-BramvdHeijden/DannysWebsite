@@ -218,6 +218,29 @@ export function createCompetitionsModule({
         return result;
     }
 
+    async function requestMatchVerification(competitionId, matchId, verified) {
+        const response = await fetch(getCompetitionApiUrl(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                action: "verifyMatch",
+                competitionId,
+                matchId,
+                verified: verified ? 1 : 0,
+                userId: getCurrentUserId()
+            })
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !Array.isArray(result.matches)) {
+            throw new Error(result.error || t("competitions.matches.error"));
+        }
+
+        return result;
+    }
+
     function normalizeCompetitionFromApi(competition) {
         if (!competition || typeof competition !== "object") {
             return null;
@@ -491,6 +514,30 @@ export function createCompetitionsModule({
         return `${basePath}?${params.toString()}`;
     }
 
+    function getMatchDateValue(match) {
+        const value = match && typeof match.date === "string" ? match.date.trim() : "";
+
+        if (!value || value.indexOf("0000-00-00") === 0) {
+            return "";
+        }
+
+        return value.slice(0, 10);
+    }
+
+    function formatMatchDate(match) {
+        const dateValue = getMatchDateValue(match);
+        if (!dateValue) {
+            return "";
+        }
+
+        const date = new Date(`${dateValue}T12:00:00`);
+        return new Intl.DateTimeFormat(localeMap[state.lang], {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        }).format(date);
+    }
+
     function openCompetitionMatchesModal() {
         if (!refs.competitionMatchesModal) {
             return;
@@ -563,13 +610,46 @@ export function createCompetitionsModule({
             const away = document.createElement("strong");
             away.textContent = match.awayTeamName || "-";
 
-            const scheduleLink = document.createElement("a");
-            scheduleLink.className = "button button-secondary competition-match-schedule";
-            scheduleLink.href = getCalendarUrl(match);
-            scheduleLink.innerHTML = `<i class="fa-solid fa-calendar-days"></i><span>${t("competitions.matches.schedule")}</span>`;
+            const matchDate = formatMatchDate(match);
+            const matchActions = document.createElement("div");
+            matchActions.className = "competition-match-actions";
+
+            if (matchDate) {
+                const dateBadge = document.createElement("span");
+                const isVerified = Number(match.verified) === 1;
+                dateBadge.className = `competition-match-date${isVerified ? " is-verified" : ""}`;
+                dateBadge.textContent = isVerified
+                    ? `${matchDate} - ${t("competitions.matches.approved")}`
+                    : `${matchDate} - ${t("competitions.matches.pendingApproval")}`;
+                matchActions.appendChild(dateBadge);
+
+                if (canManageCompetitions() && !isVerified) {
+                    const approveButton = document.createElement("button");
+                    approveButton.type = "button";
+                    approveButton.className = "competition-match-verify-button";
+                    approveButton.dataset.matchApprove = String(match.id);
+                    approveButton.dataset.competitionId = competition ? String(competition.id) : "";
+                    approveButton.innerHTML = `<i class="fa-solid fa-check"></i><span>${t("competitions.matches.approve")}</span>`;
+
+                    const rejectButton = document.createElement("button");
+                    rejectButton.type = "button";
+                    rejectButton.className = "competition-match-verify-button is-reject";
+                    rejectButton.dataset.matchReject = String(match.id);
+                    rejectButton.dataset.competitionId = competition ? String(competition.id) : "";
+                    rejectButton.innerHTML = `<i class="fa-solid fa-xmark"></i><span>${t("competitions.matches.rejectDate")}</span>`;
+
+                    matchActions.append(approveButton, rejectButton);
+                }
+            } else {
+                const scheduleLink = document.createElement("a");
+                scheduleLink.className = "button button-secondary competition-match-schedule";
+                scheduleLink.href = getCalendarUrl(match);
+                scheduleLink.innerHTML = `<i class="fa-solid fa-calendar-days"></i><span>${t("competitions.matches.schedule")}</span>`;
+                matchActions.appendChild(scheduleLink);
+            }
 
             teams.append(home, versus, away);
-            card.append(roundLabel, teams, scheduleLink);
+            card.append(roundLabel, teams, matchActions);
             refs.competitionMatchesGrid.appendChild(card);
         });
     }
@@ -925,6 +1005,22 @@ export function createCompetitionsModule({
         return true;
     }
 
+    async function verifyCompetitionMatch(competitionId, matchId, verified) {
+        if (!canManageCompetitions() || !competitionId || !matchId) {
+            return;
+        }
+
+        try {
+            const result = await requestMatchVerification(competitionId, matchId, verified);
+            generatedMatchResults[String(competitionId)] = result;
+            renderCompetitionMatches(result);
+        } catch (error) {
+            if (refs.competitionMatchesStatus) {
+                refs.competitionMatchesStatus.textContent = error.message || t("competitions.matches.error");
+            }
+        }
+    }
+
     async function updateCompetitionRequest(competitionId, action) {
         if (!canManageCompetitions() || !competitionId) {
             return;
@@ -974,6 +1070,7 @@ export function createCompetitionsModule({
         deleteCompetition,
         startCompetition,
         showCompetitionInfo,
+        verifyCompetitionMatch,
         acceptCompetitionRequest,
         rejectCompetitionRequest
     };

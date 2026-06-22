@@ -485,15 +485,19 @@ function competitions_store_matches($competitionId, array $teams, array $matches
     $pdo->beginTransaction();
 
     try {
+        $matchIds = array();
+
         foreach ($matches as $match) {
             $statement = $pdo->prepare("INSERT INTO `wedstrijden` (`poule_id`, `datum`, `verified`) VALUES (?, NULL, 0)");
             $statement->execute(array($pouleId));
             $matchId = $pdo->lastInsertId();
+            $matchIds[] = $matchId;
 
             competitions_insert_team_match($matchId, $match["homeTeamId"]);
             competitions_insert_team_match($matchId, $match["awayTeamId"]);
         }
 
+        competitions_reset_new_matches($matchIds);
         $pdo->commit();
     } catch (PDOException $exception) {
         if ($pdo->inTransaction()) {
@@ -504,6 +508,19 @@ function competitions_store_matches($competitionId, array $teams, array $matches
     }
 
     return competitions_stored_matches($pouleId);
+}
+
+function competitions_reset_new_matches(array $matchIds)
+{
+    global $pdo;
+
+    if (count($matchIds) === 0) {
+        return;
+    }
+
+    $placeholders = implode(", ", array_fill(0, count($matchIds), "?"));
+    $statement = $pdo->prepare("UPDATE `wedstrijden` SET `datum` = NULL, `verified` = 0 WHERE `wedstrijd_id` IN ($placeholders)");
+    $statement->execute($matchIds);
 }
 
 function competitions_ensure_match_schema()
@@ -582,7 +599,7 @@ function competitions_stored_matches($pouleId)
     global $pdo;
 
     $statement = $pdo->prepare(
-        "SELECT w.`wedstrijd_id`, w.`datum`, tw1.`team_id` AS `home_team_id`, t1.`team_name` AS `home_team_name`, " .
+        "SELECT w.`wedstrijd_id`, w.`datum`, w.`verified`, tw1.`team_id` AS `home_team_id`, t1.`team_name` AS `home_team_name`, " .
         "tw2.`team_id` AS `away_team_id`, t2.`team_name` AS `away_team_name` " .
         "FROM `wedstrijden` w " .
         "INNER JOIN `teamwedstrijd` tw1 ON tw1.`wedstrijd_id` = w.`wedstrijd_id` " .
@@ -601,6 +618,7 @@ function competitions_stored_matches($pouleId)
             "id" => (string) $row["wedstrijd_id"],
             "round" => $round,
             "date" => isset($row["datum"]) ? (string) $row["datum"] : "",
+            "verified" => isset($row["verified"]) ? (int) $row["verified"] : 0,
             "homeTeamId" => (string) $row["home_team_id"],
             "homeTeamName" => preg_replace('/\s*\([^()]+-\d{4}\)\s*$/', '', (string) $row["home_team_name"]),
             "awayTeamId" => (string) $row["away_team_id"],
@@ -663,6 +681,70 @@ function competitions_matches_tournament(array $data)
         "teams" => competitions_teams_from_matches($matches),
         "matches" => $matches,
     ));
+}
+
+function competitions_update_match_verification(array $data)
+{
+    global $pdo;
+
+    if (!competitions_is_admin($data)) {
+        competitions_respond(403, array("error" => "Alleen admins mogen wedstrijddatums controleren."));
+    }
+
+    $competitionId = isset($data["competitionId"]) ? trim((string) $data["competitionId"]) : "";
+    $matchId = isset($data["matchId"]) ? trim((string) $data["matchId"]) : "";
+    $verified = isset($data["verified"]) && (int) $data["verified"] === 1 ? 1 : 0;
+
+    if ($competitionId === "" || !is_numeric($competitionId) || $matchId === "" || !is_numeric($matchId)) {
+        competitions_respond(422, array("error" => "Competitie-id of wedstrijd-id ontbreekt."));
+    }
+
+    $competition = competitions_fetch_tournament($competitionId);
+    if (!$competition) {
+        competitions_respond(404, array("error" => "Competitie niet gevonden."));
+    }
+
+    if (!competitions_match_belongs_to_tournament($matchId, $competitionId)) {
+        competitions_respond(404, array("error" => "Wedstrijd niet gevonden voor deze competitie."));
+    }
+
+    if ($verified === 1) {
+        $dateStatement = $pdo->prepare("SELECT `datum` FROM `wedstrijden` WHERE `wedstrijd_id` = ? LIMIT 1");
+        $dateStatement->execute(array($matchId));
+        $date = trim((string) $dateStatement->fetchColumn());
+
+        if ($date === "" || strpos($date, "0000-00-00") === 0) {
+            competitions_respond(422, array("error" => "Plan eerst een datum in voordat je goedkeurt."));
+        }
+
+        $statement = $pdo->prepare("UPDATE `wedstrijden` SET `verified` = 1 WHERE `wedstrijd_id` = ?");
+        $statement->execute(array($matchId));
+    } else {
+        $statement = $pdo->prepare("UPDATE `wedstrijden` SET `verified` = 0, `datum` = NULL WHERE `wedstrijd_id` = ?");
+        $statement->execute(array($matchId));
+    }
+
+    $matches = competitions_matches_for_tournament($competitionId);
+
+    competitions_respond(200, array(
+        "competition" => competitions_public_record($competition),
+        "teams" => competitions_teams_from_matches($matches),
+        "matches" => $matches,
+    ));
+}
+
+function competitions_match_belongs_to_tournament($matchId, $competitionId)
+{
+    global $pdo;
+
+    $statement = $pdo->prepare(
+        "SELECT COUNT(*) FROM `wedstrijden` w " .
+        "INNER JOIN `poules` p ON p.`poule_id` = w.`poule_id` " .
+        "WHERE w.`wedstrijd_id` = ? AND p.`tournament_id` = ?"
+    );
+    $statement->execute(array($matchId, $competitionId));
+
+    return (int) $statement->fetchColumn() > 0;
 }
 
 function competitions_tournament_team_code(array $competition)
@@ -899,6 +981,10 @@ if ($action === "start") {
 
 if ($action === "matches") {
     competitions_matches_tournament($data);
+}
+
+if ($action === "verifyMatch") {
+    competitions_update_match_verification($data);
 }
 
 competitions_respond(400, array("error" => "Onbekende competitie-actie."));
