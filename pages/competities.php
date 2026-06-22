@@ -3,6 +3,7 @@ require_once __DIR__ . "/../includes/db.php";
 require_once __DIR__ . "/../includes/bootstrap-data.php";
 require_once __DIR__ . "/../includes/header.php";
 
+// Startdata voor competities, teams en sessie.
 $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
 ?>
 <!DOCTYPE html>
@@ -25,6 +26,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
 <main class="page-shell">
     <?php render_site_header("competitions", false); ?>
 
+    <!-- Introblok van de competitiepagina. -->
     <section class="hero-section" id="competities">
         <div class="hero-copy">
             <h1>
@@ -43,6 +45,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
         </div>
     </section>
 
+    <!-- Knop om teams te beheren of te bekijken. -->
     <section class="teams-panel">
         <div class="challenge-banner">
             <div class="challenge-copy">
@@ -61,6 +64,8 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
             </div>
         </div>
     </section>
+
+    <!-- Overzicht met alle geaccepteerde competities. -->
     <section class="competitions-panel">
         <div class="panel-heading">
             <h2 data-i18n="competitions.heading">AANKOMENDE COMPETITIES</h2>
@@ -92,6 +97,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
         </div>
     </section>
 
+    <!-- Admin-overzicht voor pending competitieaanvragen. -->
     <section class="competitions-panel competition-requests-panel" data-competition-requests-panel hidden>
         <div class="panel-heading">
             <h2 data-i18n="competitions.requests.heading">AANGEVRAAGDE COMPETITIES</h2>
@@ -115,6 +121,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
     </section>
 </main>
 
+<!-- Inlog- en registratievenster. -->
 <div class="auth-modal" data-auth-modal hidden>
     <div class="auth-modal-backdrop" data-auth-close></div>
     <div class="auth-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
@@ -205,6 +212,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
     </div>
 </div>
 
+<!-- Formulier voor competitie aanvragen, toevoegen en bewerken. -->
 <div class="competition-modal" data-competition-modal hidden>
     <div class="competition-modal-backdrop" data-competition-cancel></div>
     <div class="competition-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="competition-modal-title">
@@ -233,13 +241,13 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
             </label>
 
             <label class="upload-label">
-                <span data-i18n="competitions.form.style">Accentkleur</span>
-                <select class="competition-select" data-competition-tone>
-                    <option value="green" data-i18n="competitions.form.styleGreen">Groen</option>
-                    <option value="yellow" data-i18n="competitions.form.styleYellow">Geel</option>
-                    <option value="red" data-i18n="competitions.form.styleRed">Rood</option>
-                    <option value="olive" data-i18n="competitions.form.styleOlive">Olijf</option>
-                </select>
+                <span data-i18n="competitions.form.endDate">Einddatum</span>
+                <input type="date" data-competition-end-date>
+            </label>
+
+            <label class="upload-label">
+                <span data-i18n="competitions.form.style">Kleur</span>
+                <input type="color" class="competition-color-picker" data-competition-tone value="#7b9151">
             </label>
 
             <div class="upload-actions">
@@ -254,6 +262,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
     </div>
 </div>
 
+<!-- Formulier en overzicht voor teams. -->
 <div class="team-modal" data-team-modal hidden>
     <div class="team-modal-backdrop" data-team-close></div>
     <div class="team-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="team-modal-title">
@@ -279,6 +288,10 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
                         <i class="fa-solid fa-chevron-down"></i>
                     </button>
                     <div class="team-user-menu" data-team-user-menu hidden>
+                        <label class="team-user-search">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                            <input type="search" data-team-user-search data-i18n-placeholder="teams.form.membersSearch" placeholder="Zoek op naam">
+                        </label>
                         <p class="team-user-menu-status" data-team-user-status data-i18n="teams.users.loading">Gebruikers laden...</p>
                         <div class="team-user-options" data-team-user-options></div>
                     </div>
@@ -308,6 +321,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
 
 
 <script>
+    // Bootstrap-data komt uit PHP en wordt door de frontend gebruikt.
     window.__BOULES_BOOTSTRAP__ = <?= json_encode($bootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 </script>
 <script type="module" src="../scripts/index.js"></script>

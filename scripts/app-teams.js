@@ -1,12 +1,20 @@
-export function createTeamsModule({ refs, state, t }) {
+export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} }) {
     let teamModalTimer = 0;
     let teamsLoaded = false;
     let teamsLoading = false;
     let usersLoaded = false;
     let usersLoading = false;
+    let currentUserTeamsLoaded = false;
+    let currentUserTeamsLoading = false;
+    let currentUserTeamsError = "";
+    let currentUserTeamsUserId = "";
     let teams = [];
+    let currentUserTeams = [];
     let users = [];
+    let userSearchTerm = "";
+    let selectedUserIds = [];
 
+    // Bepaal API-pad voor teams.
     function getTeamApiUrl() {
         const script = document.querySelector("script[src$='scripts/index.js']");
         return script ? new URL("../api/teams.php", script.src).toString() : "api/teams.php";
@@ -18,6 +26,7 @@ export function createTeamsModule({ refs, state, t }) {
             : "";
     }
 
+    // Verstuur request naar teams-API.
     async function requestTeams(payload) {
         const response = await fetch(getTeamApiUrl(), {
             method: "POST",
@@ -35,6 +44,7 @@ export function createTeamsModule({ refs, state, t }) {
         return result;
     }
 
+    // Zet teamdata om naar frontend-formaat.
     function normalizeTeam(team) {
         if (!team || typeof team !== "object") {
             return null;
@@ -59,6 +69,7 @@ export function createTeamsModule({ refs, state, t }) {
         };
     }
 
+    // Zet gebruiker om naar keuzelijst-formaat.
     function normalizeUser(user) {
         if (!user || typeof user !== "object") {
             return null;
@@ -72,6 +83,24 @@ export function createTeamsModule({ refs, state, t }) {
         }
 
         return { id, name };
+    }
+
+    // Teams waar de ingelogde gebruiker lid van is.
+    function getCurrentUserTeams() {
+        if (!state.loggedIn || currentUserTeamsUserId !== getCurrentUserId()) {
+            return [];
+        }
+
+        return currentUserTeams.slice();
+    }
+
+    // Laadstatus van mijn teams.
+    function getCurrentUserTeamsStatus() {
+        return {
+            loaded: currentUserTeamsLoaded,
+            loading: currentUserTeamsLoading,
+            error: currentUserTeamsError
+        };
     }
 
     function setTeamFeedback(message = "", isSuccess = false) {
@@ -96,13 +125,7 @@ export function createTeamsModule({ refs, state, t }) {
     }
 
     function getSelectedUserIds() {
-        if (!refs.teamUserOptions) {
-            return [];
-        }
-
-        return Array.from(refs.teamUserOptions.querySelectorAll("input[type='checkbox']:checked"))
-            .map((input) => input.value)
-            .filter(Boolean);
+        return selectedUserIds.slice();
     }
 
     function syncUserSummary() {
@@ -132,6 +155,12 @@ export function createTeamsModule({ refs, state, t }) {
 
         refs.teamUserMenu.hidden = !isOpen;
         refs.teamUserToggle.setAttribute("aria-expanded", String(isOpen));
+
+        if (isOpen && refs.teamUserSearch) {
+            window.setTimeout(() => {
+                refs.teamUserSearch.focus();
+            }, 0);
+        }
     }
 
     function createTeamCard(team) {
@@ -174,18 +203,39 @@ export function createTeamsModule({ refs, state, t }) {
 
         setUserStatus("");
 
-        users.forEach((user) => {
+        const visibleUsers = userSearchTerm
+            ? users.filter((user) => user.name.toLowerCase().indexOf(userSearchTerm) !== -1)
+            : users;
+
+        if (visibleUsers.length === 0) {
+            setUserStatus(t("teams.users.noResults"));
+            syncUserSummary();
+            return;
+        }
+
+        visibleUsers.forEach((user) => {
             const label = document.createElement("label");
             label.className = "team-user-option";
 
             const checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.value = user.id;
+            checkbox.checked = selectedUserIds.indexOf(user.id) !== -1;
 
             const text = document.createElement("span");
             text.textContent = user.name;
 
-            checkbox.addEventListener("change", syncUserSummary);
+            checkbox.addEventListener("change", () => {
+                if (checkbox.checked && selectedUserIds.indexOf(user.id) === -1) {
+                    selectedUserIds.push(user.id);
+                }
+
+                if (!checkbox.checked) {
+                    selectedUserIds = selectedUserIds.filter((selectedId) => selectedId !== user.id);
+                }
+
+                syncUserSummary();
+            });
             label.append(checkbox, text);
             refs.teamUserOptions.appendChild(label);
         });
@@ -243,6 +293,7 @@ export function createTeamsModule({ refs, state, t }) {
         });
     }
 
+    // Laad alle teams voor het teamoverzicht.
     async function loadTeams(force = false) {
         if (teamsLoading || (teamsLoaded && !force)) {
             renderTeams();
@@ -258,6 +309,7 @@ export function createTeamsModule({ refs, state, t }) {
                 ? result.teams.map(normalizeTeam).filter(Boolean)
                 : [];
             teamsLoaded = true;
+            onTeamsChanged();
         } catch (error) {
             setTeamStatus(error.message || t("teams.error"));
         } finally {
@@ -266,6 +318,55 @@ export function createTeamsModule({ refs, state, t }) {
         }
     }
 
+    // Laad alleen teams van de huidige gebruiker.
+    async function loadCurrentUserTeams(force = false) {
+        const currentUserId = getCurrentUserId();
+        const userChanged = currentUserTeamsUserId !== currentUserId;
+
+        if (!state.loggedIn || !currentUserId) {
+            currentUserTeams = [];
+            currentUserTeamsLoaded = false;
+            currentUserTeamsError = "";
+            currentUserTeamsUserId = "";
+            onTeamsChanged();
+            return [];
+        }
+
+        if (currentUserTeamsLoading) {
+            return userChanged ? [] : currentUserTeams.slice();
+        }
+
+        if (currentUserTeamsLoaded && !force && !userChanged) {
+            return currentUserTeams.slice();
+        }
+
+        currentUserTeamsLoading = true;
+        currentUserTeamsError = "";
+        onTeamsChanged();
+
+        try {
+            const result = await requestTeams({ action: "listMine" });
+            currentUserTeams = Array.isArray(result.teams)
+                ? result.teams.map(normalizeTeam).filter(Boolean)
+                : [];
+            currentUserTeamsLoaded = true;
+            currentUserTeamsUserId = currentUserId;
+            onTeamsChanged();
+        } catch (error) {
+            currentUserTeams = [];
+            currentUserTeamsLoaded = false;
+            currentUserTeamsError = error.message || t("teams.error");
+            currentUserTeamsUserId = "";
+            onTeamsChanged();
+        } finally {
+            currentUserTeamsLoading = false;
+            onTeamsChanged();
+        }
+
+        return currentUserTeams.slice();
+    }
+
+    // Open teamvenster.
     function openTeamModal() {
         if (!refs.teamModal || !state.loggedIn) {
             return;
@@ -276,7 +377,8 @@ export function createTeamsModule({ refs, state, t }) {
         refs.teamModal.hidden = false;
         refs.body.classList.add("team-modal-open");
         loadTeams();
-        loadUsers(true);
+        loadCurrentUserTeams();
+        loadUsers();
 
         requestAnimationFrame(() => {
             refs.teamModal.classList.add("is-open");
@@ -290,11 +392,26 @@ export function createTeamsModule({ refs, state, t }) {
     }
 
     function preloadUsers() {
-        if (!refs.teamUserOptions || !state.loggedIn) {
+        if (!refs.teamUserOptions) {
             return;
         }
 
-        loadUsers(true);
+        loadUsers();
+    }
+
+    // Laad teamdata alvast op de competitiepagina.
+    function preloadTeamData() {
+        if (!refs.teamList && !refs.teamUserOptions) {
+            return;
+        }
+
+        loadTeams();
+        loadCurrentUserTeams();
+        loadUsers();
+    }
+
+    function preloadCurrentUserTeams(force = false) {
+        return loadCurrentUserTeams(force);
     }
 
     function closeTeamModal() {
@@ -311,6 +428,11 @@ export function createTeamsModule({ refs, state, t }) {
             if (refs.teamForm) {
                 refs.teamForm.reset();
             }
+            userSearchTerm = "";
+            selectedUserIds = [];
+            if (refs.teamUserSearch) {
+                refs.teamUserSearch.value = "";
+            }
             if (refs.teamUserOptions) {
                 refs.teamUserOptions.querySelectorAll("input[type='checkbox']").forEach((input) => {
                     input.checked = false;
@@ -322,6 +444,7 @@ export function createTeamsModule({ refs, state, t }) {
         }, 220);
     }
 
+    // Maak een nieuw team aan.
     async function submitTeam(event) {
         event.preventDefault();
 
@@ -360,10 +483,20 @@ export function createTeamsModule({ refs, state, t }) {
             const createdTeam = normalizeTeam(result.team);
             if (createdTeam) {
                 teams.unshift(createdTeam);
+                currentUserTeams.unshift(createdTeam);
+                currentUserTeamsLoaded = true;
+                currentUserTeamsError = "";
+                currentUserTeamsUserId = getCurrentUserId();
                 teamsLoaded = true;
+                onTeamsChanged();
             }
             if (refs.teamForm) {
                 refs.teamForm.reset();
+            }
+            userSearchTerm = "";
+            selectedUserIds = [];
+            if (refs.teamUserSearch) {
+                refs.teamUserSearch.value = "";
             }
             if (refs.teamUserOptions) {
                 refs.teamUserOptions.querySelectorAll("input[type='checkbox']").forEach((input) => {
@@ -401,13 +534,25 @@ export function createTeamsModule({ refs, state, t }) {
         setUserMenuOpen(false);
     }
 
+    function filterUsers(value) {
+        userSearchTerm = typeof value === "string" ? value.trim().toLowerCase() : "";
+        renderUsers();
+    }
+
     return {
         openTeamModal,
         preloadUsers,
+        preloadTeamData,
+        preloadCurrentUserTeams,
+        loadTeams,
+        loadCurrentUserTeams,
+        getCurrentUserTeams,
+        getCurrentUserTeamsStatus,
         closeTeamModal,
         submitTeam,
         toggleUserMenu,
         closeUserMenu,
+        filterUsers,
         syncTeamButtons
     };
 }

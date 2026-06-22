@@ -16,7 +16,8 @@ export function createUiModule({
     closeTeamModal,
     syncTeamButtons,
     closeLeaderboardModal,
-    canManageCompetitions
+    canManageCompetitions,
+    onAuthStateChanged = () => {}
 }) {
     let languageMenuTimer = 0;
     let accountMenuTimer = 0;
@@ -515,6 +516,7 @@ export function createUiModule({
         renderLeaderboard();
         renderCompetitions();
         renderPhotos();
+        onAuthStateChanged(state.loggedIn);
     }
 
     function setAuthenticatedUser(user, role = "player") {

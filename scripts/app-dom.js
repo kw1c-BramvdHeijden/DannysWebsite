@@ -1,4 +1,5 @@
 export const refs = {
+    // Algemene pagina-elementen.
     body: document.body,
     html: document.documentElement,
     siteHeader: document.querySelector(".site-header"),
@@ -39,6 +40,8 @@ export const refs = {
     authSignupPasswordConfirmInput: document.querySelector("[data-auth-signup-password-confirm]"),
     authFeedbackElements: Array.from(document.querySelectorAll("[data-auth-feedback]")),
     authPasswordToggles: Array.from(document.querySelectorAll("[data-auth-password-toggle]")),
+
+    // Foto-elementen.
     uploadTriggers: Array.from(document.querySelectorAll("[data-upload-trigger]")),
     photoInput: document.querySelector("[data-photo-input]"),
     photoHub: document.querySelector("[data-photo-public], .photo-hub"),
@@ -62,6 +65,8 @@ export const refs = {
     uploadTitleInput: document.querySelector("[data-upload-title]"),
     uploadDescriptionInput: document.querySelector("[data-upload-description]"),
     uploadCancelButtons: Array.from(document.querySelectorAll("[data-upload-cancel]")),
+
+    // Competitie-elementen.
     competitionGrid: document.querySelector("[data-competition-grid]"),
     competitionRequestsPanel: document.querySelector("[data-competition-requests-panel]"),
     competitionRequestsGrid: document.querySelector("[data-competition-requests-grid]"),
@@ -78,8 +83,11 @@ export const refs = {
     competitionNameInput: document.querySelector("[data-competition-name]"),
     competitionTypeInput: document.querySelector("[data-competition-type]"),
     competitionDateInput: document.querySelector("[data-competition-date]"),
+    competitionEndDateInput: document.querySelector("[data-competition-end-date]"),
     competitionToneInput: document.querySelector("[data-competition-tone]"),
     competitionCancelButtons: Array.from(document.querySelectorAll("[data-competition-cancel]")),
+
+    // Team-elementen.
     teamOpenButtons: Array.from(document.querySelectorAll("[data-team-open]")),
     teamModal: document.querySelector("[data-team-modal]"),
     teamForm: document.querySelector("[data-team-form]"),
@@ -87,12 +95,15 @@ export const refs = {
     teamNameInput: document.querySelector("[data-team-name]"),
     teamUserToggle: document.querySelector("[data-team-user-toggle]"),
     teamUserMenu: document.querySelector("[data-team-user-menu]"),
+    teamUserSearch: document.querySelector("[data-team-user-search]"),
     teamUserSummary: document.querySelector("[data-team-user-summary]"),
     teamUserStatus: document.querySelector("[data-team-user-status]"),
     teamUserOptions: document.querySelector("[data-team-user-options]"),
     teamFeedback: document.querySelector("[data-team-feedback]"),
     teamStatus: document.querySelector("[data-team-status]"),
     teamList: document.querySelector("[data-team-list]"),
+
+    // Leaderboard-elementen.
     leaderboardPreviewList: document.querySelector("[data-leaderboard-list]"),
     leaderboardOpenButton: document.querySelector("[data-leaderboard-open]"),
     leaderboardModal: document.querySelector("[data-leaderboard-modal]"),
