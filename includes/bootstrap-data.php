@@ -179,27 +179,51 @@ function boules_public_image_path($image, $assetPrefix)
     return $assetPrefix . $image;
 }
 
-function boules_registered_team_ids($pdo, $tournamentId)
+function boules_registered_teams($pdo, $tournamentId)
 {
-    if ($tournamentId === "" || !boules_table_exists($pdo, "tournament_registrations")) {
+    if ($tournamentId === "" || !boules_table_exists($pdo, "tournament_registrations") || !boules_table_exists($pdo, "teams")) {
         return array();
     }
 
-    $columns = boules_table_columns($pdo, "tournament_registrations");
-    $tournamentColumn = boules_first_existing_column($columns, array("tournament_id", "competition_id", "id_tournament", "id_competition"));
-    $teamColumn = boules_first_existing_column($columns, array("team_id", "id_team"));
+    $registrationColumns = boules_table_columns($pdo, "tournament_registrations");
+    $teamColumns = boules_table_columns($pdo, "teams");
+    $tournamentColumn = boules_first_existing_column($registrationColumns, array("tournament_id", "competition_id", "id_tournament", "id_competition"));
+    $registrationTeamColumn = boules_first_existing_column($registrationColumns, array("team_id", "id_team"));
+    $teamIdColumn = boules_first_existing_column($teamColumns, array("team_id", "id"));
+    $teamNameColumn = boules_first_existing_column($teamColumns, array("team_name", "name", "team", "naam"));
 
-    if (!$tournamentColumn || !$teamColumn) {
+    if (!$tournamentColumn || !$registrationTeamColumn || !$teamIdColumn || !$teamNameColumn) {
         return array();
     }
 
-    $statement = $pdo->prepare("SELECT `$teamColumn` AS `team_id` FROM `tournament_registrations` WHERE `$tournamentColumn` = ?");
+    $statement = $pdo->prepare(
+        "SELECT tr.`$registrationTeamColumn` AS `id`, t.`$teamNameColumn` AS `name` " .
+        "FROM `tournament_registrations` tr " .
+        "INNER JOIN `teams` t ON t.`$teamIdColumn` = tr.`$registrationTeamColumn` " .
+        "WHERE tr.`$tournamentColumn` = ? ORDER BY t.`$teamNameColumn` ASC"
+    );
     $statement->execute(array($tournamentId));
 
-    $teamIds = array();
+    $teams = array();
     foreach ($statement->fetchAll() as $row) {
-        if (isset($row["team_id"])) {
-            $teamIds[] = (string) $row["team_id"];
+        if (isset($row["id"])) {
+            $teams[] = array(
+                "id" => (string) $row["id"],
+                "name" => isset($row["name"]) && trim((string) $row["name"]) !== "" ? (string) $row["name"] : "Team " . (string) $row["id"],
+            );
+        }
+    }
+
+    return $teams;
+}
+
+function boules_registered_team_ids($pdo, $tournamentId)
+{
+    $teamIds = array();
+
+    foreach (boules_registered_teams($pdo, $tournamentId) as $team) {
+        if (isset($team["id"])) {
+            $teamIds[] = (string) $team["id"];
         }
     }
 
@@ -246,7 +270,11 @@ function boules_fetch_competitions($pdo, $competitionHref)
 
     foreach ($competitions as $index => $competition) {
         $competitionId = isset($competition["id"]) ? (string) $competition["id"] : "";
-        $competitions[$index]["registeredTeamIds"] = boules_registered_team_ids($pdo, $competitionId);
+        $registeredTeams = boules_registered_teams($pdo, $competitionId);
+        $competitions[$index]["registeredTeams"] = $registeredTeams;
+        $competitions[$index]["registeredTeamIds"] = array_map(function ($team) {
+            return isset($team["id"]) ? (string) $team["id"] : "";
+        }, $registeredTeams);
     }
 
     return $competitions;

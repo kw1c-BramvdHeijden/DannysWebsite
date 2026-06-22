@@ -105,6 +105,15 @@ function normalizeCompetition(competition) {
         tone: normalizeCompetitionTone(competition.tone),
         status: typeof competition.status === "string" ? competition.status.trim() : "",
         registeredTeamIds: Array.isArray(competition.registeredTeamIds) ? competition.registeredTeamIds.map(String) : [],
+        registeredTeams: Array.isArray(competition.registeredTeams)
+            ? competition.registeredTeams
+                .filter((team) => team && typeof team === "object")
+                .map((team) => ({
+                    id: typeof team.id === "string" || typeof team.id === "number" ? String(team.id) : "",
+                    name: typeof team.name === "string" && team.name.trim() ? team.name.trim() : "Team"
+                }))
+                .filter((team) => team.id || team.name)
+            : [],
         href: typeof competition.href === "string" && competition.href.trim() ? competition.href.trim() : "#competities"
     };
 }

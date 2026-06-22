@@ -163,6 +163,15 @@ export function createCompetitionsModule({
             status: typeof competition.status === "string" ? competition.status : "",
             requesterName: typeof competition.requesterName === "string" ? competition.requesterName.trim() : "",
             registeredTeamIds: Array.isArray(competition.registeredTeamIds) ? competition.registeredTeamIds.map(String) : [],
+            registeredTeams: Array.isArray(competition.registeredTeams)
+                ? competition.registeredTeams
+                    .filter((team) => team && typeof team === "object")
+                    .map((team) => ({
+                        id: typeof team.id === "string" || typeof team.id === "number" ? String(team.id) : "",
+                        name: typeof team.name === "string" && team.name.trim() ? team.name.trim() : "Team"
+                    }))
+                    .filter((team) => team.id || team.name)
+                : [],
             href: getDefaultCompetitionHref()
         };
     }
@@ -283,23 +292,29 @@ export function createCompetitionsModule({
         const title = document.createElement("h3");
         title.textContent = getLocalizedText(competition.title, state.lang);
 
+        const header = document.createElement("div");
+        header.className = "competition-card-header";
+        header.append(icon, title);
+
         const details = document.createElement("dl");
         details.className = "competition-details";
 
         [
-            [t("competitions.detail.name"), getLocalizedText(competition.title, state.lang)],
             [t("competitions.detail.location"), getLocalizedText(competition.type, state.lang)],
             [t("competitions.detail.startDate"), formatPlainDate(competition.startDate)],
             [t("competitions.detail.endDate"), formatPlainDate(competition.endDate)]
         ].forEach(([label, value]) => {
+            const item = document.createElement("div");
+            item.className = "competition-detail-item";
             const term = document.createElement("dt");
             term.textContent = label;
             const description = document.createElement("dd");
             description.textContent = value || "-";
-            details.append(term, description);
+            item.append(term, description);
+            details.appendChild(item);
         });
 
-        card.append(icon, title, details);
+        card.append(header, details);
 
         const userTeams = state.loggedIn ? getCurrentUserTeams() : [];
         const userTeamsStatus = state.loggedIn
@@ -308,8 +323,35 @@ export function createCompetitionsModule({
         const registeredTeamIds = Array.isArray(competition.registeredTeamIds)
             ? competition.registeredTeamIds.map(String)
             : [];
+        const registeredTeams = Array.isArray(competition.registeredTeams)
+            ? competition.registeredTeams.filter((team) => team && typeof team.name === "string" && team.name.trim())
+            : [];
         const availableTeams = userTeams.filter((team) => registeredTeamIds.indexOf(String(team.id)) === -1);
         const alreadyRegisteredTeams = userTeams.filter((team) => registeredTeamIds.indexOf(String(team.id)) !== -1);
+
+        const registeredTeamsSection = document.createElement("section");
+        registeredTeamsSection.className = "competition-registered-teams";
+
+        const registeredTitle = document.createElement("h4");
+        registeredTitle.textContent = t("competitions.registeredTeams.title");
+        registeredTeamsSection.appendChild(registeredTitle);
+
+        if (registeredTeams.length === 0) {
+            const emptyTeams = document.createElement("p");
+            emptyTeams.className = "competition-registered-empty";
+            emptyTeams.textContent = t("competitions.registeredTeams.empty");
+            registeredTeamsSection.appendChild(emptyTeams);
+        } else {
+            const list = document.createElement("ul");
+            registeredTeams.forEach((team) => {
+                const item = document.createElement("li");
+                item.textContent = team.name;
+                list.appendChild(item);
+            });
+            registeredTeamsSection.appendChild(list);
+        }
+
+        card.appendChild(registeredTeamsSection);
 
         const signup = document.createElement("div");
         signup.className = "competition-team-signup";
