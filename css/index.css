@@ -916,9 +916,8 @@
     .hero-section,
     .content-grid,
     .benefits-strip,
-    .quote-inner,
     .upload-modal-layout {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr!important;
     }
 
     .photo-grid {
