@@ -100,6 +100,7 @@ function boules_auth_user_role($pdo, $userId, array $user, array $userColumns)
     return "player";
 }
 
+// Geef de huidige sessiegebruiker door aan JavaScript.
 function boules_fetch_auth($pdo)
 {
     if (session_status() === PHP_SESSION_NONE) {
@@ -179,6 +180,7 @@ function boules_public_image_path($image, $assetPrefix)
     return $assetPrefix . $image;
 }
 
+// Haal aangemelde teams met naam op.
 function boules_registered_teams($pdo, $tournamentId)
 {
     if ($tournamentId === "" || !boules_table_exists($pdo, "tournament_registrations") || !boules_table_exists($pdo, "teams")) {
@@ -217,6 +219,7 @@ function boules_registered_teams($pdo, $tournamentId)
     return $teams;
 }
 
+// Geef alleen team-id's terug voor aanmeldlogica.
 function boules_registered_team_ids($pdo, $tournamentId)
 {
     $teamIds = array();
@@ -230,6 +233,7 @@ function boules_registered_team_ids($pdo, $tournamentId)
     return $teamIds;
 }
 
+// Haal competities op voor de eerste paginalaad.
 function boules_fetch_competitions($pdo, $competitionHref)
 {
     $table = boules_first_existing_table($pdo, array("tournaments", "competitions"));
@@ -268,6 +272,7 @@ function boules_fetch_competitions($pdo, $competitionHref)
 
     $competitions = $pdo->query($sql)->fetchAll();
 
+    // Voeg aangemelde teams toe aan elke competitie.
     foreach ($competitions as $index => $competition) {
         $competitionId = isset($competition["id"]) ? (string) $competition["id"] : "";
         $registeredTeams = boules_registered_teams($pdo, $competitionId);
@@ -360,6 +365,7 @@ function boules_fetch_photos($pdo, $limit, $assetPrefix)
     return $photos;
 }
 
+// Bundel alle startdata voor de frontend.
 function boules_bootstrap_data($pdo, $competitionHref, $photoLimit, $assetPrefix)
 {
     return array(

@@ -14,10 +14,12 @@ export function createCompetitionsModule({
     let competitionModalTimer = 0;
     let competitionFormMode = "admin";
 
+    // Admins mogen competities beheren.
     function canManageCompetitions() {
         return state.loggedIn && state.role === "admin";
     }
 
+    // Sorteer competities op startdatum.
     function buildCompetitionCollection() {
         return state.competitions
             .slice()
@@ -49,6 +51,7 @@ export function createCompetitionsModule({
         return competitionToneMap[tone] || "fa-calendar-days";
     }
 
+    // Toon feedback onder het competitieformulier.
     function setCompetitionFeedback(message = "", isSuccess = false) {
         if (!refs.competitionFeedback) {
             return;
@@ -58,6 +61,7 @@ export function createCompetitionsModule({
         refs.competitionFeedback.classList.toggle("is-success", isSuccess);
     }
 
+    // Speler vraagt een competitie aan.
     async function requestCompetition(competitionData) {
         const response = await fetch(getCompetitionApiUrl(), {
             method: "POST",
@@ -78,6 +82,7 @@ export function createCompetitionsModule({
         return result.competition;
     }
 
+    // Admin maakt direct een geaccepteerde competitie aan.
     async function createAcceptedCompetition(competitionData) {
         const response = await fetch(getCompetitionApiUrl(), {
             method: "POST",
@@ -98,6 +103,7 @@ export function createCompetitionsModule({
         return result.competition;
     }
 
+    // Admin werkt een bestaande competitie bij.
     async function updateAcceptedCompetition(competitionId, competitionData) {
         const response = await fetch(getCompetitionApiUrl(), {
             method: "POST",
@@ -119,6 +125,7 @@ export function createCompetitionsModule({
         return result.competition;
     }
 
+    // Admin verwijdert een competitie.
     async function deleteAcceptedCompetition(competitionId) {
         const response = await fetch(getCompetitionApiUrl(), {
             method: "POST",
@@ -139,6 +146,7 @@ export function createCompetitionsModule({
         return result;
     }
 
+    // Zet API-data om naar het frontend-formaat.
     function normalizeCompetitionFromApi(competition) {
         if (!competition || typeof competition !== "object") {
             return null;
@@ -176,6 +184,7 @@ export function createCompetitionsModule({
         };
     }
 
+    // Algemene helper voor competitie-API-calls.
     async function requestCompetitionApi(payload) {
         const response = await fetch(getCompetitionApiUrl(), {
             method: "POST",
@@ -193,6 +202,7 @@ export function createCompetitionsModule({
         return result;
     }
 
+    // Meld een team aan voor een competitie.
     async function registerTeamForCompetition(competitionId, teamId) {
         const result = await requestCompetitionApi({
             action: "registerTeam",
@@ -203,6 +213,7 @@ export function createCompetitionsModule({
         return result.competition;
     }
 
+    // Laad pending aanvragen voor admins.
     async function loadCompetitionRequests() {
         if (!refs.competitionRequestsPanel || !canManageCompetitions() || state.competitionRequestsLoaded || state.competitionRequestsLoading) {
             return;
@@ -242,6 +253,7 @@ export function createCompetitionsModule({
         return `${t("competitions.datePrefix")}: ${formattedDate}`;
     }
 
+    // Formatteer alleen de datumwaarde.
     function formatPlainDate(dateValue) {
         if (!dateValue) {
             return "-";
@@ -255,11 +267,13 @@ export function createCompetitionsModule({
         }).format(date);
     }
 
+    // Bouw de kaart voor een aankomende competitie.
     function createCompetitionCard(competition) {
         const card = document.createElement("article");
         card.className = "competition-card";
 
         if (canManageCompetitions()) {
+            // Beheerknoppen zijn alleen zichtbaar voor admins.
             const actions = document.createElement("div");
             actions.className = "competition-card-actions";
 
@@ -332,6 +346,7 @@ export function createCompetitionsModule({
         const registeredTeamsSection = document.createElement("section");
         registeredTeamsSection.className = "competition-registered-teams";
 
+        // Toon alle teams die al aangemeld zijn.
         const registeredTitle = document.createElement("h4");
         registeredTitle.textContent = t("competitions.registeredTeams.title");
         registeredTeamsSection.appendChild(registeredTitle);
@@ -356,6 +371,7 @@ export function createCompetitionsModule({
         const signup = document.createElement("div");
         signup.className = "competition-team-signup";
 
+        // Toon de juiste aanmeldstatus per gebruiker.
         if (!state.loggedIn) {
             const message = document.createElement("p");
             message.textContent = t("competitions.teamSignup.loginRequired");
@@ -402,6 +418,7 @@ export function createCompetitionsModule({
         return card;
     }
 
+    // Render alle aankomende competities.
     function renderCompetitions() {
         if (!refs.competitionGrid) {
             return;
@@ -432,6 +449,7 @@ export function createCompetitionsModule({
         loadCompetitionRequests();
     }
 
+    // Bouw een kaart voor een pending aanvraag.
     function createCompetitionRequestCard(competition) {
         const card = document.createElement("article");
         card.className = "competition-request-card";
@@ -473,6 +491,7 @@ export function createCompetitionsModule({
         return card;
     }
 
+    // Render het admin-overzicht met aanvragen.
     function renderCompetitionRequests() {
         if (!refs.competitionRequestsPanel || !refs.competitionRequestsGrid) {
             return;
@@ -517,10 +536,12 @@ export function createCompetitionsModule({
         });
     }
 
+    // Zoek competitie in lokale state.
     function getCompetitionById(competitionId) {
         return state.competitions.find((competition) => String(competition.id) === String(competitionId)) || null;
     }
 
+    // Zet de tekst van het formulier op aanvraag, toevoegen of bewerken.
     function syncCompetitionFormUI() {
         const isEditing = Boolean(state.pendingCompetitionId);
         const isRequesting = competitionFormMode === "request";
@@ -543,6 +564,7 @@ export function createCompetitionsModule({
 
     }
 
+    // Reset formulier naar de standaardwaarden.
     function resetCompetitionForm() {
         state.pendingCompetitionId = null;
         competitionFormMode = "admin";
@@ -557,6 +579,7 @@ export function createCompetitionsModule({
         }
     }
 
+    // Open adminformulier voor toevoegen of bewerken.
     function openCompetitionModal(competitionId = null) {
         if (!canManageCompetitions() || !refs.competitionModal || !refs.competitionNameInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionEndDateInput || !refs.competitionToneInput) {
             return;
@@ -593,6 +616,7 @@ export function createCompetitionsModule({
         }, 120);
     }
 
+    // Open formulier waarmee spelers een aanvraag doen.
     function openCompetitionRequestModal() {
         if (!refs.competitionModal || !refs.competitionNameInput || !refs.competitionTypeInput || !refs.competitionDateInput || !refs.competitionEndDateInput || !refs.competitionToneInput) {
             return;
@@ -620,6 +644,7 @@ export function createCompetitionsModule({
         }, 120);
     }
 
+    // Sluit het competitieformulier.
     function closeCompetitionModal() {
         if (!refs.competitionModal || refs.competitionModal.hidden) {
             resetCompetitionForm();
@@ -638,6 +663,7 @@ export function createCompetitionsModule({
         }, 220);
     }
 
+    // Valideer en sla het formulier op.
     async function saveCompetition(event) {
         event.preventDefault();
 
@@ -674,6 +700,7 @@ export function createCompetitionsModule({
         }
 
         if (endDate < startDate) {
+            // Einddatum mag nooit voor startdatum liggen.
             setCompetitionFeedback(t("competitions.form.endDateBeforeStart"));
             refs.competitionEndDateInput.focus();
             return;
@@ -769,6 +796,7 @@ export function createCompetitionsModule({
         closeCompetitionModal();
     }
 
+    // Verwijder een competitie na bevestiging.
     async function deleteCompetition(competitionId) {
         if (!canManageCompetitions()) {
             return;
@@ -793,6 +821,7 @@ export function createCompetitionsModule({
         }
     }
 
+    // Registreer het gekozen team voor deze competitie.
     async function registerSelectedTeam(competitionId) {
         if (!state.loggedIn || !competitionId) {
             return;
@@ -839,6 +868,7 @@ export function createCompetitionsModule({
     }
 
 
+    // Accepteer of wijs een pending aanvraag af.
     async function updateCompetitionRequest(competitionId, action) {
         if (!canManageCompetitions() || !competitionId) {
             return;

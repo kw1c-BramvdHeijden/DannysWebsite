@@ -82,6 +82,7 @@ function normalizeCompetitionTone(tone) {
     return competitionToneMap[tone] ? tone : "#7b9151";
 }
 
+// Zet competitie-data om naar het vaste frontend-formaat.
 function normalizeCompetition(competition) {
     if (!competition || typeof competition !== "object") {
         return null;
@@ -105,6 +106,7 @@ function normalizeCompetition(competition) {
         tone: normalizeCompetitionTone(competition.tone),
         status: typeof competition.status === "string" ? competition.status.trim() : "",
         registeredTeamIds: Array.isArray(competition.registeredTeamIds) ? competition.registeredTeamIds.map(String) : [],
+        // Namen zijn nodig om aangemelde teams te tonen.
         registeredTeams: Array.isArray(competition.registeredTeams)
             ? competition.registeredTeams
                 .filter((team) => team && typeof team === "object")
@@ -227,6 +229,7 @@ export function generateRecordId() {
         : String(Date.now());
 }
 
+// Bouw de centrale applicatie-state.
 export function createAppState() {
     const bootstrap = getBootstrapData();
     const auth = bootstrap.auth && typeof bootstrap.auth === "object" ? bootstrap.auth : {};

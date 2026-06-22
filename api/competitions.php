@@ -7,6 +7,7 @@ session_start();
 require_once __DIR__ . "/../includes/db.php";
 require_once __DIR__ . "/../includes/bootstrap-data.php";
 
+// Stuur JSON terug en stop de API.
 function competitions_respond($statusCode, array $payload)
 {
     http_response_code($statusCode);
@@ -14,6 +15,7 @@ function competitions_respond($statusCode, array $payload)
     exit;
 }
 
+// Lees JSON-body uit het request.
 function competitions_json_body()
 {
     $data = json_decode(file_get_contents("php://input"), true);
@@ -21,6 +23,7 @@ function competitions_json_body()
     return is_array($data) ? $data : array();
 }
 
+// Controleer of de sessiegebruiker admin is.
 function competitions_is_admin()
 {
     if (isset($_SESSION["role"]) && $_SESSION["role"] === "admin") {
@@ -32,6 +35,7 @@ function competitions_is_admin()
     return $userId !== "" && competitions_user_is_admin($userId);
 }
 
+// Haal adminrol uit de database.
 function competitions_user_is_admin($userId)
 {
     global $pdo;
@@ -86,6 +90,7 @@ function competitions_user_is_admin($userId)
     return false;
 }
 
+// Herken adminrollen uit verschillende tabellen.
 function competitions_role_is_admin($role)
 {
     $roleValue = strtolower(trim((string) $role));
@@ -93,6 +98,7 @@ function competitions_role_is_admin($role)
     return $roleValue === "admin" || $roleValue === "administrator" || $roleValue === "beheerder";
 }
 
+// Haal de ingelogde gebruiker uit de sessie.
 function competitions_current_user_id()
 {
     $userId = isset($_SESSION["user_id"]) ? trim((string) $_SESSION["user_id"]) : "";
@@ -100,6 +106,7 @@ function competitions_current_user_id()
     return $userId !== "" && is_numeric($userId) ? $userId : "";
 }
 
+// Blokkeer acties die alleen admins mogen doen.
 function competitions_require_admin()
 {
     if (!competitions_is_admin()) {
@@ -107,11 +114,13 @@ function competitions_require_admin()
     }
 }
 
+// Speleraanvragen zijn pending, admin-aanmaak is accepted.
 function competitions_status_for_action($action)
 {
     return $action === "create" ? "accepted" : "pending";
 }
 
+// Maak database-record geschikt voor de frontend.
 function competitions_public_record(array $row)
 {
     $tournamentId = (string) $row["tournament_id"];
@@ -131,6 +140,7 @@ function competitions_public_record(array $row)
     );
 }
 
+// Haal aangemelde teams met naam op.
 function competitions_registered_teams($tournamentId)
 {
     global $pdo;
@@ -171,6 +181,7 @@ function competitions_registered_teams($tournamentId)
     return $teams;
 }
 
+// Alleen de ids zijn nodig voor aanmeldlogica.
 function competitions_registered_team_ids($tournamentId)
 {
     $teamIds = array();
@@ -184,6 +195,7 @@ function competitions_registered_team_ids($tournamentId)
     return $teamIds;
 }
 
+// Toon alleen de voornaam in adminlijsten.
 function competitions_first_name($name)
 {
     $name = trim((string) $name);
@@ -197,6 +209,7 @@ function competitions_first_name($name)
     return $parts && isset($parts[0]) ? $parts[0] : $name;
 }
 
+// Controleer en vul verplichte kolommen aan.
 function competitions_ensure_tournaments_schema()
 {
     global $pdo;
@@ -216,6 +229,7 @@ function competitions_ensure_tournaments_schema()
     }
 }
 
+// Controleer of een kolom bestaat.
 function competitions_tournament_has_column($column)
 {
     global $pdo;
@@ -223,6 +237,7 @@ function competitions_tournament_has_column($column)
     return in_array($column, boules_table_columns($pdo, "tournaments"), true);
 }
 
+// Voeg status toe als die ontbreekt.
 function competitions_ensure_status_column()
 {
     global $pdo;
@@ -232,6 +247,7 @@ function competitions_ensure_status_column()
     }
 }
 
+// Voeg kleur toe als die ontbreekt.
 function competitions_ensure_tone_column()
 {
     global $pdo;
@@ -241,6 +257,7 @@ function competitions_ensure_tone_column()
     }
 }
 
+// Selecteer vaste kolommen voor competities.
 function competitions_select_columns()
 {
     $columns = array("`tournament_id`", "`name`", "`start_date`", "`end_date`", "`location`", "`status`");
@@ -250,6 +267,7 @@ function competitions_select_columns()
     return implode(", ", $columns);
 }
 
+// Haal naam van de aanvrager op.
 function competitions_requester_name_expression()
 {
     global $pdo;
@@ -269,11 +287,13 @@ function competitions_requester_name_expression()
     return "(SELECT u.`$userName` FROM `users` u WHERE u.`$userId` = `tournaments`.`created_by` LIMIT 1) AS `requester_name`";
 }
 
+// Selectie voor pending aanvragen.
 function competitions_pending_select_columns()
 {
     return competitions_select_columns() . ", " . competitions_requester_name_expression();
 }
 
+// Haal één competitie op.
 function competitions_fetch_tournament($competitionId)
 {
     global $pdo;
@@ -284,6 +304,7 @@ function competitions_fetch_tournament($competitionId)
     return $statement->fetch();
 }
 
+// Valideer formulierdata uit de frontend.
 function competitions_validate_payload(array $competition)
 {
     $title = isset($competition["title"]) ? trim((string) $competition["title"]) : "";
@@ -317,6 +338,7 @@ function competitions_validate_payload(array $competition)
     );
 }
 
+// Maak een competitie of aanvraag aan.
 function competitions_create_tournament(array $competition, $action)
 {
     global $pdo;
@@ -357,6 +379,7 @@ function competitions_create_tournament(array $competition, $action)
     ));
 }
 
+// Geef alle pending aanvragen terug.
 function competitions_list_pending()
 {
     global $pdo;
@@ -371,6 +394,7 @@ function competitions_list_pending()
     ));
 }
 
+// Zet een aanvraag op accepted of afgewezen.
 function competitions_update_status(array $data, $status)
 {
     global $pdo;
@@ -395,6 +419,7 @@ function competitions_update_status(array $data, $status)
     ));
 }
 
+// Werk een bestaande competitie bij.
 function competitions_update_tournament(array $data)
 {
     global $pdo;
@@ -429,6 +454,7 @@ function competitions_update_tournament(array $data)
     ));
 }
 
+// Verwijder een competitie.
 function competitions_delete_tournament(array $data)
 {
     global $pdo;
@@ -453,6 +479,7 @@ function competitions_delete_tournament(array $data)
     competitions_respond(200, array("deleted" => true, "id" => $competitionId));
 }
 
+// Check of de sessiegebruiker lid is van het team.
 function competitions_team_belongs_to_user($teamId, $userId)
 {
     global $pdo;
@@ -475,6 +502,7 @@ function competitions_team_belongs_to_user($teamId, $userId)
     return (int) $statement->fetchColumn() > 0;
 }
 
+// Controleer of de statuskolom deze waarde accepteert.
 function competitions_registration_status_accepts($statusColumn, $status)
 {
     global $pdo;
@@ -495,6 +523,7 @@ function competitions_registration_status_accepts($statusColumn, $status)
     return strpos($type, "'" . str_replace("'", "\\'", $status) . "'") !== false;
 }
 
+// Meld een team aan voor een competitie.
 function competitions_register_team(array $data)
 {
     global $pdo;
@@ -573,10 +602,12 @@ function competitions_register_team(array $data)
     ));
 }
 
+// Alleen POST-verzoeken zijn toegestaan.
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     competitions_respond(405, array("error" => "Alleen POST is toegestaan."));
 }
 
+// Bereid de competitietabel voor.
 try {
     competitions_ensure_tournaments_schema();
 } catch (PDOException $exception) {
@@ -586,6 +617,7 @@ try {
 $data = competitions_json_body();
 $action = isset($data["action"]) ? (string) $data["action"] : "request";
 
+// Routeer de gevraagde actie.
 if ($action === "request" || $action === "create") {
     competitions_create_tournament(isset($data["competition"]) && is_array($data["competition"]) ? $data["competition"] : array(), $action);
 }

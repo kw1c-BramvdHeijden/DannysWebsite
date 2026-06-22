@@ -14,6 +14,7 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
     let userSearchTerm = "";
     let selectedUserIds = [];
 
+    // Bepaal API-pad voor teams.
     function getTeamApiUrl() {
         const script = document.querySelector("script[src$='scripts/index.js']");
         return script ? new URL("../api/teams.php", script.src).toString() : "api/teams.php";
@@ -25,6 +26,7 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
             : "";
     }
 
+    // Verstuur request naar teams-API.
     async function requestTeams(payload) {
         const response = await fetch(getTeamApiUrl(), {
             method: "POST",
@@ -42,6 +44,7 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         return result;
     }
 
+    // Zet teamdata om naar frontend-formaat.
     function normalizeTeam(team) {
         if (!team || typeof team !== "object") {
             return null;
@@ -66,6 +69,7 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         };
     }
 
+    // Zet gebruiker om naar keuzelijst-formaat.
     function normalizeUser(user) {
         if (!user || typeof user !== "object") {
             return null;
@@ -81,6 +85,7 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         return { id, name };
     }
 
+    // Teams waar de ingelogde gebruiker lid van is.
     function getCurrentUserTeams() {
         if (!state.loggedIn || currentUserTeamsUserId !== getCurrentUserId()) {
             return [];
@@ -89,6 +94,7 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         return currentUserTeams.slice();
     }
 
+    // Laadstatus van mijn teams.
     function getCurrentUserTeamsStatus() {
         return {
             loaded: currentUserTeamsLoaded,
@@ -287,6 +293,7 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         });
     }
 
+    // Laad alle teams voor het teamoverzicht.
     async function loadTeams(force = false) {
         if (teamsLoading || (teamsLoaded && !force)) {
             renderTeams();
@@ -311,6 +318,7 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         }
     }
 
+    // Laad alleen teams van de huidige gebruiker.
     async function loadCurrentUserTeams(force = false) {
         const currentUserId = getCurrentUserId();
         const userChanged = currentUserTeamsUserId !== currentUserId;
@@ -358,6 +366,7 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         return currentUserTeams.slice();
     }
 
+    // Open teamvenster.
     function openTeamModal() {
         if (!refs.teamModal || !state.loggedIn) {
             return;
@@ -390,6 +399,7 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         loadUsers();
     }
 
+    // Laad teamdata alvast op de competitiepagina.
     function preloadTeamData() {
         if (!refs.teamList && !refs.teamUserOptions) {
             return;
@@ -434,6 +444,7 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         }, 220);
     }
 
+    // Maak een nieuw team aan.
     async function submitTeam(event) {
         event.preventDefault();
 
