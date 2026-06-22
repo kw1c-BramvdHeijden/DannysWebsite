@@ -3,6 +3,7 @@ export function bindEvents({
     state,
     photos,
     competitions,
+    teams,
     leaderboard,
     ui,
     t
@@ -13,6 +14,11 @@ export function bindEvents({
 
     refs.navLinks.forEach((link) => {
         link.addEventListener("click", () => {
+            const href = link.getAttribute("href") || "";
+            if (href.indexOf("competities") !== -1) {
+                teams.preloadUsers();
+            }
+
             const targetId = link.getAttribute("href")?.replace("#", "");
             if (targetId) {
                 ui.setCurrentNavLink(targetId);
@@ -193,6 +199,22 @@ export function bindEvents({
         });
     });
 
+    refs.teamOpenButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            teams.openTeamModal();
+        });
+    });
+
+    refs.teamCloseButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            teams.closeTeamModal();
+        });
+    });
+
+    refs.teamUserToggle?.addEventListener("click", () => {
+        teams.toggleUserMenu();
+    });
+
     refs.leaderboardOpenButton?.addEventListener("click", () => {
         leaderboard.openLeaderboardModal();
     });
@@ -215,6 +237,10 @@ export function bindEvents({
 
     refs.competitionForm?.addEventListener("submit", (event) => {
         competitions.saveCompetition(event);
+    });
+
+    refs.teamForm?.addEventListener("submit", (event) => {
+        teams.submitTeam(event);
     });
 
     refs.competitionGrid?.addEventListener("click", (event) => {
@@ -298,6 +324,14 @@ export function bindEvents({
             }
         }
 
+        if (refs.teamModal && !refs.teamModal.hidden && refs.teamUserMenu && refs.teamUserToggle) {
+            const clickedInMenu = refs.teamUserMenu.contains(target);
+            const clickedToggle = refs.teamUserToggle.contains(target);
+            if (!clickedInMenu && !clickedToggle) {
+                teams.closeUserMenu();
+            }
+        }
+
         if (window.innerWidth <= 920 && refs.siteHeader && !refs.siteHeader.contains(target) && refs.body.classList.contains("nav-open")) {
             ui.closeMobileMenu();
         }
@@ -315,6 +349,11 @@ export function bindEvents({
 
         if (refs.competitionModal && !refs.competitionModal.hidden) {
             competitions.closeCompetitionModal();
+            return;
+        }
+
+        if (refs.teamModal && !refs.teamModal.hidden) {
+            teams.closeTeamModal();
             return;
         }
 

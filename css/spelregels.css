@@ -1,40 +1,5 @@
-:root {
-  --bg: #efe5d2;
-  --bg-soft: #f7f1e6;
-  --surface: rgba(255, 249, 240, 0.82);
-  --surface-strong: #fbf6ee;
-  --text: #1f2220;
-  --muted: #6f675d;
-  --line: rgba(130, 110, 83, 0.18);
-  --accent: #cc3d2f;
-  --accent-dark: #ab2e22;
-  --olive: #6f7f44;
-  --shadow: 0 22px 60px rgba(84, 59, 28, 0.12);
-  --shadow-soft: 0 16px 38px rgba(59, 46, 31, 0.08);
-  --ease: 180ms ease;
-  --green-deep: #526833;
-  --radius-xl: 32px;
-  --radius-lg: 24px;
-  --radius-md: 18px;
-}
-
-* {
-  box-sizing: border-box;
-}
-
 html {
   scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-  color: var(--text);
-  background:
-    radial-gradient(circle at top left, rgba(255, 242, 214, 0.95), transparent 35%),
-    radial-gradient(circle at top right, rgba(240, 205, 140, 0.35), transparent 30%),
-    linear-gradient(180deg, #f4ecdf 0%, #ece1cb 100%);
 }
 
 body::before {
@@ -48,6 +13,10 @@ body::before {
   opacity: 0.8;
 }
 
+img {
+  max-width: 100%;
+}
+
 .brand-title,
 .brand-subtitle,
 .eyebrow,
@@ -57,6 +26,12 @@ body::before {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+.page-shell {
+  width: min(100%, 1380px);
+  margin: 0 auto;
+  padding: 20px 20px 0;
 }
 
 .brand-title {
@@ -142,6 +117,36 @@ body::before {
   flex-wrap: wrap;
   gap: 14px;
   margin-top: 28px;
+}
+
+.hero-copy > * {
+  opacity: 0;
+  animation: reveal-up 720ms both;
+}
+
+.hero-copy h1 {
+  margin: 0;
+  font-size: clamp(4rem, 8vw, 6.9rem);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  animation-delay: 100ms;
+}
+
+.hero-copy h1 span {
+  display: block;
+}
+
+.hero-copy h1 .accent {
+  color: var(--red);
+}
+
+.hero-copy p {
+  max-width: 36rem;
+  margin: 24px 0 0;
+  color: var(--muted);
+  font-size: 1.08rem;
+  line-height: 1.75;
+  animation-delay: 180ms;
 }
 
 .highlights {

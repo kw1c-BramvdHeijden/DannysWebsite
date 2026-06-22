@@ -1,4 +1,10 @@
-<?php require_once __DIR__ . "/../includes/header.php"; ?>
+<?php
+require_once __DIR__ . "/../includes/db.php";
+require_once __DIR__ . "/../includes/bootstrap-data.php";
+require_once __DIR__ . "/../includes/header.php";
+
+$bootstrapData = boules_bootstrap_data($pdo, "competities.php", 0, "../");
+?>
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -7,12 +13,14 @@
   <title>Boules Competities | Spelregels</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/competities_fotos_kalender_spelregels.css">
-  <link rel="stylesheet" href="../css/spelregels.css">
+<!--  <link rel="stylesheet" href="../css/index.css">-->
   <link rel="stylesheet" href="../css/header.css">
   <link rel="stylesheet" href="../css/footer.css">
+  <link rel="stylesheet" href="../css/competities_fotos_kalender_spelregels.css">
+  <link rel="stylesheet" href="../css/spelregels.css">
+  <link rel="stylesheet" href="../css/base.css">
 </head>
-<body>
+<body data-competitions-href="competities.php">
   <main class="page-shell">
     <?php render_site_header("rules", false); ?>
 
@@ -159,7 +167,13 @@
     </div>
   </main>
 
+  <?php include __DIR__ . "/../includes/footer.php"; ?>
+
   <!-- Auth modal is rendered by includes/header.php. -->
+  <script>
+    window.__BOULES_BOOTSTRAP__ = <?= json_encode($bootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+  </script>
+  <script type="module" src="../scripts/index.js"></script>
   <script type="module" src="../scripts/spelregels.js"></script>
 </body>
 </html>
