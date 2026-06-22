@@ -1,5 +1,8 @@
+import { translations } from "./app-translations.js";
+
 const SCORE_LIMIT = 13;
 const LIVE_REFRESH_MS = 5000;
+const LANGUAGE_STORAGE_KEY = "boules_language";
 let livePollTimer = 0;
 
 const refs = {
@@ -30,10 +33,27 @@ const state = {
     loading: false,
     saving: false,
     listError: "",
+    feedbackMessage: "",
+    feedbackType: "",
+    feedbackIsKey: false,
     loggedIn: false,
     role: "player",
     authClass: document.body.classList.contains("is-logged-in")
 };
+
+function getLanguage() {
+    return localStorage.getItem(LANGUAGE_STORAGE_KEY) === "en" ? "en" : "nl";
+}
+
+function getLocale() {
+    return getLanguage() === "en" ? "en-GB" : "nl-NL";
+}
+
+function t(key) {
+    const language = getLanguage();
+
+    return translations[language]?.[key] || translations.nl[key] || key;
+}
 
 function getApiUrl() {
     return document.body.dataset.scoreboardApi || "../api/scoreboard.php";
@@ -49,7 +69,7 @@ function normalizeMatch(match) {
         ? match.teams
             .map((team) => ({
                 id: typeof team.id === "string" || typeof team.id === "number" ? String(team.id) : "",
-                name: typeof team.name === "string" && team.name.trim() ? team.name.trim() : "Team",
+                name: typeof team.name === "string" && team.name.trim() ? team.name.trim() : t("scoreboard.teamFallback"),
                 score: Number.isFinite(Number(team.score)) ? Number(team.score) : 0,
                 isMine: team.isMine === true
             }))
@@ -88,7 +108,7 @@ async function requestJson(url, options = {}) {
     const result = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-        throw new Error(result.error || "Scoreboard kon niet worden geladen.");
+        throw new Error(result.error || t("scoreboard.error.load"));
     }
 
     return result;
@@ -96,7 +116,7 @@ async function requestJson(url, options = {}) {
 
 function formatMatchDate(dateValue) {
     if (!dateValue) {
-        return "Datum volgt";
+        return t("scoreboard.dateFallback");
     }
 
     const normalizedDate = dateValue.includes("T") ? dateValue : dateValue.replace(" ", "T");
@@ -106,7 +126,7 @@ function formatMatchDate(dateValue) {
         return dateValue;
     }
 
-    return new Intl.DateTimeFormat("nl-NL", {
+    return new Intl.DateTimeFormat(getLocale(), {
         day: "numeric",
         month: "long",
         year: "numeric"
@@ -143,14 +163,21 @@ function setListStatus(message) {
     }
 }
 
-function setFeedback(message = "", type = "") {
+function syncFeedback() {
     if (!refs.feedback) {
         return;
     }
 
-    refs.feedback.textContent = message;
-    refs.feedback.classList.toggle("is-success", type === "success");
-    refs.feedback.classList.toggle("is-error", type === "error");
+    refs.feedback.textContent = state.feedbackIsKey ? t(state.feedbackMessage) : state.feedbackMessage;
+    refs.feedback.classList.toggle("is-success", state.feedbackType === "success");
+    refs.feedback.classList.toggle("is-error", state.feedbackType === "error");
+}
+
+function setFeedback(message = "", type = "", isKey = false) {
+    state.feedbackMessage = message;
+    state.feedbackType = type;
+    state.feedbackIsKey = isKey;
+    syncFeedback();
 }
 
 function setUrlMatch(matchId) {
@@ -187,18 +214,18 @@ function renderMatches() {
     refs.matches.innerHTML = "";
 
     if (state.loading) {
-        setListStatus("Wedstrijden laden...");
+        setListStatus(t("scoreboard.loading"));
         return;
     }
 
     if (state.matches.length === 0) {
-        setListStatus(state.listError || (state.loggedIn ? "Er staan geen wedstrijden voor jouw teams klaar." : "Er zijn nog geen wedstrijden beschikbaar."));
+        setListStatus(state.listError || (state.loggedIn ? t("scoreboard.empty.mine") : t("scoreboard.empty.all")));
         return;
     }
 
     setListStatus(state.loggedIn && state.role !== "admin"
-        ? "Jouw wedstrijden staan bovenaan. Live updates zijn actief."
-        : "Alle wedstrijden. Live updates zijn actief.");
+        ? t("scoreboard.status.mineLive")
+        : t("scoreboard.status.allLive"));
 
     state.matches.forEach((match) => {
         const button = createElement("button", "scoreboard-match-button");
@@ -209,7 +236,7 @@ function renderMatches() {
 
         const main = createElement("span", "scoreboard-match-main");
         const title = createElement("strong", "", getMatchTitle(match));
-        const meta = createElement("span", "", `${formatMatchDate(match.date)} - ${match.pouleName || "Poule"} - ${match.tournamentName || "Toernooi"}`);
+        const meta = createElement("span", "", `${formatMatchDate(match.date)} - ${match.pouleName || t("scoreboard.poolFallback")} - ${match.tournamentName || t("scoreboard.tournamentFallback")}`);
         main.append(title, meta);
 
         const scoreLine = createElement("span", "scoreboard-match-score");
@@ -223,14 +250,14 @@ function renderMatches() {
         const chip = createElement("span", "scoreboard-match-chip");
         if (match.completed) {
             chip.classList.add("is-completed");
-            chip.textContent = "Afgerond";
+            chip.textContent = t("scoreboard.chip.completed");
         } else if (match.isLive) {
-            chip.textContent = match.canEdit ? "Nu scoren" : "Live meekijken";
+            chip.textContent = match.canEdit ? t("scoreboard.chip.scoreNow") : t("scoreboard.chip.watchLive");
         } else if (match.canEdit) {
-            chip.textContent = match.isMine ? "Jouw wedstrijd" : "Beheer";
+            chip.textContent = match.isMine ? t("scoreboard.chip.yourMatch") : t("scoreboard.chip.manage");
         } else {
             chip.classList.add("is-locked");
-            chip.textContent = "Meekijken";
+            chip.textContent = t("scoreboard.chip.watch");
         }
 
         button.append(main, scoreLine, chip);
@@ -259,8 +286,8 @@ function updateHeroBoard() {
     const heroTeams = match
         ? match.teams.slice(0, 2)
         : [
-            { id: "demo-a", name: "Team A", score: 9 },
-            { id: "demo-b", name: "Team B", score: 13 }
+            { id: "demo-a", name: t("scoreboard.demo.teamA"), score: 9 },
+            { id: "demo-b", name: t("scoreboard.demo.teamB"), score: 13 }
         ];
     const heroScores = heroTeams.map((team) => {
         if (match && match.id === state.selectedId && Object.prototype.hasOwnProperty.call(state.pendingScores, team.id)) {
@@ -303,7 +330,7 @@ function renderTeam(match, team) {
 
     const copy = createElement("div", "scoreboard-team-copy");
     const name = createElement("span", "scoreboard-team-name", team.name);
-    const meta = createElement("span", "scoreboard-team-meta", team.isMine ? "Jouw team" : "Team");
+    const meta = createElement("span", "scoreboard-team-meta", team.isMine ? t("scoreboard.team.mine") : t("scoreboard.team.label"));
     copy.append(name, meta);
 
     const scoreControls = createElement("div", "scoreboard-team-score");
@@ -312,7 +339,7 @@ function renderTeam(match, team) {
     minus.type = "button";
     minus.dataset.scoreAction = "minus";
     minus.dataset.teamId = team.id;
-    minus.setAttribute("aria-label", `Punt aftrekken voor ${team.name}`);
+    minus.setAttribute("aria-label", `${t("scoreboard.aria.minus")} ${team.name}`);
     minus.innerHTML = '<i class="fa-solid fa-minus" aria-hidden="true"></i>';
 
     const number = createElement("span", "scoreboard-score-number", String(score).padStart(2, "0"));
@@ -321,7 +348,7 @@ function renderTeam(match, team) {
     plus.type = "button";
     plus.dataset.scoreAction = "plus";
     plus.dataset.teamId = team.id;
-    plus.setAttribute("aria-label", `Punt toevoegen voor ${team.name}`);
+    plus.setAttribute("aria-label", `${t("scoreboard.aria.plus")} ${team.name}`);
     plus.innerHTML = '<i class="fa-solid fa-plus" aria-hidden="true"></i>';
 
     const otherTeamHasLimit = Object.entries(state.pendingScores)
@@ -346,7 +373,7 @@ function renderDetail() {
     }
 
     if (refs.detailKicker) {
-        refs.detailKicker.textContent = match.tournamentName || "WEDSTRIJD";
+        refs.detailKicker.textContent = match.tournamentName || t("scoreboard.detail.kicker");
     }
 
     if (refs.detailTitle) {
@@ -355,7 +382,7 @@ function renderDetail() {
 
     if (refs.detailMeta) {
         const location = match.location ? ` - ${match.location}` : "";
-        refs.detailMeta.textContent = `${formatMatchDate(match.date)} - ${match.pouleName || "Poule"}${location}`;
+        refs.detailMeta.textContent = `${formatMatchDate(match.date)} - ${match.pouleName || t("scoreboard.poolFallback")}${location}`;
     }
 
     if (refs.stateChip) {
@@ -363,8 +390,10 @@ function renderDetail() {
         refs.stateChip.classList.toggle("is-completed", match.completed);
         refs.stateChip.classList.toggle("is-locked", !match.canEdit && !match.completed);
         refs.stateChip.textContent = match.completed && winner
-            ? `Winnaar: ${winner.name}`
-            : (match.isLive ? (match.canEdit ? "Live scoren" : "Live meekijken") : (match.canEdit ? "Score bijwerken" : "Meekijken"));
+            ? `${t("scoreboard.state.winner")} ${winner.name}`
+            : (match.isLive
+                ? (match.canEdit ? t("scoreboard.state.liveScore") : t("scoreboard.state.liveWatch"))
+                : (match.canEdit ? t("scoreboard.state.updateScore") : t("scoreboard.state.watch")));
     }
 
     if (refs.teams) {
@@ -401,6 +430,12 @@ function syncActionState() {
 function render() {
     renderMatches();
     renderDetail();
+}
+
+function applyScoreboardTranslations() {
+    document.title = t("scoreboard.meta.title");
+    render();
+    syncFeedback();
 }
 
 function selectMatch(matchId, updateUrl = true) {
@@ -474,7 +509,7 @@ async function saveScore() {
 
     state.saving = true;
     syncActionState();
-    setFeedback("Score opslaan...");
+    setFeedback("scoreboard.feedback.saving", "", true);
 
     try {
         const result = await requestJson(getApiUrl(), {
@@ -493,10 +528,10 @@ async function saveScore() {
         if (updatedMatch) {
             state.matches = state.matches.map((entry) => entry.id === updatedMatch.id ? updatedMatch : entry);
             state.pendingScores = buildPendingScores(updatedMatch);
-            setFeedback("Score opgeslagen.", "success");
+            setFeedback("scoreboard.feedback.saved", "success", true);
         }
     } catch (error) {
-        setFeedback(error.message || "Score kon niet worden opgeslagen.", "error");
+        setFeedback(error.message || t("scoreboard.error.save"), "error");
     } finally {
         state.saving = false;
         render();
@@ -549,7 +584,7 @@ async function loadMatches(options = {}) {
             if (!hadLocalChanges || previousSelectedId !== nextMatch.id || !nextMatch.canEdit) {
                 state.pendingScores = buildPendingScores(nextMatch);
             } else if (silent) {
-                setFeedback("Live updates staan even stil tot je opslaat of ververst.");
+                setFeedback("scoreboard.feedback.livePaused", "", true);
             }
 
             if (previousSelectedId !== nextMatch.id) {
@@ -567,7 +602,7 @@ async function loadMatches(options = {}) {
             render();
         }
     } catch (error) {
-        state.listError = error.message || "Scoreboard kon niet worden geladen.";
+        state.listError = error.message || t("scoreboard.error.load");
 
         if (!silent) {
             state.matches = [];
@@ -635,6 +670,13 @@ document.addEventListener("visibilitychange", () => {
 });
 
 new MutationObserver(() => {
+    applyScoreboardTranslations();
+}).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["lang"]
+});
+
+new MutationObserver(() => {
     const nextAuthClass = document.body.classList.contains("is-logged-in");
     if (nextAuthClass === state.authClass) {
         return;
@@ -647,5 +689,6 @@ new MutationObserver(() => {
     attributeFilter: ["class"]
 });
 
+applyScoreboardTranslations();
 loadMatches();
 startLivePolling();

@@ -21,11 +21,11 @@ require_once __DIR__ . "/../includes/header.php";
     <section class="hero-section scoreboard-hero" id="scoreboard">
         <div class="hero-copy">
             <h1>
-                <span>KIES.</span>
-                <span>SCOOR.</span>
-                <span class="accent">WIN.</span>
+                <span data-i18n="scoreboard.hero.line1">KIES.</span>
+                <span data-i18n="scoreboard.hero.line2">SCOOR.</span>
+                <span class="accent" data-i18n="scoreboard.hero.line3">WIN.</span>
             </h1>
-            <p>
+            <p data-i18n="scoreboard.hero.description">
                 Selecteer je wedstrijd en werk de jeu de boules score bij tot de winnende 13 punten.
             </p>
         </div>
@@ -51,20 +51,20 @@ require_once __DIR__ . "/../includes/header.php";
         </div>
     </section>
 
-    <section class="scoreboard-layout" aria-label="Scoreboard wedstrijden">
+    <section class="scoreboard-layout" data-i18n-aria-label="scoreboard.layoutLabel" aria-label="Scoreboard wedstrijden">
         <section class="scoreboard-panel scoreboard-match-panel" aria-labelledby="scoreboard-matches-title">
             <div class="panel-heading scoreboard-panel-heading">
                 <div>
-                    <p class="photo-kicker">WEDSTRIJDEN</p>
-                    <h2 id="scoreboard-matches-title">Kies je wedstrijd</h2>
+                    <p class="photo-kicker" data-i18n="scoreboard.matches.kicker">WEDSTRIJDEN</p>
+                    <h2 id="scoreboard-matches-title" data-i18n="scoreboard.matches.title">Kies je wedstrijd</h2>
                 </div>
                 <button class="button button-ghost scoreboard-refresh" type="button" data-scoreboard-refresh>
                     <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
-                    <span>Ververs</span>
+                    <span data-i18n="scoreboard.refresh">Ververs</span>
                 </button>
             </div>
 
-            <p class="scoreboard-status" data-scoreboard-list-status aria-live="polite">Wedstrijden laden...</p>
+            <p class="scoreboard-status" data-scoreboard-list-status aria-live="polite" data-i18n="scoreboard.loading">Wedstrijden laden...</p>
             <div class="scoreboard-match-list" data-scoreboard-matches></div>
         </section>
 
@@ -73,8 +73,8 @@ require_once __DIR__ . "/../includes/header.php";
                 <span class="scoreboard-empty-icon" aria-hidden="true">
                     <i class="fa-solid fa-clipboard-list"></i>
                 </span>
-                <h2>Geen wedstrijd geselecteerd</h2>
-                <p>Kies links een wedstrijd om de score te bekijken.</p>
+                <h2 data-i18n="scoreboard.empty.title">Geen wedstrijd geselecteerd</h2>
+                <p data-i18n="scoreboard.empty.description">Kies links een wedstrijd om de score te bekijken.</p>
             </div>
 
             <div class="scoreboard-detail" data-scoreboard-detail hidden>
@@ -92,11 +92,11 @@ require_once __DIR__ . "/../includes/header.php";
                 <div class="scoreboard-actions">
                     <button class="button button-ghost" type="button" data-scoreboard-minus-round>
                         <i class="fa-solid fa-minus" aria-hidden="true"></i>
-                        <span>Ronde terug</span>
+                        <span data-i18n="scoreboard.actions.roundBack">Ronde terug</span>
                     </button>
                     <button class="button button-primary" type="button" data-scoreboard-save>
                         <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
-                        <span>Score opslaan</span>
+                        <span data-i18n="scoreboard.actions.save">Score opslaan</span>
                     </button>
                 </div>
 
