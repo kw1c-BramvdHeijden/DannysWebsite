@@ -867,6 +867,13 @@ body.nav-open .nav-toggle span:nth-child(3) {
     font-size: 0.88rem;
     line-height: 1.45;
 }
+
+@media (max-width: 1380px){
+ header .main-nav  a .fa-solid{
+     display: none;
+ }
+}
+
 @media (max-width: 1140px){
     body.nav-open .nav-panel {
         opacity: 1;
