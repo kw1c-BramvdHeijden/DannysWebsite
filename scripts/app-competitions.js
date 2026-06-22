@@ -71,7 +71,7 @@ export function createCompetitionsModule({
         const todayValue = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
         const startValue = new Date(`${competition.startDate}T00:00:00`).getTime();
 
-        return Number.isFinite(startValue) && startValue < todayValue;
+        return Number.isFinite(startValue) && startValue <= todayValue;
     }
 
     function getCompetitionApiUrl() {
@@ -538,6 +538,19 @@ export function createCompetitionsModule({
         }).format(date);
     }
 
+    function isMatchDateTodayOrPast(match) {
+        const dateValue = getMatchDateValue(match);
+        if (!dateValue) {
+            return false;
+        }
+
+        const today = new Date();
+        const todayValue = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+        const matchValue = new Date(`${dateValue}T00:00:00`).getTime();
+
+        return Number.isFinite(matchValue) && matchValue <= todayValue;
+    }
+
     function openCompetitionMatchesModal() {
         if (!refs.competitionMatchesModal) {
             return;
@@ -615,13 +628,23 @@ export function createCompetitionsModule({
             matchActions.className = "competition-match-actions";
 
             if (matchDate) {
-                const dateBadge = document.createElement("span");
                 const isVerified = Number(match.verified) === 1;
-                dateBadge.className = `competition-match-date${isVerified ? " is-verified" : ""}`;
-                dateBadge.textContent = isVerified
-                    ? `${matchDate} - ${t("competitions.matches.approved")}`
-                    : `${matchDate} - ${t("competitions.matches.pendingApproval")}`;
-                matchActions.appendChild(dateBadge);
+
+                if (isVerified && isMatchDateTodayOrPast(match)) {
+                    const matchStartButton = document.createElement("button");
+                    matchStartButton.type = "button";
+                    matchStartButton.className = "button button-secondary competition-match-start";
+                    matchStartButton.dataset.matchStart = String(match.id || "");
+                    matchStartButton.innerHTML = `<i class="fa-solid fa-play"></i><span>${t("competitions.matches.start")}</span>`;
+                    matchActions.appendChild(matchStartButton);
+                } else {
+                    const dateBadge = document.createElement("span");
+                    dateBadge.className = `competition-match-date${isVerified ? " is-verified" : ""}`;
+                    dateBadge.textContent = isVerified
+                        ? `${matchDate} - ${t("competitions.matches.approved")}`
+                        : `${matchDate} - ${t("competitions.matches.pendingApproval")}`;
+                    matchActions.appendChild(dateBadge);
+                }
 
                 if (canManageCompetitions() && !isVerified) {
                     const approveButton = document.createElement("button");

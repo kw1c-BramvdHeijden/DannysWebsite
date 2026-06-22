@@ -4,6 +4,22 @@ session_start();
 
 require_once __DIR__ . "/../includes/db.php";
 
+$competities = [];
+
+$stmt = $pdo->prepare("
+    SELECT name, start_date
+    FROM tournaments
+    WHERE status = 'geaccepteerd'
+");
+
+$stmt->execute();
+
+
+
+foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+    $datum = date('Y-m-d', strtotime($row['start_date']));
+    $competities[$datum][] = $row['name'];
+}
 /* ===== SESSION ===== */
 
 if (!isset($_SESSION['gekozen_datums'])) {
@@ -255,6 +271,7 @@ require_once __DIR__ . "/../includes/header.php";
                             $datum,
                             $_SESSION['gekozen_datums']
                         );
+                        $dagCompetities = $competities[$datum] ?? [];
                         ?>
 
                         <input
@@ -274,9 +291,19 @@ require_once __DIR__ . "/../includes/header.php";
                                 onchange="this.form.submit()"
                             >
 
-                            <span>
+                            <span class="day-number">
                                 <?php echo $dag; ?>
+
                             </span>
+
+                            <?php foreach ($dagCompetities as $competitie): ?>
+                                <div class="calendar-event">
+                                    <?php echo htmlspecialchars($competitie); ?>
+                                </div>
+                            <?php endforeach; ?>
+
+
+
                         </label>
                     <?php endfor; ?>
                 </div>

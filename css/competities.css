@@ -241,6 +241,7 @@
 }
 
 .competition-match-schedule,
+.competition-match-start,
 .competition-match-verify-button {
     justify-content: center;
     white-space: nowrap;
@@ -357,8 +358,20 @@
     }
 
     .competition-match-schedule,
+    .competition-match-start,
     .competition-match-date,
     .competition-match-verify-button {
         width: 100%;
     }
+}
+.calendar-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    padding-right: 20px;
+}
+
+.calendar-button {
+    min-width: 160px;
 }

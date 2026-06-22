@@ -65,15 +65,21 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
         <div class="panel-heading">
             <h2 data-i18n="competitions.heading">AANKOMENDE COMPETITIES</h2>
             <div class="panel-actions">
-                    <span class="panel-admin-indicator" data-competition-admin-indicator hidden>
-                        <i class="fa-solid fa-pen-to-square"></i>
-                        <span data-i18n="competitions.adminMode">Admin-modus: beheer aankomende competities</span>
-                    </span>
+        <span class="panel-admin-indicator" data-competition-admin-indicator hidden>
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span data-i18n="competitions.adminMode">Admin-modus: beheer aankomende competities</span>
+        </span>
             </div>
         </div>
 
-        <div class="competition-cards" data-competition-grid></div>
+        <div class="calendar-container">
+            <a href="kalender.php" class="button button-secondary calendar-button">
+                <i class="fa-solid fa-calendar-days"></i>
+                Kalender
+            </a>
+        </div>
 
+        <div class="competition-cards" data-competition-grid></div>
         <div class="challenge-banner">
             <div class="challenge-copy">
                 <span class="challenge-boules" aria-hidden="true"></span>
