@@ -13,7 +13,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "competities.php", 0, "../");
   <title>Boules Competities | Spelregels</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="../css/variables.css">
-  <link rel="stylesheet" href="../css/index.css">
+<!--  <link rel="stylesheet" href="../css/index.css">-->
   <link rel="stylesheet" href="../css/header.css">
   <link rel="stylesheet" href="../css/footer.css">
   <link rel="stylesheet" href="../css/competities_fotos_kalender_spelregels.css">
