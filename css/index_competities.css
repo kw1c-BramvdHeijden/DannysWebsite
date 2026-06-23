@@ -556,7 +556,7 @@ body.matches-modal-open {
 
 .competition-form {
     display: grid;
-    gap: 18px;
+    gap: 5px;
     padding: 34px 30px 30px;
 }
 
@@ -883,6 +883,7 @@ body.matches-modal-open {
     }
 
     .team-modal-shell {
+        display: block;
         grid-template-columns: 1fr;
         overflow-y: auto;
     }
