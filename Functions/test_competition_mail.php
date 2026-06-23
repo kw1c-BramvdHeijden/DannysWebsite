@@ -22,7 +22,7 @@ if (PHP_SAPI !== "cli") {
     exit("Alleen via CLI gebruiken.");
 }
 
-$db = test_mail_arg("db", "dannyproject_mailtest");
+$db = test_mail_arg("db", "dannyproject");
 $host = test_mail_arg("host", "localhost");
 $user = test_mail_arg("user", "root");
 $pass = test_mail_arg("pass", "");
