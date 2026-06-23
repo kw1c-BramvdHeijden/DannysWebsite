@@ -8,8 +8,10 @@ export function createCompetitionsModule({
     generateRecordId,
     saveCompetitions,
     getCurrentUserTeams = () => [],
+    getCompetitionSignupTeams = getCurrentUserTeams,
     getCurrentUserTeamsStatus = () => ({ loaded: true, loading: false, error: "" }),
-    loadCurrentUserTeams = () => {}
+    loadCurrentUserTeams = () => {},
+    loadCompetitionSignupTeams = loadCurrentUserTeams
 }) {
     let competitionModalTimer = 0;
     let competitionFormMode = "admin";
@@ -405,7 +407,7 @@ export function createCompetitionsModule({
 
         card.append(header, details);
 
-        const userTeams = state.loggedIn ? getCurrentUserTeams() : [];
+        const signupTeams = state.loggedIn ? getCompetitionSignupTeams() : [];
         const userTeamsStatus = state.loggedIn
             ? getCurrentUserTeamsStatus()
             : { loaded: true, loading: false, error: "" };
@@ -415,8 +417,8 @@ export function createCompetitionsModule({
         const registeredTeams = Array.isArray(competition.registeredTeams)
             ? competition.registeredTeams.filter((team) => team && typeof team.name === "string" && team.name.trim())
             : [];
-        const availableTeams = userTeams.filter((team) => registeredTeamIds.indexOf(String(team.id)) === -1);
-        const alreadyRegisteredTeams = userTeams.filter((team) => registeredTeamIds.indexOf(String(team.id)) !== -1);
+        const availableTeams = signupTeams.filter((team) => registeredTeamIds.indexOf(String(team.id)) === -1);
+        const alreadyRegisteredTeams = signupTeams.filter((team) => registeredTeamIds.indexOf(String(team.id)) !== -1);
         const registrationClosed = isRegistrationClosed(competition);
 
         const registeredTeamsSection = document.createElement("section");
@@ -684,6 +686,17 @@ export function createCompetitionsModule({
         }
 
         refs.competitionGrid.innerHTML = "";
+
+        const userTeamsStatus = state.loggedIn
+            ? getCurrentUserTeamsStatus()
+            : { loaded: true, loading: false, error: "" };
+        if (state.loggedIn && !userTeamsStatus.loaded && !userTeamsStatus.loading) {
+            loadCurrentUserTeams(false).then(() => {
+                renderCompetitions();
+            }).catch(() => {
+                renderCompetitions();
+            });
+        }
 
         const competitions = buildCompetitionCollection();
         if (competitions.length === 0) {
@@ -1105,8 +1118,8 @@ export function createCompetitionsModule({
         }
 
         try {
-            const userTeams = await loadCurrentUserTeams(true);
-            const canUseSelectedTeam = Array.isArray(userTeams) && userTeams.some((team) => String(team.id) === String(teamId));
+            const signupTeams = await loadCompetitionSignupTeams(true);
+            const canUseSelectedTeam = Array.isArray(signupTeams) && signupTeams.some((team) => String(team.id) === String(teamId));
             if (!canUseSelectedTeam) {
                 renderCompetitions();
                 window.alert(t("competitions.teamSignup.error"));

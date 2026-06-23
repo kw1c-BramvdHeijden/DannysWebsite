@@ -1,7 +1,8 @@
-export function createTeamsModule({ refs, state, t, getLocalizedText }) {
+export function createTeamsModule({ refs, state, t, getLocalizedText, onTeamsChanged = () => {} }) {
     let teamModalTimer = 0;
     let teamsLoaded = false;
     let teamsLoading = false;
+    let teamsError = "";
     let usersLoaded = false;
     let usersLoading = false;
     let teams = [];
@@ -99,6 +100,27 @@ export function createTeamsModule({ refs, state, t, getLocalizedText }) {
 
     function getSelectedUserIds() {
         return selectedUserIds.slice();
+    }
+
+    function getCurrentUserTeams() {
+        const currentUserId = getCurrentUserId();
+        if (!currentUserId) {
+            return [];
+        }
+
+        return teams.filter((team) => Array.isArray(team.memberIds) && team.memberIds.map(String).indexOf(currentUserId) !== -1);
+    }
+
+    function getCompetitionSignupTeams() {
+        return state.role === "admin" ? teams.slice() : getCurrentUserTeams();
+    }
+
+    function getCurrentUserTeamsStatus() {
+        return {
+            loaded: teamsLoaded,
+            loading: teamsLoading,
+            error: teamsError
+        };
     }
 
     function syncUserSummary() {
@@ -327,10 +349,11 @@ export function createTeamsModule({ refs, state, t, getLocalizedText }) {
     async function loadTeams(force = false) {
         if (teamsLoading || (teamsLoaded && !force)) {
             renderTeams();
-            return;
+            return teams;
         }
 
         teamsLoading = true;
+        teamsError = "";
         renderTeams();
 
         try {
@@ -340,11 +363,27 @@ export function createTeamsModule({ refs, state, t, getLocalizedText }) {
                 : [];
             teamsLoaded = true;
         } catch (error) {
-            setTeamStatus(error.message || t("teams.error"));
+            teamsError = error.message || t("teams.error");
+            teamsLoaded = true;
+            setTeamStatus(teamsError);
         } finally {
             teamsLoading = false;
             renderTeams();
         }
+
+        return teams;
+    }
+
+    async function loadCurrentUserTeams(force = false) {
+        await loadTeams(force);
+
+        return getCurrentUserTeams();
+    }
+
+    async function loadCompetitionSignupTeams(force = false) {
+        await loadTeams(force);
+
+        return getCompetitionSignupTeams();
     }
 
     function openTeamModal() {
@@ -448,6 +487,7 @@ export function createTeamsModule({ refs, state, t, getLocalizedText }) {
             setUserMenuOpen(false);
             setTeamFeedback(t("teams.success"), true);
             renderTeams();
+            onTeamsChanged();
         } catch (error) {
             setTeamFeedback(error.message || t("teams.error"));
         } finally {
@@ -498,6 +538,7 @@ export function createTeamsModule({ refs, state, t, getLocalizedText }) {
             teams = teams.filter((team) => String(team.id) !== String(teamId));
             teamsLoaded = true;
             renderTeams();
+            onTeamsChanged();
             setTeamFeedback(t("teams.deleteSuccess"), true);
         } catch (error) {
             setTeamFeedback(error.message || t("teams.error"));
@@ -513,6 +554,11 @@ export function createTeamsModule({ refs, state, t, getLocalizedText }) {
         closeUserMenu,
         filterUsers,
         deleteTeam,
-        syncTeamButtons
+        syncTeamButtons,
+        getCurrentUserTeams,
+        getCompetitionSignupTeams,
+        getCurrentUserTeamsStatus,
+        loadCurrentUserTeams,
+        loadCompetitionSignupTeams
     };
 }

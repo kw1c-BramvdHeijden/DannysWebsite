@@ -92,6 +92,7 @@ function normalizeCompetition(competition) {
     }
 
     const startDate = typeof competition.startDate === "string" ? competition.startDate : "";
+    const endDate = typeof competition.endDate === "string" ? competition.endDate : "";
     const title = normalizeLocalizedField(competition.title);
     const type = normalizeLocalizedField(competition.type);
 
@@ -104,9 +105,21 @@ function normalizeCompetition(competition) {
         title,
         type,
         startDate,
+        endDate,
         tone: normalizeCompetitionTone(competition.tone),
         status: typeof competition.status === "string" ? competition.status.trim() : "",
         started: competition.started === true,
+        registeredTeamIds: Array.isArray(competition.registeredTeamIds) ? competition.registeredTeamIds.map(String) : [],
+        registeredTeams: Array.isArray(competition.registeredTeams)
+            ? competition.registeredTeams
+                .filter((team) => team && typeof team === "object")
+                .map((team) => ({
+                    id: typeof team.id === "string" || typeof team.id === "number" ? String(team.id) : "",
+                    name: typeof team.name === "string" && team.name.trim() ? team.name.trim() : "Team"
+                }))
+                .filter((team) => team.id || team.name)
+            : [],
+        matchesGenerated: competition.matchesGenerated === true,
         href: typeof competition.href === "string" && competition.href.trim() ? competition.href.trim() : "#competities"
     };
 }
