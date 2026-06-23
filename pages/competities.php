@@ -240,11 +240,6 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
                 <input type="text" data-competition-name data-i18n-placeholder="competitions.form.namePlaceholder" placeholder="Bijvoorbeeld: Voorjaars Toernooi">
             </label>
 
-            <label class="upload-label competition-abbreviation-label">
-                <span data-i18n="competitions.form.abbreviation">Afkorting</span>
-                <input type="text" data-competition-abbreviation data-i18n-placeholder="competitions.form.abbreviationPlaceholder" placeholder="VT">
-            </label>
-
             <label class="upload-label">
                 <span data-i18n="competitions.form.type">Locatie</span>
                 <input type="text" data-competition-type data-i18n-placeholder="competitions.form.typePlaceholder" placeholder="Bijvoorbeeld: Dorpsplein 4 of Baan 2">
@@ -310,13 +305,6 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
                 <label class="upload-label">
                     <span data-i18n="teams.form.name">Teamnaam</span>
                     <input type="text" data-team-name maxlength="35" data-i18n-placeholder="teams.form.namePlaceholder" placeholder="Bijvoorbeeld: De Pleinwerpers">
-                </label>
-
-                <label class="upload-label">
-                    <span data-i18n="teams.form.competition">Competitie</span>
-                    <select class="competition-select" data-team-tournament>
-                        <option value="" data-i18n="teams.form.competitionPlaceholder">Selecteer competitie</option>
-                    </select>
                 </label>
 
                 <div class="team-user-picker">
