@@ -1,132 +1,131 @@
 <?php
-require_once __DIR__ . '/../includes/db.php';
 
-if (!isset($pdo) || !$pdo instanceof PDO) {
-    exit('Database verbinding niet gevonden.');
-}
-$key = $_GET['key'] ?? '';
+require_once __DIR__ . "/../includes/db.php";
+require_once __DIR__ . "/competition_mailer.php";
 
-if ($key !== 'test123') {
-    http_response_code(403);
-    exit('Geen toegang');
+function toernooi_mail_is_cli()
+{
+    return PHP_SAPI === "cli";
 }
 
-require_once __DIR__ . '/../includes/db.php';
+function toernooi_mail_arg($name, $default = "")
+{
+    global $argv;
 
-$testMode = true;
-$testEmail = 'neobrugman12@gmail.com';
-
-$fromEmail = 'noreply@st1739531586.splsites.nl';
-$fromName = 'Jeu De Dabs';
-$replyTo = 'neobrugman12@gmail.com';
-
-$stmt = $pdo->query("
-    SELECT DISTINCT
-        tr.registration_id,
-        tr.tournament_id,
-        tr.team_id,
-        u.user_id,
-        u.username,
-        u.email
-    FROM tournament_registrations tr
-    INNER JOIN team_members tm ON tm.team_id = tr.team_id
-    INNER JOIN users u ON u.user_id = tm.user_id
-    LEFT JOIN tournament_email_logs tel
-        ON tel.registration_id = tr.registration_id
-        AND tel.user_id = u.user_id
-    WHERE u.email IS NOT NULL
-    AND u.email != ''
-    AND tr.status IN ('pending', 'accepted')
-    AND tel.log_id IS NULL
-");
-
-$players = $stmt->fetchAll();
-
-if (!$players) {
-    echo "Geen spelers gevonden om te mailen.";
-    exit;
-}
-
-$sent = 0;
-$failed = 0;
-
-foreach ($players as $player) {
-    $originalEmail = trim($player['email']);
-    $sendToEmail = $testMode ? $testEmail : $originalEmail;
-    $username = trim($player['username']);
-
-    if (!filter_var($sendToEmail, FILTER_VALIDATE_EMAIL)) {
-        $failed++;
-        echo "Ongeldig emailadres overgeslagen: {$sendToEmail}<br>";
-        continue;
+    if (!toernooi_mail_is_cli()) {
+        return isset($_GET[$name]) ? trim((string) $_GET[$name]) : $default;
     }
 
-    $safeUsername = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
-    $subject = 'Bevestiging Jeu de Boules Toernooi';
+    $prefix = "--" . $name . "=";
 
-    $body = "
-        <html>
-        <body>
-            <h2>Hoi {$safeUsername},</h2>
-            <p>Je bent aangemeld voor het Jeu de Boules toernooi.</p>
-            <p>We sturen je deze mail om je inschrijving te bevestigen.</p>
-            <p>Meer informatie over de planning, teams en wedstrijden volgt later.</p>
-            <br>
-            <p>Met vriendelijke groet,</p>
-            <p>De organisatie</p>
-        </body>
-        </html>
-    ";
+    foreach ($argv as $argument) {
+        if (strpos($argument, $prefix) === 0) {
+            return trim(substr($argument, strlen($prefix)));
+        }
+    }
 
-    $headers = "From: {$fromName} <{$fromEmail}>\r\n";
-    $headers .= "Reply-To: {$replyTo}\r\n";
-    $headers .= "Return-Path: {$fromEmail}\r\n";
-    $headers .= "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+    return $default;
+}
 
-    $success = mail(
-        $sendToEmail,
-        $subject,
-        $body,
-        $headers,
-        "-f{$fromEmail}"
+function toernooi_mail_bool_arg($name, $default)
+{
+    $value = strtolower(toernooi_mail_arg($name, $default ? "1" : "0"));
+
+    return in_array($value, array("1", "true", "yes", "ja"), true);
+}
+
+function toernooi_mail_output(array $summary)
+{
+    $lines = array(
+        "Registratiebevestigingen",
+        "Verzonden: " . $summary["sent"],
+        "Overgeslagen: " . $summary["skipped"],
+        "Mislukt: " . $summary["failed"],
     );
 
-    if ($success) {
-        if (!$testMode) {
-            $log = $pdo->prepare("
-                INSERT INTO tournament_email_logs (registration_id, user_id, email)
-                VALUES (?, ?, ?)
-            ");
-
-            $log->execute([
-                $player['registration_id'],
-                $player['user_id'],
-                $originalEmail
-            ]);
-        }
-
-        $sent++;
-
-        echo "Verzonden naar {$sendToEmail}";
-
-        if ($testMode) {
-            echo " als test voor originele speler {$originalEmail}";
-        }
-
-        echo "<br>";
-
-        if ($testMode) {
-            break;
-        }
-    } else {
-        $failed++;
-        echo "Mislukt naar {$sendToEmail}<br>";
+    foreach ($summary["errors"] as $error) {
+        $lines[] = "Fout: " . $error;
     }
 
-    sleep(1);
+    if (toernooi_mail_is_cli()) {
+        echo implode(PHP_EOL, $lines) . PHP_EOL;
+        return;
+    }
+
+    header("Content-Type: text/plain; charset=utf-8");
+    echo implode("\n", $lines);
 }
 
-echo "<br>Klaar.<br>";
-echo "Verzonden: {$sent}<br>";
-echo "Mislukt: {$failed}<br>";
+if (!toernooi_mail_is_cli()) {
+    $expectedKey = getenv("MAIL_TASK_KEY");
+    $expectedKey = $expectedKey === false || $expectedKey === "" ? "test123" : $expectedKey;
+    $providedKey = isset($_GET["key"]) ? (string) $_GET["key"] : "";
+
+    if (!hash_equals($expectedKey, $providedKey)) {
+        http_response_code(403);
+        exit("Geen toegang");
+    }
+}
+
+$config = file_exists(__DIR__ . "/mail_config.php") ? require __DIR__ . "/mail_config.php" : array();
+$testMode = toernooi_mail_bool_arg("test", true);
+$testEmail = toernooi_mail_arg("testEmail", isset($config["reply_to"]) ? $config["reply_to"] : "");
+$registrationId = toernooi_mail_arg("registrationId", "");
+$limit = toernooi_mail_arg("limit", $testMode ? "1" : "");
+$summary = competition_mail_empty_summary();
+$options = array();
+$messageLimit = $limit !== "" && is_numeric($limit) ? (int) $limit : 0;
+
+if ($testMode) {
+    if ($testEmail === "") {
+        http_response_code(422);
+        exit("Geef testEmail mee of zet reply_to in mail_config.php.");
+    }
+
+    $options["override_email"] = $testEmail;
+    $options["force"] = true;
+    $options["log_sends"] = false;
+}
+
+if ($messageLimit > 0) {
+    $options["message_limit"] = $messageLimit;
+}
+
+try {
+    if ($registrationId !== "") {
+        if (!is_numeric($registrationId)) {
+            http_response_code(422);
+            exit("registrationId moet numeriek zijn.");
+        }
+
+        $summary = competition_mail_send_registration_confirmation($pdo, $registrationId, $options);
+        toernooi_mail_output($summary);
+        exit;
+    }
+
+    foreach (competition_mail_fetch_active_registration_ids($pdo) as $activeRegistrationId) {
+        if ($messageLimit > 0 && $summary["sent"] >= $messageLimit) {
+            break;
+        }
+
+        $registrationOptions = $options;
+
+        if ($messageLimit > 0) {
+            $registrationOptions["message_limit"] = $messageLimit - $summary["sent"];
+        }
+
+        $summary = competition_mail_merge_summary(
+            $summary,
+            competition_mail_send_registration_confirmation($pdo, $activeRegistrationId, $registrationOptions)
+        );
+
+        if ($testMode && $summary["sent"] > 0) {
+            break;
+        }
+    }
+
+    toernooi_mail_output($summary);
+} catch (Throwable $exception) {
+    http_response_code(500);
+    echo "Registratiebevestigingen konden niet worden verzonden: " . $exception->getMessage();
+}

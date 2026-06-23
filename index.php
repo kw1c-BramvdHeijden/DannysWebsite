@@ -23,7 +23,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
 </head>
 <body data-competitions-href="pages/competities.php">
     <main class="page-shell">
-        <?php render_site_header("home", true); ?>
+    <?php render_site_header("home", true); ?>
 
         <section class="hero-section" id="home">
             <div class="hero-copy">
