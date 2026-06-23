@@ -1,4 +1,10 @@
-<?php require_once __DIR__ . "/../includes/header.php"; ?>
+<?php
+require_once __DIR__ . "/../includes/db.php";
+require_once __DIR__ . "/../includes/bootstrap-data.php";
+require_once __DIR__ . "/../includes/header.php";
+
+$bootstrapData = boules_bootstrap_data($pdo, "competities.php", 100, "../");
+?>
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -8,6 +14,10 @@
     <title>Boules Competities | Foto's</title>
     <link rel="stylesheet" href="../css/variables.css">
     <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/footer.css">
+    <link rel="stylesheet" href="../css/fotos.css">
+    <link rel="stylesheet" href="../css/base.css">
 </head>
 <body data-competitions-href="competities.php">
     <main class="page-shell">
@@ -59,96 +69,6 @@
         </section>
     </main>
 
-    <div class="auth-modal" data-auth-modal hidden>
-        <div class="auth-modal-backdrop" data-auth-close></div>
-        <div class="auth-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
-            <button type="button" class="auth-modal-close" data-auth-close aria-label="Sluit inlogvenster">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <div class="auth-panel">
-                <div class="auth-panel-emblem" aria-hidden="true">
-                    <span class="auth-panel-leaf"></span>
-                    <span class="auth-panel-avatar"><i class="fa-regular fa-user"></i></span>
-                    <span class="auth-panel-leaf"></span>
-                </div>
-
-                <div class="auth-panel-tabs" role="tablist" aria-label="Authenticatie">
-                    <button type="button" class="auth-panel-tab is-active" data-auth-tab="login">Inloggen</button>
-                    <button type="button" class="auth-panel-tab" data-auth-tab="signup">Aanmelden</button>
-                </div>
-
-                <div class="auth-panel-copy">
-                    <p class="photo-kicker" data-auth-kicker>WELKOM TERUG</p>
-                    <h2 id="auth-modal-title" data-auth-title>Inloggen</h2>
-                    <p class="upload-description" data-auth-description>Log in om verder te gaan.</p>
-                </div>
-
-                <form class="auth-popup-form is-active" data-auth-form="login">
-                    <label class="auth-input">
-                        <i class="fa-regular fa-user"></i>
-                        <input type="text" data-auth-login-identity autocomplete="username">
-                    </label>
-
-                    <label class="auth-input auth-input-password">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" data-auth-login-password autocomplete="current-password">
-                        <button type="button" class="auth-password-toggle" data-auth-password-toggle aria-label="Toon wachtwoord">
-                            <i class="fa-regular fa-eye"></i>
-                        </button>
-                    </label>
-
-                    <a href="#photos" class="auth-inline-link" data-auth-forgot-password>Wachtwoord vergeten?</a>
-                    <p class="auth-popup-feedback" data-auth-feedback="login" aria-live="polite"></p>
-
-                    <button type="submit" class="button button-primary auth-popup-submit" data-auth-submit-login>Inloggen</button>
-
-                    <p class="auth-switch-row">
-                        <span data-auth-switch-copy-login>Nog geen account?</span>
-                        <button type="button" class="auth-switch-button" data-auth-switch="signup">Aanmelden</button>
-                    </p>
-                </form>
-
-                <form class="auth-popup-form" data-auth-form="signup" hidden>
-                    <label class="auth-input">
-                        <i class="fa-regular fa-user"></i>
-                        <input type="text" data-auth-signup-name autocomplete="name">
-                    </label>
-
-                    <label class="auth-input">
-                        <i class="fa-regular fa-envelope"></i>
-                        <input type="email" data-auth-signup-email autocomplete="email">
-                    </label>
-
-                    <label class="auth-input auth-input-password">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" data-auth-signup-password autocomplete="new-password">
-                        <button type="button" class="auth-password-toggle" data-auth-password-toggle aria-label="Toon wachtwoord">
-                            <i class="fa-regular fa-eye"></i>
-                        </button>
-                    </label>
-
-                    <label class="auth-input auth-input-password">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        <input type="password" data-auth-signup-password-confirm autocomplete="new-password">
-                        <button type="button" class="auth-password-toggle" data-auth-password-toggle aria-label="Toon wachtwoord">
-                            <i class="fa-regular fa-eye"></i>
-                        </button>
-                    </label>
-
-                    <p class="auth-popup-feedback" data-auth-feedback="signup" aria-live="polite"></p>
-
-                    <button type="submit" class="button button-primary auth-popup-submit" data-auth-submit-signup>Account aanmaken</button>
-
-                    <p class="auth-switch-row">
-                        <span data-auth-switch-copy-signup>Heb je al een account?</span>
-                        <button type="button" class="auth-switch-button" data-auth-switch="login">Inloggen</button>
-                    </p>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <div class="upload-modal" data-upload-modal hidden>
         <div class="upload-modal-backdrop" data-upload-cancel></div>
         <div class="upload-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
@@ -195,6 +115,9 @@
         </div>
     </div>
 
+    <script>
+        window.__BOULES_BOOTSTRAP__ = <?= json_encode($bootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    </script>
     <script type="module" src="../scripts/index.js"></script>
 </body>
 </html>
