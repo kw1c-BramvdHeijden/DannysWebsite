@@ -839,6 +839,38 @@ body.matches-modal-open {
     font-weight: 700;
 }
 
+.team-delete-button {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    margin-top: 6px;
+    padding: 8px 12px;
+    border: 1px solid rgba(171, 46, 39, 0.24);
+    border-radius: 999px;
+    background: rgba(171, 46, 39, 0.08);
+    color: #8f261f;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 800;
+    transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.team-delete-button:hover,
+.team-delete-button:focus-visible {
+    transform: translateY(-1px);
+    border-color: rgba(171, 46, 39, 0.46);
+    background: rgba(171, 46, 39, 0.14);
+    color: #711d18;
+    outline: 0;
+}
+
+.team-delete-button i {
+    font-size: 0.9rem;
+}
+
 .team-empty {
     margin: 0;
     color: var(--muted);

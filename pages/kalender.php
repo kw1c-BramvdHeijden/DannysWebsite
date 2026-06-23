@@ -16,6 +16,14 @@ function is_valid_calendar_date_input($datum)
     return is_string($datum) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $datum);
 }
 
+function kalender_url($maand, $jaar, array $extra = [])
+{
+    return "?" . http_build_query(array_merge([
+        "maand" => (int) $maand,
+        "jaar" => (int) $jaar,
+    ], $extra));
+}
+
 function kalender_reschedule_file()
 {
     return __DIR__ . "/../data/reschedule_requests.json";
@@ -94,6 +102,10 @@ $isHerplanMode = isset($_GET["herplan"]) && $_GET["herplan"] === "1" && $herplan
 $herplanMessage = isset($_GET["requested"]) ? "Herplanaanvraag opgeslagen. Het andere team moet de datum nog goedkeuren." : "";
 $herplanError = "";
 $herplanCurrentDate = $isHerplanMode ? kalender_match_date($pdo, $herplanMatchId) : "";
+$herplanQuery = $isHerplanMode ? [
+        "herplan" => "1",
+        "wedstrijd_id" => $herplanMatchId,
+] : [];
 
 /* ===== DATUMS OPSLAAN ===== */
 
@@ -255,6 +267,39 @@ $aantalDagen = cal_days_in_month(
         $jaar
 );
 
+$competities = [];
+if (boules_table_exists($pdo, "tournaments")) {
+    $statement = $pdo->query(
+            "SELECT `name`, `start_date`, `end_date` FROM `tournaments` " .
+            "WHERE `status` IS NULL OR LOWER(`status`) NOT IN ('pending', 'in afwachting', 'aangevraagd', 'rejected', 'denied', 'afgewezen')"
+    );
+
+    foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $competition) {
+        $name = isset($competition["name"]) ? trim((string) $competition["name"]) : "";
+        $startDate = isset($competition["start_date"]) ? substr((string) $competition["start_date"], 0, 10) : "";
+        $endDate = isset($competition["end_date"]) && $competition["end_date"] ? substr((string) $competition["end_date"], 0, 10) : $startDate;
+
+        if ($name === "" || !is_valid_calendar_date_input($startDate) || !is_valid_calendar_date_input($endDate)) {
+            continue;
+        }
+
+        if ($endDate < $startDate) {
+            $endDate = $startDate;
+        }
+
+        $period = new DatePeriod(
+                new DateTime($startDate),
+                new DateInterval("P1D"),
+                (new DateTime($endDate))->modify("+1 day")
+        );
+
+        foreach ($period as $date) {
+            $dateKey = $date->format("Y-m-d");
+            $competities[$dateKey][] = $name;
+        }
+    }
+}
+
 require_once __DIR__ . "/../includes/header.php";
 ?>
 
@@ -281,7 +326,7 @@ require_once __DIR__ . "/../includes/header.php";
             <div class="header">
                 <a
                         class="arrow"
-                        href="?maand=<?php echo $vorigeMaand; ?>&amp;jaar=<?php echo $vorigeJaar; ?>"
+                        href="<?php echo htmlspecialchars(kalender_url($vorigeMaand, $vorigeJaar, $herplanQuery)); ?>"
                         aria-label="Vorige maand"
                 >
                     <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
@@ -293,7 +338,7 @@ require_once __DIR__ . "/../includes/header.php";
 
                 <a
                         class="arrow"
-                        href="?maand=<?php echo $volgendeMaand; ?>&amp;jaar=<?php echo $volgendeJaar; ?>"
+                        href="<?php echo htmlspecialchars(kalender_url($volgendeMaand, $volgendeJaar, $herplanQuery)); ?>"
                         aria-label="Volgende maand"
                 >
                     <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
@@ -354,9 +399,17 @@ require_once __DIR__ . "/../includes/header.php";
                                     onchange="this.form.submit()"
                             >
 
-                            <span>
+                            <span class="day-number">
                                 <?php echo $dag; ?>
                             </span>
+
+                            <?php if (isset($competities[$datum])): ?>
+                                <div class="calendar-events">
+                                    <?php foreach ($competities[$datum] as $competitieNaam): ?>
+                                        <span class="calendar-event"><?php echo htmlspecialchars($competitieNaam); ?></span>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
                         </label>
                     <?php endfor; ?>
                 </div>
@@ -398,7 +451,7 @@ require_once __DIR__ . "/../includes/header.php";
 
                             <a
                                     class="remove-btn"
-                                    href="?maand=<?php echo $maand; ?>&amp;jaar=<?php echo $jaar; ?>&amp;remove=<?php echo urlencode($datum); ?>"
+                                    href="<?php echo htmlspecialchars(kalender_url($maand, $jaar, ["remove" => $datum])); ?>"
                                     aria-label="Verwijder <?php echo htmlspecialchars(date('d-m-Y', strtotime($datum))); ?>"
                             >
                                 <i class="fa-solid fa-xmark" aria-hidden="true"></i>
