@@ -691,7 +691,7 @@ export function createCompetitionsModule({
             ? getCurrentUserTeamsStatus()
             : { loaded: true, loading: false, error: "" };
         if (state.loggedIn && !userTeamsStatus.loaded && !userTeamsStatus.loading) {
-            loadCurrentUserTeams(false).then(() => {
+            loadCompetitionSignupTeams(false).then(() => {
                 renderCompetitions();
             }).catch(() => {
                 renderCompetitions();

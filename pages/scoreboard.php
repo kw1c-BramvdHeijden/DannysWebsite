@@ -107,6 +107,8 @@ require_once __DIR__ . "/../includes/header.php";
     </section>
 </main>
 
+<?php include __DIR__ . "/../includes/footer.php"; ?>
+
 <script type="module" src="../scripts/index.js"></script>
 <script type="module" src="../scripts/scoreboard.js"></script>
 </body>

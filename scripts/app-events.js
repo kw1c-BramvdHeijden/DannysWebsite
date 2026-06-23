@@ -286,6 +286,12 @@ export function bindEvents({
             return;
         }
 
+        const teamRegisterButton = target.closest("[data-competition-team-register]");
+        if (teamRegisterButton) {
+            competitions.registerSelectedTeam(teamRegisterButton.getAttribute("data-competition-team-register"));
+            return;
+        }
+
         const editButton = target.closest("[data-competition-edit]");
         if (editButton) {
             competitions.openCompetitionModal(editButton.getAttribute("data-competition-edit"));

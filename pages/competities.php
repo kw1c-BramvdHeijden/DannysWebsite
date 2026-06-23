@@ -125,7 +125,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
     </section>
 
 </main>
-
+<?php include __DIR__ . "/../includes/footer.php"; ?>
 <!-- Inlog- en registratievenster. -->
 <div class="auth-modal" data-auth-modal hidden>
     <div class="auth-modal-backdrop" data-auth-close></div>
