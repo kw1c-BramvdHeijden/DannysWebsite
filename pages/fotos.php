@@ -68,6 +68,8 @@ $bootstrapData = boules_bootstrap_data($pdo, "competities.php", 100, "../");
             </div>
         </section>
     </main>
+    <?php include __DIR__ . "/../includes/footer.php"; ?>
+
 
     <div class="upload-modal" data-upload-modal hidden>
         <div class="upload-modal-backdrop" data-upload-cancel></div>
