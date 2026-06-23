@@ -1,8 +1,8 @@
 .photo-hub {
     margin-top: 22px;
     padding: 24px;
-    opacity: 0;
-    animation: reveal-up 760ms 440ms both;
+    opacity: 1;
+    animation: none;
 }
 
 .photo-head {

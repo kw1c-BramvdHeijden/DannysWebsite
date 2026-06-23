@@ -15,6 +15,28 @@ export function createPhotosModule({
         return script ? new URL("../api/photos.php", script.src).toString() : "api/photos.php";
     }
 
+    function normalizePhotoImagePath(image) {
+        if (typeof image !== "string" || !image.trim()) {
+            return "";
+        }
+
+        const imagePath = image.trim();
+        if (/^(https?:\/\/|\/|data:image\/)/i.test(imagePath)) {
+            return imagePath;
+        }
+
+        return new URL(`../${imagePath.replace(/^(\.\.\/)+/, "")}`, getPhotosApiUrl()).toString();
+    }
+
+    function normalizePersistedPhoto(photo) {
+        return {
+            ...photo,
+            id: String(photo.id),
+            ownerId: photo.ownerId === null || photo.ownerId === undefined ? null : String(photo.ownerId),
+            image: normalizePhotoImagePath(photo.image)
+        };
+    }
+
     async function persistPhoto(photo) {
         const response = await fetch(getPhotosApiUrl(), {
             method: "POST",
@@ -32,7 +54,7 @@ export function createPhotosModule({
             throw new Error(result.error || "Foto kon niet worden opgeslagen.");
         }
 
-        return result.photo;
+        return normalizePersistedPhoto(result.photo);
     }
 
     async function deletePersistedPhoto(photoId) {
@@ -62,11 +84,11 @@ export function createPhotosModule({
             return true;
         }
 
-        return Boolean(photo.ownerId) && photo.ownerId === state.user?.id;
+        return Boolean(photo.ownerId) && String(photo.ownerId) === String(state.user?.id);
     }
 
     function canEditPhoto(photo) {
-        return state.loggedIn && Boolean(photo.ownerId) && photo.ownerId === state.user?.id;
+        return state.loggedIn && Boolean(photo.ownerId) && String(photo.ownerId) === String(state.user?.id);
     }
 
     function buildPhotoCollection() {
@@ -398,18 +420,12 @@ export function createPhotosModule({
                 image: state.pendingUpload.image
             };
 
-            state.photos.unshift(photo);
-            savePhotos(state.photos);
-            renderPhotos();
-            closeUploadModal();
-
             try {
                 const savedPhoto = await persistPhoto(photo);
-                state.photos = state.photos.map((entry) => (
-                    String(entry.id) === String(photo.id) ? savedPhoto : entry
-                ));
+                state.photos.unshift(savedPhoto);
                 savePhotos(state.photos);
                 renderPhotos();
+                closeUploadModal();
             } catch (error) {
                 window.alert(error.message);
             }
