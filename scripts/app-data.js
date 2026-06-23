@@ -222,7 +222,8 @@ export function generateRecordId() {
 
 export function createAppState() {
     const bootstrap = getBootstrapData();
-    const auth = bootstrap.auth && typeof bootstrap.auth === "object" ? bootstrap.auth : {};
+    const hasBootstrapAuth = bootstrap.auth && typeof bootstrap.auth === "object";
+    const auth = hasBootstrapAuth ? bootstrap.auth : {};
     const storedAuth = readStoredAuth();
     const bootstrapUser = normalizeUser(bootstrap.user ?? auth.user);
     const bootstrapAuth = auth.loggedIn === true && bootstrapUser
@@ -232,7 +233,7 @@ export function createAppState() {
             user: bootstrapUser
         }
         : null;
-    const activeAuth = bootstrapAuth || storedAuth;
+    const activeAuth = hasBootstrapAuth ? bootstrapAuth : storedAuth;
 
     return {
         lang: normalizeLanguage(localStorage.getItem(STORAGE_KEYS.lang)),
