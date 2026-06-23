@@ -6,7 +6,10 @@ body.team-modal-open {
     overflow: hidden;
 }
 
-/* Paneel rond competitie-overzichten. */
+body.match-modal-open {
+    overflow: hidden;
+}
+
 .competitions-panel {
     padding: 22px;
     border: 1px solid rgba(255, 255, 255, 0.68);
@@ -33,22 +36,18 @@ body.team-modal-open {
     font-size: 1rem;
 }
 
-/* Grid met aankomende competities. */
 .competition-cards {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
 }
 
-/* Kaart voor één competitie. */
 .competition-card {
     position: relative;
-    display: grid;
-    gap: 16px;
-    padding: 18px;
+    padding: 20px 18px;
     border: 1px solid rgba(134, 109, 74, 0.12);
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.76);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.66);
     transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
 }
 
@@ -59,23 +58,13 @@ body.team-modal-open {
     box-shadow: 0 18px 26px rgba(59, 46, 31, 0.1);
 }
 
-/* Kop met kleuricoon en titel. */
-.competition-card-header {
-    display: grid;
-    grid-template-columns: 46px minmax(0, 1fr);
-    align-items: center;
-    gap: 12px;
-    min-height: 46px;
-    padding-right: 92px;
-}
-
-/* Gekleurd competitie-icoon. */
 .competition-icon {
     display: inline-grid;
     place-items: center;
     width: 46px;
     height: 46px;
-    border-radius: 12px;
+    margin-bottom: 14px;
+    border-radius: 50%;
     color: var(--white);
 }
 
@@ -100,108 +89,14 @@ body.team-modal-open {
 }
 
 .competition-card h3 {
-    min-width: 0;
-    margin: 0;
+    margin: 0 0 12px;
     font-size: 1.28rem;
-    line-height: 1.15;
-    overflow-wrap: anywhere;
 }
 
 .competition-card p {
     margin: 0 0 6px;
     color: var(--muted);
     font-size: 0.95rem;
-}
-
-/* Locatie en datums. */
-.competition-details {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-    margin: 0;
-}
-
-.competition-detail-item {
-    min-width: 0;
-    padding: 10px;
-    border-radius: 12px;
-    background: rgba(246, 242, 233, 0.74);
-}
-
-.competition-details dt {
-    color: var(--green-deep);
-    font-size: 0.78rem;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
-.competition-details dd {
-    min-width: 0;
-    margin: 4px 0 0;
-    color: var(--muted);
-    font-size: 0.94rem;
-    overflow-wrap: anywhere;
-}
-
-/* Aangemelde teams bij een competitie. */
-.competition-registered-teams {
-    display: grid;
-    gap: 10px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(134, 109, 74, 0.12);
-}
-
-.competition-registered-teams h4 {
-    margin: 0;
-    color: var(--green-deep);
-    font-size: 0.82rem;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
-.competition-registered-teams ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.competition-registered-teams li {
-    min-width: 0;
-    max-width: 100%;
-    padding: 8px 10px;
-    border: 1px solid rgba(123, 145, 81, 0.22);
-    border-radius: 999px;
-    background: rgba(123, 145, 81, 0.12);
-    color: var(--green-deep);
-    font-size: 0.9rem;
-    font-weight: 800;
-    overflow-wrap: anywhere;
-}
-
-.competition-registered-empty {
-    margin: 0;
-    color: var(--muted);
-    font-weight: 700;
-}
-
-/* Team aanmelden voor een competitie. */
-.competition-team-signup {
-    display: grid;
-    gap: 10px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(134, 109, 74, 0.12);
-}
-
-.competition-team-signup p {
-    margin: 0;
-    font-weight: 700;
-}
-
-.competition-team-signup .button {
-    width: 100%;
 }
 
 .competition-card a {
@@ -213,7 +108,12 @@ body.team-modal-open {
     font-weight: 700;
 }
 
-/* Admin-knoppen op een competitiekaart. */
+.competition-start-button {
+    justify-content: center;
+    width: 100%;
+    margin-top: 14px;
+}
+
 .competition-card-actions {
     position: absolute;
     top: 14px;
@@ -247,7 +147,6 @@ body.team-modal-open {
     background: rgba(171, 46, 39, 0.94);
 }
 
-/* Lege staat voor lijsten. */
 .competition-empty {
     display: grid;
     place-items: center;
@@ -260,7 +159,6 @@ body.team-modal-open {
     background: rgba(255, 255, 255, 0.32);
 }
 
-/* Call-to-action banner. */
 .challenge-banner {
     display: flex;
     align-items: center;
@@ -419,22 +317,6 @@ body.team-modal-open {
     background: var(--white);
 }
 
-.competition-color-picker {
-    width: 100%;
-    height: 52px;
-    padding: 6px;
-    border: 1px solid rgba(134, 109, 74, 0.16);
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.84);
-    cursor: pointer;
-}
-
-.competition-color-picker:focus {
-    outline: none;
-    border-color: rgba(123, 145, 81, 0.4);
-    box-shadow: 0 0 0 4px rgba(123, 145, 81, 0.12);
-}
-
 .team-modal {
     position: fixed;
     inset: 0;
@@ -530,6 +412,10 @@ body.team-modal-open {
     gap: 8px;
 }
 
+.competition-abbreviation-label {
+    max-width: 220px;
+}
+
 .team-user-picker-label {
     color: var(--muted);
     font-size: 0.86rem;
@@ -564,33 +450,33 @@ body.team-modal-open {
     box-shadow: 0 18px 28px rgba(59, 46, 31, 0.14);
 }
 
-.team-user-search {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-    padding: 9px 10px;
-    border: 1px solid rgba(134, 109, 74, 0.14);
-    border-radius: 10px;
-    background: rgba(246, 242, 233, 0.76);
-    color: var(--muted);
-}
-
-.team-user-search input {
-    width: 100%;
-    min-width: 0;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: var(--ink);
-    font: inherit;
-}
-
 .team-user-menu-status {
     margin: 0 0 8px;
     color: var(--muted);
     font-size: 0.9rem;
     font-weight: 700;
+}
+
+.team-user-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(134, 109, 74, 0.16);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.86);
+    color: var(--muted);
+}
+
+.team-user-search input {
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
 }
 
 .team-user-options {
@@ -675,6 +561,27 @@ body.team-modal-open {
     font-weight: 700;
 }
 
+.team-delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 6px;
+    padding: 9px 10px;
+    border: 1px solid rgba(171, 46, 39, 0.24);
+    border-radius: 10px;
+    background: rgba(171, 46, 39, 0.08);
+    color: #8f241e;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.team-delete-button:hover,
+.team-delete-button:focus-visible {
+    background: rgba(171, 46, 39, 0.14);
+}
+
 .team-empty {
     margin: 0;
     color: var(--muted);
@@ -683,7 +590,7 @@ body.team-modal-open {
 
 @media (max-width: 1120px) {
     .competition-cards {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .team-modal-shell {
@@ -698,14 +605,6 @@ body.team-modal-open {
 
 @media (max-width: 700px) {
     .competition-cards {
-        grid-template-columns: 1fr;
-    }
-
-    .competition-card-header {
-        padding-right: 0;
-    }
-
-    .competition-details {
         grid-template-columns: 1fr;
     }
 

@@ -70,11 +70,18 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
         <div class="panel-heading">
             <h2 data-i18n="competitions.heading">AANKOMENDE COMPETITIES</h2>
             <div class="panel-actions">
-                    <span class="panel-admin-indicator" data-competition-admin-indicator hidden>
-                        <i class="fa-solid fa-pen-to-square"></i>
-                        <span data-i18n="competitions.adminMode">Admin-modus: beheer aankomende competities</span>
-                    </span>
+        <span class="panel-admin-indicator" data-competition-admin-indicator hidden>
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span data-i18n="competitions.adminMode">Admin-modus: beheer aankomende competities</span>
+        </span>
             </div>
+        </div>
+
+        <div class="calendar-container">
+            <a href="kalender.php" class="button button-secondary calendar-button">
+                <i class="fa-solid fa-calendar-days"></i>
+                Kalender
+            </a>
         </div>
 
         <div class="competition-cards" data-competition-grid></div>
@@ -119,6 +126,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
         </div>
         <div class="competition-request-list" data-competition-requests-grid></div>
     </section>
+
 </main>
 
 <!-- Inlog- en registratievenster. -->
@@ -230,6 +238,11 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
                 <input type="text" data-competition-name data-i18n-placeholder="competitions.form.namePlaceholder" placeholder="Bijvoorbeeld: Voorjaars Toernooi">
             </label>
 
+            <label class="upload-label competition-abbreviation-label">
+                <span data-i18n="competitions.form.abbreviation">Afkorting</span>
+                <input type="text" data-competition-abbreviation data-i18n-placeholder="competitions.form.abbreviationPlaceholder" placeholder="VT">
+            </label>
+
             <label class="upload-label">
                 <span data-i18n="competitions.form.type">Locatie</span>
                 <input type="text" data-competition-type data-i18n-placeholder="competitions.form.typePlaceholder" placeholder="Bijvoorbeeld: Dorpsplein 4 of Baan 2">
@@ -262,6 +275,22 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
     </div>
 </div>
 
+<div class="match-modal" data-competition-matches-modal hidden>
+    <div class="match-modal-backdrop" data-competition-matches-close></div>
+    <div class="match-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="competition-matches-title">
+        <button type="button" class="match-modal-close" data-competition-matches-close data-i18n-aria-label="competitions.matches.close" aria-label="Sluit wedstrijdoverzicht">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="match-modal-content">
+            <p class="photo-kicker" data-i18n="competitions.matches.adminOnly">Gegenereerd via de startknop</p>
+            <h2 id="competition-matches-title" data-competition-matches-title data-i18n="competitions.matches.heading">WEDSTRIJDOVERZICHT</h2>
+            <p class="competition-matches-status" data-competition-matches-status aria-live="polite"></p>
+            <div class="competition-match-list" data-competition-matches-grid></div>
+        </div>
+    </div>
+</div>
+
 <!-- Formulier en overzicht voor teams. -->
 <div class="team-modal" data-team-modal hidden>
     <div class="team-modal-backdrop" data-team-close></div>
@@ -278,7 +307,14 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
 
                 <label class="upload-label">
                     <span data-i18n="teams.form.name">Teamnaam</span>
-                    <input type="text" data-team-name data-i18n-placeholder="teams.form.namePlaceholder" placeholder="Bijvoorbeeld: De Pleinwerpers">
+                    <input type="text" data-team-name maxlength="35" data-i18n-placeholder="teams.form.namePlaceholder" placeholder="Bijvoorbeeld: De Pleinwerpers">
+                </label>
+
+                <label class="upload-label">
+                    <span data-i18n="teams.form.competition">Competitie</span>
+                    <select class="competition-select" data-team-tournament>
+                        <option value="" data-i18n="teams.form.competitionPlaceholder">Selecteer competitie</option>
+                    </select>
                 </label>
 
                 <div class="team-user-picker">

@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . "/leaderboard-data.php";
 
 function boules_table_exists($pdo, $tableName)
 {
@@ -35,19 +34,27 @@ function boules_table_columns($pdo, $tableName)
 
 function boules_first_existing_column(array $columns, array $columnNames)
 {
-    $columnsByLowerName = array();
-    foreach ($columns as $column) {
-        $columnsByLowerName[strtolower($column)] = $column;
-    }
-
     foreach ($columnNames as $columnName) {
-        $columnKey = strtolower($columnName);
-        if (isset($columnsByLowerName[$columnKey])) {
-            return $columnsByLowerName[$columnKey];
+        if (in_array($columnName, $columns, true)) {
+            return $columnName;
         }
     }
 
     return null;
+}
+
+function boules_ensure_tournament_status_column($pdo)
+{
+    if (!boules_table_exists($pdo, "tournaments")) {
+        return;
+    }
+
+    if (in_array("status", boules_table_columns($pdo, "tournaments"), true)) {
+        $pdo->exec("ALTER TABLE `tournaments` ALTER `status` SET DEFAULT 'pending'");
+        return;
+    }
+
+    $pdo->exec("ALTER TABLE `tournaments` ADD COLUMN `status` VARCHAR(32) NOT NULL DEFAULT 'pending'");
 }
 
 function boules_select_alias($column, $alias, $fallback)
@@ -55,108 +62,31 @@ function boules_select_alias($column, $alias, $fallback)
     return $column ? "`$column` AS `$alias`" : "$fallback AS `$alias`";
 }
 
-function boules_auth_initials($name)
+function boules_tournament_has_matches($pdo, $tournamentId)
 {
-    $name = trim((string) $name);
-
-    return $name === "" ? "A" : strtoupper(substr($name, 0, 1));
-}
-
-function boules_auth_normalize_role($role)
-{
-    $role = strtolower(trim((string) $role));
-
-    return $role === "admin" || $role === "administrator" || $role === "beheerder" ? "admin" : "player";
-}
-
-function boules_auth_user_role($pdo, $userId, array $user, array $userColumns)
-{
-    $roleColumn = boules_first_existing_column($userColumns, array("role", "rol"));
-    if ($roleColumn && isset($user[$roleColumn])) {
-        return boules_auth_normalize_role($user[$roleColumn]);
+    if (!boules_table_exists($pdo, "poules") || !boules_table_exists($pdo, "wedstrijden")) {
+        return false;
     }
 
-    if (!boules_table_exists($pdo, "user_roles") || !boules_table_exists($pdo, "roles")) {
-        return "player";
-    }
+    $pouleColumns = boules_table_columns($pdo, "poules");
+    $pouleId = boules_first_existing_column($pouleColumns, array("poule_id", "id"));
+    $pouleTournamentId = boules_first_existing_column($pouleColumns, array("tournament_id", "competition_id"));
 
-    $userRoleColumns = boules_table_columns($pdo, "user_roles");
-    $roleColumns = boules_table_columns($pdo, "roles");
-    $userRoleUserId = boules_first_existing_column($userRoleColumns, array("user_id", "userId", "id_user"));
-    $userRoleRoleId = boules_first_existing_column($userRoleColumns, array("role_id", "roleId", "id_role"));
-    $roleId = boules_first_existing_column($roleColumns, array("role_id", "id"));
-    $roleName = boules_first_existing_column($roleColumns, array("role_name", "name", "role", "rol", "title"));
+    $matchColumns = boules_table_columns($pdo, "wedstrijden");
+    $matchPouleId = boules_first_existing_column($matchColumns, array("poule_id", "id_poule"));
 
-    if (!$userRoleUserId || !$userRoleRoleId || !$roleId || !$roleName) {
-        return "player";
+    if (!$pouleId || !$pouleTournamentId || !$matchPouleId) {
+        return false;
     }
 
     $statement = $pdo->prepare(
-        "SELECT r.`$roleName` FROM `user_roles` ur " .
-        "INNER JOIN `roles` r ON r.`$roleId` = ur.`$userRoleRoleId` " .
-        "WHERE ur.`$userRoleUserId` = ?"
+        "SELECT COUNT(*) FROM `wedstrijden` w " .
+        "INNER JOIN `poules` p ON p.`$pouleId` = w.`$matchPouleId` " .
+        "WHERE p.`$pouleTournamentId` = ?"
     );
-    $statement->execute(array($userId));
+    $statement->execute(array($tournamentId));
 
-    foreach ($statement->fetchAll() as $role) {
-        if (boules_auth_normalize_role($role[$roleName]) === "admin") {
-            return "admin";
-        }
-    }
-
-    return "player";
-}
-
-// Geef de huidige sessiegebruiker door aan JavaScript.
-function boules_fetch_auth($pdo)
-{
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-
-    $sessionUserId = isset($_SESSION["user_id"]) ? trim((string) $_SESSION["user_id"]) : "";
-    if ($sessionUserId === "" || !is_numeric($sessionUserId) || !boules_table_exists($pdo, "users")) {
-        return array("loggedIn" => false);
-    }
-
-    $columns = boules_table_columns($pdo, "users");
-    $userIdColumn = boules_first_existing_column($columns, array("user_id", "id"));
-    $nameColumn = boules_first_existing_column($columns, array("name", "naam", "full_name", "username", "gebruikersnaam", "email"));
-    $emailColumn = boules_first_existing_column($columns, array("email", "emailadres"));
-
-    if (!$userIdColumn) {
-        return array("loggedIn" => false);
-    }
-
-    $statement = $pdo->prepare("SELECT * FROM `users` WHERE `$userIdColumn` = ? LIMIT 1");
-    $statement->execute(array($sessionUserId));
-    $user = $statement->fetch();
-
-    if (!$user) {
-        return array("loggedIn" => false);
-    }
-
-    $name = $nameColumn && isset($user[$nameColumn]) ? trim((string) $user[$nameColumn]) : "";
-    if ($name === "" && $emailColumn && isset($user[$emailColumn])) {
-        $name = trim((string) $user[$emailColumn]);
-    }
-    if ($name === "") {
-        $name = "Account";
-    }
-
-    $role = isset($_SESSION["role"]) ? boules_auth_normalize_role($_SESSION["role"]) : boules_auth_user_role($pdo, $sessionUserId, $user, $columns);
-    $_SESSION["role"] = $role;
-
-    return array(
-        "loggedIn" => true,
-        "role" => $role,
-        "accountRole" => $role,
-        "user" => array(
-            "id" => (string) $sessionUserId,
-            "name" => $name,
-            "initials" => boules_auth_initials($name),
-        ),
-    );
+    return (int) $statement->fetchColumn() > 0;
 }
 
 function boules_user_name_expression($pdo, $photoTable, $ownerColumn)
@@ -187,60 +117,6 @@ function boules_public_image_path($image, $assetPrefix)
     return $assetPrefix . $image;
 }
 
-// Haal aangemelde teams met naam op.
-function boules_registered_teams($pdo, $tournamentId)
-{
-    if ($tournamentId === "" || !boules_table_exists($pdo, "tournament_registrations") || !boules_table_exists($pdo, "teams")) {
-        return array();
-    }
-
-    $registrationColumns = boules_table_columns($pdo, "tournament_registrations");
-    $teamColumns = boules_table_columns($pdo, "teams");
-    $tournamentColumn = boules_first_existing_column($registrationColumns, array("tournament_id", "competition_id", "id_tournament", "id_competition"));
-    $registrationTeamColumn = boules_first_existing_column($registrationColumns, array("team_id", "id_team"));
-    $teamIdColumn = boules_first_existing_column($teamColumns, array("team_id", "id"));
-    $teamNameColumn = boules_first_existing_column($teamColumns, array("team_name", "name", "team", "naam"));
-
-    if (!$tournamentColumn || !$registrationTeamColumn || !$teamIdColumn || !$teamNameColumn) {
-        return array();
-    }
-
-    $statement = $pdo->prepare(
-        "SELECT tr.`$registrationTeamColumn` AS `id`, t.`$teamNameColumn` AS `name` " .
-        "FROM `tournament_registrations` tr " .
-        "INNER JOIN `teams` t ON t.`$teamIdColumn` = tr.`$registrationTeamColumn` " .
-        "WHERE tr.`$tournamentColumn` = ? ORDER BY t.`$teamNameColumn` ASC"
-    );
-    $statement->execute(array($tournamentId));
-
-    $teams = array();
-    foreach ($statement->fetchAll() as $row) {
-        if (isset($row["id"])) {
-            $teams[] = array(
-                "id" => (string) $row["id"],
-                "name" => isset($row["name"]) && trim((string) $row["name"]) !== "" ? (string) $row["name"] : "Team " . (string) $row["id"],
-            );
-        }
-    }
-
-    return $teams;
-}
-
-// Geef alleen team-id's terug voor aanmeldlogica.
-function boules_registered_team_ids($pdo, $tournamentId)
-{
-    $teamIds = array();
-
-    foreach (boules_registered_teams($pdo, $tournamentId) as $team) {
-        if (isset($team["id"])) {
-            $teamIds[] = (string) $team["id"];
-        }
-    }
-
-    return $teamIds;
-}
-
-// Haal competities op voor de eerste paginalaad.
 function boules_fetch_competitions($pdo, $competitionHref)
 {
     $table = boules_first_existing_table($pdo, array("tournaments", "competitions"));
@@ -248,12 +124,15 @@ function boules_fetch_competitions($pdo, $competitionHref)
         return array();
     }
 
+    if ($table === "tournaments") {
+        boules_ensure_tournament_status_column($pdo);
+    }
+
     $columns = boules_table_columns($pdo, $table);
     $id = boules_first_existing_column($columns, array("id", "tournament_id", "competition_id"));
     $title = boules_first_existing_column($columns, array("title", "name", "naam", "tournament_name"));
     $type = boules_first_existing_column($columns, array("type", "competition_type", "soort", "format", "location"));
     $startDate = boules_first_existing_column($columns, array("startDate", "start_date", "startdatum", "date", "datum"));
-    $endDate = boules_first_existing_column($columns, array("endDate", "end_date", "einddatum"));
     $tone = boules_first_existing_column($columns, array("tone", "kleur", "color", "accent"));
     $status = boules_first_existing_column($columns, array("status", "state", "aanvraag_status", "approval_status"));
 
@@ -266,7 +145,6 @@ function boules_fetch_competitions($pdo, $competitionHref)
         boules_select_alias($title, "title", "''"),
         boules_select_alias($type, "type", "'Toernooi'"),
         boules_select_alias($startDate, "startDate", "''"),
-        boules_select_alias($endDate, "endDate", "''"),
         boules_select_alias($tone, "tone", "'green'"),
         $pdo->quote($competitionHref) . " AS `href`",
     )) . " FROM `$table`";
@@ -279,14 +157,8 @@ function boules_fetch_competitions($pdo, $competitionHref)
 
     $competitions = $pdo->query($sql)->fetchAll();
 
-    // Voeg aangemelde teams toe aan elke competitie.
     foreach ($competitions as $index => $competition) {
-        $competitionId = isset($competition["id"]) ? (string) $competition["id"] : "";
-        $registeredTeams = boules_registered_teams($pdo, $competitionId);
-        $competitions[$index]["registeredTeams"] = $registeredTeams;
-        $competitions[$index]["registeredTeamIds"] = array_map(function ($team) {
-            return isset($team["id"]) ? (string) $team["id"] : "";
-        }, $registeredTeams);
+        $competitions[$index]["started"] = $id ? boules_tournament_has_matches($pdo, $competition["id"]) : false;
     }
 
     return $competitions;
@@ -294,82 +166,32 @@ function boules_fetch_competitions($pdo, $competitionHref)
 
 function boules_fetch_leaderboard($pdo)
 {
-    if (function_exists("leaderboard_fetch_team_rows") && function_exists("leaderboard_bootstrap_entries")) {
-        return leaderboard_bootstrap_entries(leaderboard_fetch_team_rows($pdo));
-    }
-
-    $table = boules_first_existing_table($pdo, array("teams", "Teams", "leaderboard"));
+    $table = boules_first_existing_table($pdo, array("leaderboard", "teams"));
     if (!$table) {
         return array();
     }
 
     $columns = boules_table_columns($pdo, $table);
-    $id = boules_first_existing_column($columns, array("team_id", "teamid", "id"));
     $team = boules_first_existing_column($columns, array("team", "team_name", "naam", "name"));
     $played = boules_first_existing_column($columns, array("played", "gespeeld", "matches_played", "wedstrijden"));
     $won = boules_first_existing_column($columns, array("won", "gewonnen", "wins"));
     $diff = boules_first_existing_column($columns, array("diff", "puntverschil", "point_diff", "doelsaldo"));
     $points = boules_first_existing_column($columns, array("points", "punten", "score"));
     $trend = boules_first_existing_column($columns, array("trend", "richting"));
-    $active = boules_first_existing_column($columns, array("active", "is_active"));
 
-    if (!$team || !$won) {
+    if (!$team) {
         return array();
     }
 
-    $join = "";
-    $playedExpression = $played ? "COALESCE(lb.`$played`, 0)" : "0";
-
-    $teamMatchTable = boules_first_existing_table($pdo, array("teamwedstrijd", "TeamWedstrijd"));
-    if (!$played && $id && $teamMatchTable) {
-        $teamMatchColumns = boules_table_columns($pdo, $teamMatchTable);
-        $teamMatchTeamColumn = boules_first_existing_column($teamMatchColumns, array("team_id", "teamid"));
-        $teamMatchMatchColumn = boules_first_existing_column($teamMatchColumns, array("wedstrijd_id", "wedstrijdid", "match_id", "matchid"));
-
-        if ($teamMatchTeamColumn && $teamMatchMatchColumn) {
-            $join = " LEFT JOIN `$teamMatchTable` tw ON tw.`$teamMatchTeamColumn` = lb.`$id`";
-            $playedExpression = "COUNT(DISTINCT tw.`$teamMatchMatchColumn`)";
-        }
-    }
-
-    $wonExpression = "COALESCE(lb.`$won`, 0)";
-    $pointsExpression = $points ? "COALESCE(lb.`$points`, 0)" : $wonExpression;
-    $diffExpression = $diff ? "COALESCE(lb.`$diff`, 0)" : "(" . $wonExpression . " - GREATEST(0, " . $playedExpression . " - " . $wonExpression . "))";
-    $trendExpression = $trend ? "lb.`$trend`" : "'flat'";
-
+    $orderColumn = $points ? $points : $team;
     $sql = "SELECT " . implode(", ", array(
-        $id ? "lb.`$id` AS `teamId`" : "lb.`$team` AS `teamId`",
-        "lb.`$team` AS `team`",
-        $playedExpression . " AS `played`",
-        $wonExpression . " AS `won`",
-        $diffExpression . " AS `diff`",
-        $pointsExpression . " AS `points`",
-        $trendExpression . " AS `trend`",
-    )) . " FROM `$table` lb" . $join;
-
-    if ($active) {
-        $sql .= " WHERE lb.`$active` = 1";
-    }
-
-    $groupColumns = array("lb.`$team`", "lb.`$won`");
-    if ($id) {
-        $groupColumns[] = "lb.`$id`";
-    }
-    if ($played) {
-        $groupColumns[] = "lb.`$played`";
-    }
-    if ($diff) {
-        $groupColumns[] = "lb.`$diff`";
-    }
-    if ($points) {
-        $groupColumns[] = "lb.`$points`";
-    }
-    if ($trend) {
-        $groupColumns[] = "lb.`$trend`";
-    }
-
-    $sql .= " GROUP BY " . implode(", ", array_unique($groupColumns));
-    $sql .= " ORDER BY `won` DESC, `played` DESC, `team` ASC";
+        boules_select_alias($team, "team", "''"),
+        boules_select_alias($played, "played", "0"),
+        boules_select_alias($won, "won", "0"),
+        boules_select_alias($diff, "diff", "0"),
+        boules_select_alias($points, "points", "0"),
+        boules_select_alias($trend, "trend", "'flat'"),
+    )) . " FROM `$table` ORDER BY `$orderColumn` DESC";
 
     return $pdo->query($sql)->fetchAll();
 }
@@ -422,11 +244,9 @@ function boules_fetch_photos($pdo, $limit, $assetPrefix)
     return $photos;
 }
 
-// Bundel alle startdata voor de frontend.
 function boules_bootstrap_data($pdo, $competitionHref, $photoLimit, $assetPrefix)
 {
     return array(
-        "auth" => boules_fetch_auth($pdo),
         "competitions" => boules_fetch_competitions($pdo, $competitionHref),
         "leaderboard" => boules_fetch_leaderboard($pdo),
         "photos" => boules_fetch_photos($pdo, $photoLimit, $assetPrefix),

@@ -3,8 +3,31 @@
 // Start een nieuwe PHP-sessie of hervat een bestaande om gegevens (zoals geselecteerde datums) te onthouden tussen pagina-aanvragen.
 session_start();
 
+require_once __DIR__ . "/../includes/db.php";
+$competities = [];
+
+$stmt = $pdo->prepare("
+    SELECT name, start_date, end_date
+    FROM tournaments
+    WHERE status = 'geaccepteert'
+ 
+");
+
+$stmt->execute();
+
+$resultaten = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($resultaten as $row) {
+    $datum = date('Y-m-d', strtotime($row['start_date']));
+    $competities[$datum][] = $row['name'];
+}
 
 
+
+foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+    $datum = date('Y-m-d', strtotime($row['start_date']));
+    $competities[$datum][] = $row['name'];
+}
 /* ===== SESSION ===== */
 
 
@@ -23,6 +46,44 @@ function is_valid_calendar_date_input($datum)
     // Controleer of de invoer een tekstreeks (string) is én voldoet aan de reguliere expressie voor 4 cijfers, een streepje, 2 cijfers, een streepje, en weer 2 cijfers.
     return is_string($datum) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $datum);
 }
+
+function calendar_wedstrijd_id()
+{
+    $wedstrijdId = isset($_POST['wedstrijd_id'])
+        ? trim((string)$_POST['wedstrijd_id'])
+        : (isset($_GET['wedstrijd_id']) ? trim((string)$_GET['wedstrijd_id']) : "");
+
+    return $wedstrijdId !== "" && is_numeric($wedstrijdId) ? $wedstrijdId : "";
+}
+
+function calendar_update_wedstrijd_datum($wedstrijdId, array $datums)
+{
+    global $pdo;
+
+    if ($wedstrijdId === "" || count($datums) === 0) {
+        return;
+    }
+
+    $datum = reset($datums);
+    if (!is_valid_calendar_date_input($datum)) {
+        return;
+    }
+
+    $statement = $pdo->prepare("UPDATE `wedstrijden` SET `datum` = ? WHERE `wedstrijd_id` = ?");
+    $statement->execute(array($datum . " 00:00:00", $wedstrijdId));
+}
+
+function calendar_url($maand, $jaar, $extra = array())
+{
+    $params = array_merge(array(
+        "maand" => (int)$maand,
+        "jaar" => (int)$jaar,
+    ), $extra);
+
+    return "?" . http_build_query($params);
+}
+
+$wedstrijdId = calendar_wedstrijd_id();
 
 
 
@@ -54,6 +115,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['gekozen_datums'] = array_unique(
         array_merge($_SESSION['gekozen_datums'], $geselecteerd) // Voeg de arrays samen.
     );
+
+    calendar_update_wedstrijd_datum($wedstrijdId, array_values($geselecteerd));
 }
 
 
@@ -97,7 +160,7 @@ if (isset($_GET['remove'])) {
 
     // Stuur een HTTP-header om de browser te herladen naar de kalenderpagina met de juiste maand en jaar, zodat de URL schoon blijft.
     header(
-        "Location: kalender.php?maand=$redirectMaand&jaar=$redirectJaar"
+        "Location: kalender.php" . calendar_url($redirectMaand, $redirectJaar, $wedstrijdId !== "" ? array("wedstrijd_id" => $wedstrijdId) : array())
     );
 
     // Stop de uitvoering van het PHP-script direct na het verzenden van de redirect-header.
@@ -254,9 +317,9 @@ require_once __DIR__ . "/../includes/header.php";
         <div class="kalender">
             <div class="header">
                 <a
-                        class="arrow"
-                        href="?maand=<?php echo $vorigeMaand; ?>&amp;jaar=<?php echo $vorigeJaar; ?>"
-                        aria-label="Vorige maand"
+                    class="arrow"
+                    href="<?php echo htmlspecialchars(calendar_url($vorigeMaand, $vorigeJaar, $wedstrijdId !== "" ? array("wedstrijd_id" => $wedstrijdId) : array())); ?>"
+                    aria-label="Vorige maand"
                 >
                     <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
                 </a>
@@ -270,9 +333,9 @@ require_once __DIR__ . "/../includes/header.php";
 
 
                 <a
-                        class="arrow"
-                        href="?maand=<?php echo $volgendeMaand; ?>&amp;jaar=<?php echo $volgendeJaar; ?>"
-                        aria-label="Volgende maand"
+                    class="arrow"
+                    href="<?php echo htmlspecialchars(calendar_url($volgendeMaand, $volgendeJaar, $wedstrijdId !== "" ? array("wedstrijd_id" => $wedstrijdId) : array())); ?>"
+                    aria-label="Volgende maand"
                 >
                     <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                 </a>
@@ -281,6 +344,10 @@ require_once __DIR__ . "/../includes/header.php";
 
 
             <form method="POST" class="kalender-form">
+                <?php if ($wedstrijdId !== ""): ?>
+                    <input type="hidden" name="wedstrijd_id" value="<?php echo htmlspecialchars($wedstrijdId); ?>">
+                <?php endif; ?>
+
                 <div class="grid">
                     <div class="weekdag">Ma</div>
                     <div class="weekdag">Di</div>
@@ -325,6 +392,7 @@ require_once __DIR__ . "/../includes/header.php";
                             $datum,
                             $_SESSION['gekozen_datums']
                         );
+                        $dagCompetities = $competities[$datum] ?? [];
                         ?>
 
 
@@ -349,9 +417,19 @@ require_once __DIR__ . "/../includes/header.php";
 
 
 
-                            <span>
+                            <span class="day-number">
                                 <?php echo $dag; ?>
+
                             </span>
+
+                            <?php foreach ($dagCompetities as $competitie): ?>
+                                <div class="calendar-event">
+                                    <?php echo htmlspecialchars($competitie); ?>
+                                </div>
+                            <?php endforeach; ?>
+
+
+
                         </label>
                     <?php endfor; ?>
                 </div>
@@ -387,9 +465,9 @@ require_once __DIR__ . "/../includes/header.php";
 
 
                             <a
-                                    class="remove-btn"
-                                    href="?maand=<?php echo $maand; ?>&amp;jaar=<?php echo $jaar; ?>&amp;remove=<?php echo urlencode($datum); ?>"
-                                    aria-label="Verwijder <?php echo htmlspecialchars(date('d-m-Y', strtotime($datum))); ?>"
+                                class="remove-btn"
+                                href="<?php echo htmlspecialchars(calendar_url($maand, $jaar, array_merge(array("remove" => $datum), $wedstrijdId !== "" ? array("wedstrijd_id" => $wedstrijdId) : array()))); ?>"
+                                aria-label="Verwijder <?php echo htmlspecialchars(date('d-m-Y', strtotime($datum))); ?>"
                             >
                                 <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                             </a>
