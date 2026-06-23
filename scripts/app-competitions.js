@@ -15,6 +15,12 @@ export function createCompetitionsModule({
     let competitionFormMode = "admin";
     const competitionMatchesCache = new Map();
     let matchesModalElement = null;
+    const competitionToneColors = {
+        green: "#7b9151",
+        yellow: "#e7b228",
+        red: "#c74b3f",
+        olive: "#526833"
+    };
 
     // Admins mogen competities beheren.
     function canManageCompetitions() {
@@ -64,6 +70,12 @@ export function createCompetitionsModule({
 
     function competitionIconForTone(tone) {
         return competitionToneMap[tone] || "fa-calendar-days";
+    }
+
+    function competitionToneInputValue(tone) {
+        const normalizedTone = normalizeCompetitionTone(tone);
+
+        return isHexColor(normalizedTone) ? normalizedTone : (competitionToneColors[normalizedTone] || "#7b9151");
     }
 
     // Toon feedback onder het competitieformulier.
@@ -844,7 +856,7 @@ export function createCompetitionsModule({
         refs.competitionTypeInput.value = competition ? getLocalizedText(competition.type, state.lang) : "";
         refs.competitionDateInput.value = competition?.startDate || "";
         refs.competitionEndDateInput.value = competition?.endDate || "";
-        refs.competitionToneInput.value = competition && isHexColor(competition.tone) ? competition.tone : "#7b9151";
+        refs.competitionToneInput.value = competition ? competitionToneInputValue(competition.tone) : "#7b9151";
 
         syncCompetitionFormUI();
 

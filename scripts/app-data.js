@@ -74,7 +74,15 @@ function normalizePhoto(photo) {
     };
 }
 
+function isHexColor(value) {
+    return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
+}
+
 function normalizeCompetitionTone(tone) {
+    if (isHexColor(tone)) {
+        return tone.toLowerCase();
+    }
+
     return competitionToneMap[tone] ? tone : "green";
 }
 

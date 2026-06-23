@@ -207,12 +207,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
 
                 <label class="upload-label">
                     <span data-i18n="competitions.form.style">Accentkleur</span>
-                    <select class="competition-select" data-competition-tone>
-                        <option value="green" data-i18n="competitions.form.styleGreen">Groen</option>
-                        <option value="yellow" data-i18n="competitions.form.styleYellow">Geel</option>
-                        <option value="red" data-i18n="competitions.form.styleRed">Rood</option>
-                        <option value="olive" data-i18n="competitions.form.styleOlive">Olijf</option>
-                    </select>
+                    <input type="color" class="competition-color-picker" data-competition-tone value="#7b9151">
                 </label>
 
                 <div class="upload-actions">
