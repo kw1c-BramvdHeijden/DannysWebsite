@@ -2,7 +2,6 @@ export function createUiModule({
     refs,
     state,
     t,
-    devAdminAccount,
     normalizeLanguage,
     normalizeRole,
     saveAuth,
@@ -14,8 +13,11 @@ export function createUiModule({
     syncCompetitionFormUI,
     closeUploadModal,
     closeCompetitionModal,
+    closeTeamModal,
+    syncTeamButtons,
     closeLeaderboardModal,
-    canManageCompetitions
+    canManageCompetitions,
+    onAuthStateChanged = () => {}
 }) {
     let languageMenuTimer = 0;
     let accountMenuTimer = 0;
@@ -41,6 +43,28 @@ export function createUiModule({
             };
         })
         .filter(Boolean);
+
+    function getAuthApiUrl() {
+        const script = document.querySelector("script[type='module'][src*='scripts/']");
+        return script ? new URL("../api/auth.php", script.src).toString() : "api/auth.php";
+    }
+
+    async function requestAuth(payload) {
+        const response = await fetch(getAuthApiUrl(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.user) {
+            throw new Error(result.error || t("auth.modal.feedback.loginInvalid"));
+        }
+
+        return result;
+    }
 
     function getAccountName() {
         return state.user?.name || t("account.name");
@@ -252,6 +276,10 @@ export function createUiModule({
         if (refs.competitionCreateButton) {
             refs.competitionCreateButton.hidden = !canManage;
         }
+
+        refs.competitionRequestButtons.forEach((button) => {
+            button.hidden = !state.loggedIn || canManage;
+        });
     }
 
     function syncAuthUI() {
@@ -272,6 +300,7 @@ export function createUiModule({
 
         syncAccountUI();
         syncCompetitionAdminUI();
+        syncTeamButtons();
     }
 
     function setAuthMode(mode) {
@@ -417,8 +446,35 @@ export function createUiModule({
         applyTranslations();
     }
 
-    function setRole(role) {
-        state.role = normalizeRole(role);
+    async function setRole(role) {
+        const nextRole = normalizeRole(role);
+
+        if (nextRole === "player") {
+            state.role = "player";
+            closeCompetitionModal();
+            if (state.loggedIn && state.user) {
+                saveAuth({
+                    loggedIn: true,
+                    role: state.role,
+                    accountRole: state.accountRole || state.role,
+                    user: state.user
+                });
+            }
+            syncAccountUI();
+            syncCompetitionAdminUI();
+            renderCompetitions();
+            renderPhotos();
+            closeAccountMenu();
+            return;
+        }
+
+        if (nextRole === "admin" && state.accountRole !== "admin") {
+            window.alert("U bent niet gemachtigd als admin");
+            closeAccountMenu();
+            return;
+        }
+
+        state.role = nextRole;
 
         if (state.role !== "admin") {
             closeCompetitionModal();
@@ -428,6 +484,7 @@ export function createUiModule({
             saveAuth({
                 loggedIn: true,
                 role: state.role,
+                accountRole: state.accountRole || state.role,
                 user: state.user
             });
         }
@@ -444,11 +501,13 @@ export function createUiModule({
 
         if (!state.loggedIn) {
             state.role = "player";
+            state.accountRole = "player";
             state.user = null;
             saveAuth(null);
             closeAuthModal();
             closeUploadModal();
             closeCompetitionModal();
+            closeTeamModal();
             closeLeaderboardModal();
             closeAccountMenu();
         }
@@ -457,12 +516,14 @@ export function createUiModule({
         renderLeaderboard();
         renderCompetitions();
         renderPhotos();
+        onAuthStateChanged(state.loggedIn);
     }
 
     function setAuthenticatedUser(user, role = "player") {
         const displayName = user?.name?.trim() || t("account.name");
 
         state.role = normalizeRole(role);
+        state.accountRole = normalizeRole(role);
         state.user = {
             id: user?.id || displayName.toLowerCase().replace(/\s+/g, "-"),
             name: displayName,
@@ -472,6 +533,7 @@ export function createUiModule({
         saveAuth({
             loggedIn: true,
             role: state.role,
+            accountRole: state.accountRole,
             user: state.user
         });
 
@@ -565,14 +627,19 @@ export function createUiModule({
         }
     }
 
-    function handleAuthFormSubmit(form, event) {
+    async function handleAuthFormSubmit(form, event) {
         event.preventDefault();
 
         const mode = form.dataset.authForm === "signup" ? "signup" : "login";
         const feedback = refs.authFeedbackElements.find((element) => element.dataset.authFeedback === mode);
+        const submitButton = form.querySelector("button[type='submit']");
         if (feedback) {
             feedback.textContent = "";
             feedback.classList.remove("is-success");
+        }
+
+        if (submitButton) {
+            submitButton.disabled = true;
         }
 
         if (mode === "login") {
@@ -585,16 +652,27 @@ export function createUiModule({
                 if (feedback) {
                     feedback.textContent = t("auth.modal.feedback.loginMissing");
                 }
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
                 return;
             }
 
-            if (devAdminAccount && identity === devAdminAccount.username && password === devAdminAccount.password) {
-                setAuthenticatedUser(devAdminAccount.user, devAdminAccount.role);
-                return;
-            }
-
-            if (feedback) {
-                feedback.textContent = t("auth.modal.feedback.backendPending");
+            try {
+                const result = await requestAuth({
+                    action: "login",
+                    identity,
+                    password
+                });
+                setAuthenticatedUser(result.user, result.role);
+            } catch (error) {
+                if (feedback) {
+                    feedback.textContent = error.message;
+                }
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
             }
             return;
         }
@@ -603,14 +681,19 @@ export function createUiModule({
         const emailInput = form.querySelector("[data-auth-signup-email]");
         const passwordInput = form.querySelector("[data-auth-signup-password]");
         const confirmInput = form.querySelector("[data-auth-signup-password-confirm]");
+        const emailNotificationsInput = form.querySelector("[data-auth-signup-email-notifications]");
         const name = nameInput instanceof HTMLInputElement ? nameInput.value.trim() : "";
         const email = emailInput instanceof HTMLInputElement ? emailInput.value.trim() : "";
         const password = passwordInput instanceof HTMLInputElement ? passwordInput.value : "";
         const passwordConfirm = confirmInput instanceof HTMLInputElement ? confirmInput.value : "";
+        const emailNotifications = emailNotificationsInput instanceof HTMLInputElement ? emailNotificationsInput.checked : false;
 
         if (!name || !email || !password || !passwordConfirm) {
             if (feedback) {
                 feedback.textContent = t("auth.modal.feedback.signupMissing");
+            }
+            if (submitButton) {
+                submitButton.disabled = false;
             }
             return;
         }
@@ -619,6 +702,9 @@ export function createUiModule({
             if (feedback) {
                 feedback.textContent = t("auth.modal.feedback.passwordShort");
             }
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
             return;
         }
 
@@ -626,11 +712,29 @@ export function createUiModule({
             if (feedback) {
                 feedback.textContent = t("auth.modal.feedback.passwordMismatch");
             }
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
             return;
         }
 
-        if (feedback) {
-            feedback.textContent = t("auth.modal.feedback.backendPending");
+        try {
+            const result = await requestAuth({
+                action: "signup",
+                name,
+                email,
+                password,
+                emailNotifications
+            });
+            setAuthenticatedUser(result.user, result.role);
+        } catch (error) {
+            if (feedback) {
+                feedback.textContent = error.message;
+            }
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
         }
     }
 

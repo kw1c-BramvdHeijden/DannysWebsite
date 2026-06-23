@@ -3,6 +3,7 @@ export function bindEvents({
     state,
     photos,
     competitions,
+    teams,
     leaderboard,
     ui,
     t
@@ -13,6 +14,11 @@ export function bindEvents({
 
     refs.navLinks.forEach((link) => {
         link.addEventListener("click", () => {
+            const href = link.getAttribute("href") || "";
+            if (href.indexOf("competities") !== -1) {
+                teams.preloadUsers();
+            }
+
             const targetId = link.getAttribute("href")?.replace("#", "");
             if (targetId) {
                 ui.setCurrentNavLink(targetId);
@@ -181,10 +187,43 @@ export function bindEvents({
         competitions.openCompetitionModal();
     });
 
+    refs.competitionRequestButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            competitions.openCompetitionRequestModal();
+        });
+    });
+
     refs.competitionCancelButtons.forEach((button) => {
         button.addEventListener("click", () => {
             competitions.closeCompetitionModal();
         });
+    });
+
+    refs.competitionMatchesCloseButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            competitions.closeCompetitionMatchesModal();
+        });
+    });
+
+    refs.teamOpenButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            teams.openTeamModal();
+        });
+    });
+
+    refs.teamCloseButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            teams.closeTeamModal();
+        });
+    });
+
+    refs.teamUserToggle?.addEventListener("click", () => {
+        teams.toggleUserMenu();
+    });
+
+    refs.teamUserSearch?.addEventListener("input", (event) => {
+        const input = event.target;
+        teams.filterUsers(input instanceof HTMLInputElement ? input.value : "");
     });
 
     refs.leaderboardOpenButton?.addEventListener("click", () => {
@@ -211,10 +250,39 @@ export function bindEvents({
         competitions.saveCompetition(event);
     });
 
+    refs.teamForm?.addEventListener("submit", (event) => {
+        teams.submitTeam(event);
+    });
+
+    refs.teamList?.addEventListener("click", (event) => {
+        const target = event.target;
+
+        if (!(target instanceof Element)) {
+            return;
+        }
+
+        const deleteButton = target.closest("[data-team-delete]");
+        if (deleteButton) {
+            teams.deleteTeam(deleteButton.getAttribute("data-team-delete"));
+        }
+    });
+
     refs.competitionGrid?.addEventListener("click", (event) => {
         const target = event.target;
 
         if (!(target instanceof Element)) {
+            return;
+        }
+
+        const startButton = target.closest("[data-competition-start]");
+        if (startButton) {
+            competitions.startCompetition(startButton.getAttribute("data-competition-start"));
+            return;
+        }
+
+        const moreLink = target.closest("[data-competition-more]");
+        if (moreLink && competitions.showCompetitionInfo(moreLink.getAttribute("data-competition-more"))) {
+            event.preventDefault();
             return;
         }
 
@@ -227,6 +295,52 @@ export function bindEvents({
         const deleteButton = target.closest("[data-competition-delete]");
         if (deleteButton) {
             competitions.deleteCompetition(deleteButton.getAttribute("data-competition-delete"));
+        }
+    });
+
+    refs.competitionRequestsGrid?.addEventListener("click", (event) => {
+        const target = event.target;
+
+        if (!(target instanceof Element)) {
+            return;
+        }
+
+        const acceptButton = target.closest("[data-competition-request-accept]");
+        if (acceptButton) {
+            competitions.acceptCompetitionRequest(acceptButton.getAttribute("data-competition-request-accept"));
+            return;
+        }
+
+        const rejectButton = target.closest("[data-competition-request-reject]");
+        if (rejectButton) {
+            competitions.rejectCompetitionRequest(rejectButton.getAttribute("data-competition-request-reject"));
+        }
+    });
+
+    refs.competitionMatchesGrid?.addEventListener("click", (event) => {
+        const target = event.target;
+
+        if (!(target instanceof Element)) {
+            return;
+        }
+
+        const approveButton = target.closest("[data-match-approve]");
+        if (approveButton) {
+            competitions.verifyCompetitionMatch(
+                approveButton.getAttribute("data-competition-id"),
+                approveButton.getAttribute("data-match-approve"),
+                true
+            );
+            return;
+        }
+
+        const rejectButton = target.closest("[data-match-reject]");
+        if (rejectButton) {
+            competitions.verifyCompetitionMatch(
+                rejectButton.getAttribute("data-competition-id"),
+                rejectButton.getAttribute("data-match-reject"),
+                false
+            );
         }
     });
 
@@ -273,6 +387,14 @@ export function bindEvents({
             }
         }
 
+        if (refs.teamModal && !refs.teamModal.hidden && refs.teamUserMenu && refs.teamUserToggle) {
+            const clickedInMenu = refs.teamUserMenu.contains(target);
+            const clickedToggle = refs.teamUserToggle.contains(target);
+            if (!clickedInMenu && !clickedToggle) {
+                teams.closeUserMenu();
+            }
+        }
+
         if (window.innerWidth <= 920 && refs.siteHeader && !refs.siteHeader.contains(target) && refs.body.classList.contains("nav-open")) {
             ui.closeMobileMenu();
         }
@@ -290,6 +412,16 @@ export function bindEvents({
 
         if (refs.competitionModal && !refs.competitionModal.hidden) {
             competitions.closeCompetitionModal();
+            return;
+        }
+
+        if (refs.competitionMatchesModal && !refs.competitionMatchesModal.hidden) {
+            competitions.closeCompetitionMatchesModal();
+            return;
+        }
+
+        if (refs.teamModal && !refs.teamModal.hidden) {
+            teams.closeTeamModal();
             return;
         }
 

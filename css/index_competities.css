@@ -1,0 +1,940 @@
+body.competition-modal-open {
+    overflow: hidden;
+}
+
+body.team-modal-open {
+    overflow: hidden;
+}
+
+body.matches-modal-open {
+    overflow: hidden;
+}
+
+/* Paneel rond competitie-overzichten. */
+.competitions-panel {
+    padding: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.68);
+    border-radius: 28px;
+    background: var(--panel);
+    box-shadow: var(--shadow-soft);
+    opacity: 0;
+    animation: reveal-up 740ms 320ms both;
+}
+
+.panel-admin-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(123, 145, 81, 0.14);
+    color: var(--green-deep);
+    font-weight: 700;
+}
+
+.panel-admin-indicator i,
+.panel-admin-button i {
+    font-size: 1rem;
+}
+
+/* Grid met aankomende competities. */
+.competition-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 16px;
+}
+
+/* Kaart voor één competitie. */
+.competition-card {
+    position: relative;
+    display: grid;
+    gap: 16px;
+    padding: 18px;
+    border: 1px solid rgba(134, 109, 74, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.76);
+    transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
+}
+
+.competition-card:hover,
+.competition-card:focus-within {
+    transform: translateY(-4px);
+    border-color: rgba(123, 145, 81, 0.34);
+    box-shadow: 0 18px 26px rgba(59, 46, 31, 0.1);
+}
+
+/* Kop met kleuricoon en titel. */
+.competition-card-header {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding-right: 92px;
+}
+
+/* Gekleurd competitie-icoon. */
+.competition-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    color: var(--white);
+}
+
+.competition-icon i {
+    font-size: 1.45rem;
+}
+
+.competition-icon.green {
+    background: var(--green);
+}
+
+.competition-icon.yellow {
+    background: #e7b228;
+}
+
+.competition-icon.red {
+    background: var(--red);
+}
+
+.competition-icon.olive {
+    background: var(--green-deep);
+}
+
+.competition-card h3 {
+    min-width: 0;
+    margin: 0;
+    font-size: 1.28rem;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.competition-card p {
+    margin: 0 0 6px;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+/* Locatie en datums. */
+.competition-details {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+
+.competition-detail-item {
+    min-width: 0;
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(246, 242, 233, 0.74);
+}
+
+.competition-details dt {
+    color: var(--green-deep);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.competition-details dd {
+    min-width: 0;
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 0.94rem;
+    overflow-wrap: anywhere;
+}
+
+/* Aangemelde teams bij een competitie. */
+.competition-registered-teams {
+    display: grid;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(134, 109, 74, 0.12);
+}
+
+.competition-registered-teams h4 {
+    margin: 0;
+    color: var(--green-deep);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.competition-registered-teams ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.competition-registered-teams li {
+    min-width: 0;
+    max-width: 100%;
+    padding: 8px 10px;
+    border: 1px solid rgba(123, 145, 81, 0.22);
+    border-radius: 999px;
+    background: rgba(123, 145, 81, 0.12);
+    color: var(--green-deep);
+    font-size: 0.9rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.competition-registered-empty {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+/* Team aanmelden voor een competitie. */
+.competition-team-signup {
+    display: grid;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(134, 109, 74, 0.12);
+}
+
+.competition-team-signup p {
+    margin: 0;
+    font-weight: 700;
+}
+
+.competition-team-signup .button {
+    width: 100%;
+}
+
+.competition-matches-panel {
+    display: grid;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(134, 109, 74, 0.12);
+}
+
+.competition-matches-panel h4 {
+    margin: 0;
+    color: var(--green-deep);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.competition-matches-panel ol {
+    display: grid;
+    gap: 8px;
+    max-height: 332px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 6px;
+}
+
+.competition-matches-panel li {
+    display: grid;
+    grid-template-columns: minmax(110px, 0.35fr) minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(246, 242, 233, 0.74);
+}
+
+.competition-matches-panel li span {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.competition-matches-panel li strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.competition-card a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    color: var(--green-deep);
+    font-weight: 700;
+}
+
+.matches-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 84;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.matches-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(22, 25, 23, 0.44);
+    backdrop-filter: blur(8px);
+}
+
+.matches-modal-dialog {
+    position: relative;
+    width: min(100%, 680px);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 28px;
+    background: rgba(251, 245, 236, 0.98);
+    box-shadow: var(--shadow-strong);
+}
+
+.matches-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.82);
+    cursor: pointer;
+}
+
+.matches-modal-content {
+    display: grid;
+    gap: 16px;
+    padding: 34px 30px 30px;
+}
+
+.matches-modal-list {
+    display: grid;
+    gap: 8px;
+    max-height: 332px;
+    margin: 0;
+    padding: 0 6px 0 0;
+    list-style: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.matches-modal-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(246, 242, 233, 0.74);
+}
+
+.matches-reschedule-status {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--green-deep);
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.matches-modal-match {
+    display: grid;
+    grid-template-columns: minmax(120px, 0.35fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-width: 0;
+}
+
+.matches-modal-match span {
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.matches-modal-match strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.matches-reschedule-button {
+    min-width: 142px;
+    padding: 10px 12px;
+}
+
+.matches-response-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: end;
+}
+
+.matches-response-button {
+    min-width: 126px;
+    padding: 10px 12px;
+}
+
+/* Admin-knoppen op een competitiekaart. */
+.competition-card-actions {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    gap: 8px;
+}
+
+.competition-action-button {
+    display: inline-grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(255, 255, 255, 0.74);
+    border-radius: 50%;
+    background: rgba(31, 35, 33, 0.8);
+    color: var(--white);
+    box-shadow: 0 14px 20px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    transition: transform var(--ease), box-shadow var(--ease), background-color var(--ease);
+}
+
+.competition-action-button:hover,
+.competition-action-button:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 24px rgba(0, 0, 0, 0.18);
+}
+
+.competition-action-button.is-delete:hover,
+.competition-action-button.is-delete:focus-visible {
+    background: rgba(171, 46, 39, 0.94);
+}
+
+/* Lege staat voor lijsten. */
+.competition-empty {
+    display: grid;
+    place-items: center;
+    min-height: 220px;
+    padding: 22px;
+    border: 1px dashed rgba(123, 145, 81, 0.42);
+    border-radius: 18px;
+    text-align: center;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.32);
+}
+
+/* Call-to-action banner. */
+.challenge-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 16px;
+    padding: 18px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(240, 196, 88, 0.32), rgba(123, 145, 81, 0.24));
+}
+
+.challenge-copy {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.challenge-copy h3 {
+    margin: 0 0 6px;
+    font-size: 1.2rem;
+}
+
+.challenge-copy p {
+    margin: 0;
+    color: #5c594f;
+}
+
+.challenge-actions {
+    display: grid;
+    gap: 10px;
+    justify-items: end;
+}
+
+.challenge-actions .button {
+    min-width: 220px;
+}
+
+.challenge-boules {
+    position: relative;
+    width: 52px;
+    height: 34px;
+    flex-shrink: 0;
+}
+
+.challenge-boules::before,
+.challenge-boules::after {
+    content: "";
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #444;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff, #c9c2b8 60%, #a8a094 100%);
+}
+
+.challenge-boules::before {
+    left: 0;
+    top: 4px;
+}
+
+.challenge-boules::after {
+    left: 20px;
+    top: 0;
+}
+
+.competition-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 82;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 220ms ease, visibility 220ms ease;
+}
+
+.competition-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.competition-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(22, 25, 23, 0.44);
+    backdrop-filter: blur(8px);
+}
+
+.competition-modal-dialog {
+    position: relative;
+    width: min(100%, 640px);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 30px;
+    background: rgba(251, 245, 236, 0.98);
+    box-shadow: var(--shadow-strong);
+    transform: translateY(24px) scale(0.98);
+    transition: transform 240ms ease;
+}
+
+.competition-modal.is-open .competition-modal-dialog {
+    transform: translateY(0) scale(1);
+}
+
+.competition-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.82);
+    cursor: pointer;
+    transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
+}
+
+.competition-modal-close:hover,
+.competition-modal-close:focus-visible {
+    transform: scale(1.04);
+    border-color: rgba(203, 53, 44, 0.34);
+    box-shadow: 0 12px 20px rgba(59, 46, 31, 0.12);
+}
+
+.competition-form {
+    display: grid;
+    gap: 18px;
+    padding: 34px 30px 30px;
+}
+
+.competition-form h2 {
+    margin: 0;
+    font-size: clamp(1.9rem, 3vw, 2.5rem);
+    line-height: 1.02;
+}
+
+.competition-select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid rgba(134, 109, 74, 0.16);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.84);
+    color: var(--ink);
+    outline: none;
+    transition: border-color var(--ease), box-shadow var(--ease), background-color var(--ease);
+}
+
+.competition-select:focus {
+    border-color: rgba(123, 145, 81, 0.4);
+    box-shadow: 0 0 0 4px rgba(123, 145, 81, 0.12);
+    background: var(--white);
+}
+
+.competition-color-picker {
+    width: 100%;
+    height: 52px;
+    padding: 6px;
+    border: 1px solid rgba(134, 109, 74, 0.16);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.84);
+    cursor: pointer;
+}
+
+.competition-color-picker:focus {
+    outline: none;
+    border-color: rgba(123, 145, 81, 0.4);
+    box-shadow: 0 0 0 4px rgba(123, 145, 81, 0.12);
+}
+
+.team-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 83;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 220ms ease, visibility 220ms ease;
+}
+
+.team-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.team-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(22, 25, 23, 0.44);
+    backdrop-filter: blur(8px);
+}
+
+.team-modal-dialog {
+    position: relative;
+    width: min(100%, 980px);
+    height: min(720px, calc(100vh - 48px));
+    max-height: calc(100vh - 48px);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 30px;
+    background: rgba(251, 245, 236, 0.98);
+    box-shadow: var(--shadow-strong);
+    transform: translateY(24px) scale(0.98);
+    transition: transform 240ms ease;
+}
+
+.team-modal.is-open .team-modal-dialog {
+    transform: translateY(0) scale(1);
+}
+
+.team-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.82);
+    cursor: pointer;
+    transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
+}
+
+.team-modal-close:hover,
+.team-modal-close:focus-visible {
+    transform: scale(1.04);
+    border-color: rgba(203, 53, 44, 0.34);
+    box-shadow: 0 12px 20px rgba(59, 46, 31, 0.12);
+}
+
+.team-modal-shell {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+    gap: 20px;
+    height: 100%;
+    min-height: 0;
+    padding: 34px 30px 30px;
+}
+
+.team-form {
+    display: grid;
+    align-content: start;
+    gap: 18px;
+    min-height: 0;
+}
+
+.team-form h2 {
+    margin: 0;
+    font-size: clamp(1.9rem, 3vw, 2.45rem);
+    line-height: 1.02;
+}
+
+.team-user-picker {
+    position: relative;
+    display: grid;
+    gap: 8px;
+}
+
+.team-user-picker-label {
+    color: var(--muted);
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
+.team-user-picker-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid rgba(134, 109, 74, 0.16);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.84);
+    color: var(--ink);
+    cursor: pointer;
+    text-align: left;
+}
+
+.team-user-menu {
+    position: absolute;
+    z-index: 4;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    padding: 10px;
+    border: 1px solid rgba(134, 109, 74, 0.16);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 18px 28px rgba(59, 46, 31, 0.14);
+}
+
+.team-user-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 9px 10px;
+    border: 1px solid rgba(134, 109, 74, 0.14);
+    border-radius: 10px;
+    background: rgba(246, 242, 233, 0.76);
+    color: var(--muted);
+}
+
+.team-user-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+}
+
+.team-user-menu-status {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.team-user-options {
+    display: grid;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.team-user-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.team-user-option:hover,
+.team-user-option:focus-within {
+    background: rgba(123, 145, 81, 0.12);
+}
+
+.team-overview {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    min-height: 0;
+    gap: 12px;
+    padding: 18px;
+    border: 1px solid rgba(134, 109, 74, 0.12);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.58);
+}
+
+.team-overview h3 {
+    margin: 0;
+    font-size: 1.35rem;
+}
+
+.team-overview-status {
+    min-height: 1.3em;
+    margin: 0;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.team-list {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.team-card {
+    display: grid;
+    gap: 6px;
+    padding: 14px;
+    border: 1px solid rgba(134, 109, 74, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.74);
+}
+
+.team-card h4,
+.team-card p {
+    margin: 0;
+}
+
+.team-card h4 {
+    font-size: 1rem;
+}
+
+.team-card p {
+    color: var(--muted);
+}
+
+.team-card-meta {
+    color: var(--green-deep);
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.team-empty {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+@media (max-width: 1120px) {
+    .competition-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .team-modal-shell {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+    }
+
+    .team-list {
+        max-height: 260px;
+    }
+}
+
+@media (max-width: 700px) {
+    .competition-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .competition-card-header {
+        padding-right: 0;
+    }
+
+    .competition-details {
+        grid-template-columns: 1fr;
+    }
+
+    .competition-matches-panel li {
+        grid-template-columns: 1fr;
+    }
+
+    .matches-modal {
+        padding: 14px;
+    }
+
+    .matches-modal-content {
+        padding: 28px 18px 22px;
+    }
+
+    .matches-modal-list li {
+        grid-template-columns: 1fr;
+    }
+
+    .matches-modal-match {
+        grid-template-columns: 1fr;
+    }
+
+    .matches-reschedule-button {
+        width: 100%;
+    }
+
+    .matches-response-actions {
+        justify-content: stretch;
+    }
+
+    .matches-response-button {
+        flex: 1;
+    }
+
+    .challenge-banner {
+        display: grid;
+        gap: 10px;
+        justify-items: start;
+    }
+
+    .challenge-actions {
+        width: 100%;
+        justify-items: start;
+    }
+
+    .challenge-actions .button {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .competition-form {
+        padding: 28px 18px 22px;
+    }
+
+    .team-modal {
+        padding: 14px;
+    }
+
+    .team-modal-shell {
+        padding: 28px 18px 22px;
+    }
+
+    .competitions-panel {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+}

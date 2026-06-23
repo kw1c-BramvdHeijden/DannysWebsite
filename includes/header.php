@@ -1,20 +1,32 @@
 <?php
-function render_site_header(string $activePage = "home", bool $isRoot = true)
+function render_site_header($activePage = "home", $isRoot = true)
 {
     $indexHome = $isRoot ? "#home" : "../index.php#home";
     $competitions = $isRoot ? "pages/competities.php" : "competities.php";
+    $scoreboard = $isRoot ? "pages/scoreboard.php" : "scoreboard.php";
     $rules = $isRoot ? "pages/spelregels.php" : "spelregels.php";
     $photos = $isRoot ? "pages/fotos.php" : "fotos.php";
 
-    $current = function (string $page) use ($activePage): string {
+    $current = function ($page) use ($activePage) {
         return $activePage === $page ? ' class="is-current"' : "";
     };
+
+    // Page-specific anchors keep the shared auth modal behavior unchanged.
+    $authForgotLinks = [
+        "home" => "#home",
+        "competitions" => "#competities",
+        "scoreboard" => "#scoreboard",
+        "photos" => "#photos",
+        "rules" => "#regels",
+    ];
+
+    $authForgotHref = isset($authForgotLinks[$activePage]) ? $authForgotLinks[$activePage] : $indexHome;
     ?>
     <header class="site-header">
         <a class="brand" href="<?= htmlspecialchars($indexHome) ?>" data-i18n-aria-label="nav.brandHome" aria-label="Boules Competities home">
-            <span class="brand-ball" aria-hidden="true"></span>
+            <img src="../images/jeudeboules.png" alt="logo" class="logo">
             <span class="brand-copy">
-                <strong>BOULES</strong>
+                <strong>Jeu de Dabs</strong>
                 <small data-i18n="brand.subtitle">COMPETITIES</small>
             </span>
         </a>
@@ -35,9 +47,13 @@ function render_site_header(string $activePage = "home", bool $isRoot = true)
                     <i class="fa-solid fa-trophy" aria-hidden="true"></i>
                     <span data-i18n="nav.competitions">Competities</span>
                 </a>
+                <a href="<?= htmlspecialchars($scoreboard) ?>"<?= $current("scoreboard") ?>>
+                    <i class="fa-solid fa-clipboard-list" aria-hidden="true"></i>
+                    <span data-i18n="nav.scoreboard">Scoreboard</span>
+                </a>
                 <a href="<?= htmlspecialchars($rules) ?>"<?= $current("rules") ?>>
                     <i class="fa-solid fa-list-check" aria-hidden="true"></i>
-                    <span data-i18n="nav.how">Hoe het werkt</span>
+                    <span data-i18n="nav.how">Spelregels</span>
                 </a>
                 <a href="<?= htmlspecialchars($photos) ?>"<?= $current("photos") ?>>
                     <i class="fa-solid fa-camera" aria-hidden="true"></i>
@@ -83,5 +99,101 @@ function render_site_header(string $activePage = "home", bool $isRoot = true)
             </div>
         </div>
     </header>
+
+    <!-- Login/signup modal lives with the header. -->
+    <div class="auth-modal" data-auth-modal hidden>
+        <div class="auth-modal-backdrop" data-auth-close></div>
+        <div class="auth-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+            <button type="button" class="auth-modal-close" data-auth-close aria-label="Sluit inlogvenster">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="auth-panel">
+                <div class="auth-panel-emblem" aria-hidden="true">
+                    <span class="auth-panel-leaf"></span>
+                    <span class="auth-panel-avatar"><i class="fa-regular fa-user"></i></span>
+                    <span class="auth-panel-leaf"></span>
+                </div>
+
+                <div class="auth-panel-tabs" role="tablist" aria-label="Authenticatie">
+                    <button type="button" class="auth-panel-tab is-active" data-auth-tab="login">Inloggen</button>
+                    <button type="button" class="auth-panel-tab" data-auth-tab="signup">Aanmelden</button>
+                </div>
+
+                <div class="auth-panel-copy">
+                    <p class="photo-kicker" data-auth-kicker>WELKOM TERUG</p>
+                    <h2 id="auth-modal-title" data-auth-title>Inloggen</h2>
+                    <p class="upload-description" data-auth-description>Inloggen om verder te gaan.</p>
+                </div>
+
+                <form class="auth-popup-form is-active" data-auth-form="login">
+                    <label class="auth-input">
+                        <i class="fa-regular fa-user"></i>
+                        <input type="text" data-auth-login-identity autocomplete="username">
+                    </label>
+
+                    <label class="auth-input auth-input-password">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" data-auth-login-password autocomplete="current-password">
+                        <button type="button" class="auth-password-toggle" data-auth-password-toggle aria-label="Toon wachtwoord">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                    </label>
+
+                    <a href="<?= htmlspecialchars($authForgotHref) ?>" class="auth-inline-link" data-auth-forgot-password>Wachtwoord vergeten?</a>
+                    <p class="auth-popup-feedback" data-auth-feedback="login" aria-live="polite"></p>
+
+                    <button type="submit" class="button button-primary auth-popup-submit" data-auth-submit-login>Inloggen</button>
+
+                    <p class="auth-switch-row">
+                        <span data-auth-switch-copy-login>Nog geen account?</span>
+                        <button type="button" class="auth-switch-button" data-auth-switch="signup">Aanmelden</button>
+                    </p>
+                </form>
+
+                <form class="auth-popup-form" data-auth-form="signup" hidden>
+                    <label class="auth-input">
+                        <i class="fa-regular fa-user"></i>
+                        <input type="text" data-auth-signup-name autocomplete="name">
+                    </label>
+
+                    <label class="auth-input">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" data-auth-signup-email autocomplete="email">
+                    </label>
+
+                    <label class="auth-input auth-input-password">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" data-auth-signup-password autocomplete="new-password">
+                        <button type="button" class="auth-password-toggle" data-auth-password-toggle aria-label="Toon wachtwoord">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                    </label>
+
+                    <label class="auth-input auth-input-password">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <input type="password" data-auth-signup-password-confirm autocomplete="new-password">
+                        <button type="button" class="auth-password-toggle" data-auth-password-toggle aria-label="Toon wachtwoord">
+                            <i class="fa-regular fa-eye"></i>
+                        </button>
+                    </label>
+
+                    <label class="auth-mail-consent">
+                        <input type="checkbox" data-auth-signup-email-notifications>
+                        <span data-i18n="auth.modal.emailConsent">Ik ga ermee akkoord dat wij mijn e-mailadres gebruiken voor e-mails over competities waarvoor mijn team is aangemeld.</span>
+                    </label>
+
+                    <p class="auth-popup-feedback" data-auth-feedback="signup" aria-live="polite"></p>
+
+                    <button type="submit" class="button button-primary auth-popup-submit" data-auth-submit-signup>Account aanmaken</button>
+
+                    <p class="auth-switch-row">
+                        <span data-auth-switch-copy-signup>Heb je al een account?</span>
+                        <button type="button" class="auth-switch-button" data-auth-switch="login">Inloggen</button>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
     <?php
 }

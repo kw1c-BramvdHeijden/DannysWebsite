@@ -1,7 +1,10 @@
 <?php
+require_once __DIR__ . '/includes/db.php';
+include_once("includes/bootstrap-data.php");
 include_once("includes/header.php");
-include_once("includes/footer.php");
- include_once("includes/leaderboard.php");
+include_once("includes/leaderboard.php");
+
+$bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
 ?>
 
 
@@ -14,11 +17,14 @@ include_once("includes/footer.php");
     <title>Boules Competities</title>
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/index_competities.css">
+    <link rel="stylesheet" href="css/base.css">
 </head>
-<body data-competitions-href="pages/competities.php">
+<body data-competitions-href="pages/competities.php" data-leaderboard-feed-href="pages/leaderboard-feed.php">
     <main class="page-shell">
-        <?php render_site_header("home", true); ?>
+    <?php render_site_header("home", true); ?>
 
         <section class="hero-section" id="home">
             <div class="hero-copy">
@@ -88,7 +94,10 @@ include_once("includes/footer.php");
                         </div>
                     </div>
                     <div class="challenge-actions">
-                        <button type="button" class="button button-secondary" data-challenge-signup data-auth-open="signup"><span data-i18n="challenge.cta">Meld je aan</span> <span aria-hidden="true">-&gt;</span></button>
+                        <button type="button" class="button button-secondary" data-competition-request hidden>
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span data-i18n="challenge.cta">Aanvraag starten</span>
+                        </button>
                         <button type="button" class="button button-outline panel-admin-button" data-competition-create hidden>
                             <i class="fa-solid fa-plus"></i>
                             <span data-i18n="competitions.add">Competitie toevoegen</span>
@@ -156,104 +165,9 @@ include_once("includes/footer.php");
         </section>
     </main>
 
-    <footer class="quote-footer" id="over">
-        <div class="quote-inner">
-            <div class="footer-boules" aria-hidden="true"><span></span><span></span><span class="small-red"></span></div>
-            <blockquote data-i18n-html="footer.quote">" Jeu de boules is meer dan een spel.<br>Het is samenzijn, strategie en plezier. "</blockquote>
-            <div class="footer-leaf" aria-hidden="true"></div>
-        </div>
-    </footer>
+    <?php include 'includes/footer.php';?>
 
-    <div class="auth-modal" data-auth-modal hidden>
-        <div class="auth-modal-backdrop" data-auth-close></div>
-        <div class="auth-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
-            <button type="button" class="auth-modal-close" data-auth-close aria-label="Sluit inlogvenster">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <div class="auth-panel">
-                <div class="auth-panel-emblem" aria-hidden="true">
-                    <span class="auth-panel-leaf"></span>
-                    <span class="auth-panel-avatar"><i class="fa-regular fa-user"></i></span>
-                    <span class="auth-panel-leaf"></span>
-                </div>
-
-                <div class="auth-panel-tabs" role="tablist" aria-label="Authenticatie">
-                    <button type="button" class="auth-panel-tab is-active" data-auth-tab="login">Inloggen</button>
-                    <button type="button" class="auth-panel-tab" data-auth-tab="signup">Aanmelden</button>
-                </div>
-
-                <div class="auth-panel-copy">
-                    <p class="photo-kicker" data-auth-kicker>WELKOM TERUG</p>
-                    <h2 id="auth-modal-title" data-auth-title>Inloggen</h2>
-                    <p class="upload-description" data-auth-description>Log in om verder te gaan en de buurtcompetitie te openen.</p>
-                </div>
-
-                <form class="auth-popup-form is-active" data-auth-form="login">
-                    <label class="auth-input">
-                        <i class="fa-regular fa-user"></i>
-                        <input type="text" data-auth-login-identity autocomplete="username">
-                    </label>
-
-                    <label class="auth-input auth-input-password">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" data-auth-login-password autocomplete="current-password">
-                        <button type="button" class="auth-password-toggle" data-auth-password-toggle aria-label="Toon wachtwoord">
-                            <i class="fa-regular fa-eye"></i>
-                        </button>
-                    </label>
-
-                    <a href="#home" class="auth-inline-link" data-auth-forgot-password>Wachtwoord vergeten?</a>
-                    <p class="auth-popup-feedback" data-auth-feedback="login" aria-live="polite"></p>
-
-                    <button type="submit" class="button button-primary auth-popup-submit" data-auth-submit-login>Inloggen</button>
-
-                    <p class="auth-switch-row">
-                        <span data-auth-switch-copy-login>Nog geen account?</span>
-                        <button type="button" class="auth-switch-button" data-auth-switch="signup">Aanmelden</button>
-                    </p>
-                </form>
-
-                <form class="auth-popup-form" data-auth-form="signup" hidden>
-                    <label class="auth-input">
-                        <i class="fa-regular fa-user"></i>
-                        <input type="text" data-auth-signup-name autocomplete="name">
-                    </label>
-
-                    <label class="auth-input">
-                        <i class="fa-regular fa-envelope"></i>
-                        <input type="email" data-auth-signup-email autocomplete="email">
-                    </label>
-
-                    <label class="auth-input auth-input-password">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" data-auth-signup-password autocomplete="new-password">
-                        <button type="button" class="auth-password-toggle" data-auth-password-toggle aria-label="Toon wachtwoord">
-                            <i class="fa-regular fa-eye"></i>
-                        </button>
-                    </label>
-
-                    <label class="auth-input auth-input-password">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        <input type="password" data-auth-signup-password-confirm autocomplete="new-password">
-                        <button type="button" class="auth-password-toggle" data-auth-password-toggle aria-label="Toon wachtwoord">
-                            <i class="fa-regular fa-eye"></i>
-                        </button>
-                    </label>
-
-                    <p class="auth-popup-feedback" data-auth-feedback="signup" aria-live="polite"></p>
-
-                    <button type="submit" class="button button-primary auth-popup-submit" data-auth-submit-signup>Account aanmaken</button>
-
-                    <p class="auth-switch-row">
-                        <span data-auth-switch-copy-signup>Heb je al een account?</span>
-                        <button type="button" class="auth-switch-button" data-auth-switch="login">Inloggen</button>
-                    </p>
-                </form>
-            </div>
-        </div>
-    </div>
-
+    <!-- Auth modal is rendered by includes/header.php. -->
     <div class="competition-modal" data-competition-modal hidden>
         <div class="competition-modal-backdrop" data-competition-cancel></div>
         <div class="competition-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="competition-modal-title">
@@ -269,6 +183,11 @@ include_once("includes/footer.php");
                 <label class="upload-label">
                     <span data-i18n="competitions.form.name">Naam</span>
                     <input type="text" data-competition-name data-i18n-placeholder="competitions.form.namePlaceholder" placeholder="Bijvoorbeeld: Voorjaars Toernooi">
+                </label>
+
+                <label class="upload-label competition-abbreviation-label">
+                    <span data-i18n="competitions.form.abbreviation">Afkorting</span>
+                    <input type="text" data-competition-abbreviation data-i18n-placeholder="competitions.form.abbreviationPlaceholder" placeholder="VT">
                 </label>
 
                 <label class="upload-label">
@@ -304,6 +223,9 @@ include_once("includes/footer.php");
 
     <?php render_leaderboard_modal(); ?>
 
+    <script>
+        window.__BOULES_BOOTSTRAP__ = <?= json_encode($bootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    </script>
     <script type="module" src="scripts/index.js"></script>
 </body>
 </html>
