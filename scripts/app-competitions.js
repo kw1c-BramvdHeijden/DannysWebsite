@@ -13,6 +13,8 @@ export function createCompetitionsModule({
 }) {
     let competitionModalTimer = 0;
     let competitionFormMode = "admin";
+    const competitionMatchesCache = new Map();
+    let matchesModalElement = null;
 
     // Admins mogen competities beheren.
     function canManageCompetitions() {
@@ -33,6 +35,15 @@ export function createCompetitionsModule({
     function getCompetitionApiUrl() {
         const script = document.querySelector("script[src$='scripts/index.js']");
         return script ? new URL("../api/competitions.php", script.src).toString() : "api/competitions.php";
+    }
+
+    function getCalendarUrl(matchId) {
+        const script = document.querySelector("script[src$='scripts/index.js']");
+        const href = script ? new URL("../pages/kalender.php", script.src) : new URL("pages/kalender.php", window.location.href);
+        href.searchParams.set("wedstrijd_id", String(matchId));
+        href.searchParams.set("herplan", "1");
+
+        return href.toString();
     }
 
     function isHexColor(value) {
@@ -180,6 +191,7 @@ export function createCompetitionsModule({
                     }))
                     .filter((team) => team.id || team.name)
                 : [],
+            matchesGenerated: competition.matchesGenerated === true,
             href: getDefaultCompetitionHref()
         };
     }
@@ -267,6 +279,53 @@ export function createCompetitionsModule({
         }).format(date);
     }
 
+    function todayDateString() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const day = String(today.getDate()).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function isRegistrationClosed(competition) {
+        return typeof competition.startDate === "string"
+            && /^\d{4}-\d{2}-\d{2}$/.test(competition.startDate)
+            && competition.startDate <= todayDateString();
+    }
+
+    async function startCompetitionSchedule(competitionId) {
+        const result = await requestCompetitionApi({
+            action: "start",
+            id: competitionId
+        });
+
+        return result;
+    }
+
+    async function loadCompetitionMatches(competitionId, force = false) {
+        const key = String(competitionId);
+        if (!force && competitionMatchesCache.has(key)) {
+            return competitionMatchesCache.get(key);
+        }
+
+        const result = await requestCompetitionApi({
+            action: "listMatches",
+            id: competitionId
+        });
+        const matches = Array.isArray(result.matches) ? result.matches : [];
+        competitionMatchesCache.set(key, matches);
+
+        return matches;
+    }
+
+    async function respondToReschedule(matchId, approved) {
+        return requestCompetitionApi({
+            action: approved ? "approveReschedule" : "rejectReschedule",
+            matchId
+        });
+    }
+
     // Bouw de kaart voor een aankomende competitie.
     function createCompetitionCard(competition) {
         const card = document.createElement("article");
@@ -342,6 +401,7 @@ export function createCompetitionsModule({
             : [];
         const availableTeams = userTeams.filter((team) => registeredTeamIds.indexOf(String(team.id)) === -1);
         const alreadyRegisteredTeams = userTeams.filter((team) => registeredTeamIds.indexOf(String(team.id)) !== -1);
+        const registrationClosed = isRegistrationClosed(competition);
 
         const registeredTeamsSection = document.createElement("section");
         registeredTeamsSection.className = "competition-registered-teams";
@@ -372,7 +432,27 @@ export function createCompetitionsModule({
         signup.className = "competition-team-signup";
 
         // Toon de juiste aanmeldstatus per gebruiker.
-        if (!state.loggedIn) {
+        if (registrationClosed) {
+            const message = document.createElement("p");
+            message.textContent = t("competitions.teamSignup.closed");
+            signup.appendChild(message);
+
+            if (competition.matchesGenerated) {
+                const viewMatchesButton = document.createElement("button");
+                viewMatchesButton.type = "button";
+                viewMatchesButton.className = "button button-outline";
+                viewMatchesButton.dataset.competitionMatches = String(competition.id);
+                viewMatchesButton.innerHTML = `<i class="fa-solid fa-list"></i><span>${t("competitions.matches.view")}</span>`;
+                signup.appendChild(viewMatchesButton);
+            } else if (canManageCompetitions()) {
+                const startButton = document.createElement("button");
+                startButton.type = "button";
+                startButton.className = "button button-primary";
+                startButton.dataset.competitionStart = String(competition.id);
+                startButton.innerHTML = `<i class="fa-solid fa-play"></i><span>${t("competitions.start.submit")}</span>`;
+                signup.appendChild(startButton);
+            }
+        } else if (!state.loggedIn) {
             const message = document.createElement("p");
             message.textContent = t("competitions.teamSignup.loginRequired");
             signup.appendChild(message);
@@ -416,6 +496,155 @@ export function createCompetitionsModule({
 
         card.appendChild(signup);
         return card;
+    }
+
+    function formatMatchDate(value) {
+        if (!value) {
+            return "-";
+        }
+
+        const datePart = String(value).slice(0, 10);
+        return formatPlainDate(datePart);
+    }
+
+    function closeMatchesModal() {
+        if (!matchesModalElement) {
+            return;
+        }
+
+        matchesModalElement.remove();
+        matchesModalElement = null;
+        refs.body.classList.remove("matches-modal-open");
+    }
+
+    function countMatchTeams(matches) {
+        const teamIds = new Set();
+        matches.forEach((match) => {
+            const teams = Array.isArray(match.teams) ? match.teams : [];
+            teams.forEach((team) => {
+                if (team && team.id) {
+                    teamIds.add(String(team.id));
+                }
+            });
+        });
+
+        return teamIds.size;
+    }
+
+    function canRescheduleMatch(match, userTeams) {
+        if (!state.loggedIn || !Array.isArray(userTeams)) {
+            return false;
+        }
+
+        const userTeamIds = new Set(userTeams.map((team) => String(team.id)));
+        const matchTeams = Array.isArray(match.teams) ? match.teams : [];
+
+        return matchTeams.some((team) => team && userTeamIds.has(String(team.id)));
+    }
+
+    function openMatchesModal(matches, userTeams = [], competitionId = "") {
+        closeMatchesModal();
+
+        const modal = document.createElement("div");
+        modal.className = "matches-modal is-open";
+        modal.innerHTML = `
+            <div class="matches-modal-backdrop" data-matches-close></div>
+            <div class="matches-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="matches-modal-title">
+                <button type="button" class="matches-modal-close" data-matches-close aria-label="${t("competitions.matches.close")}">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <section class="matches-modal-content">
+                    <p class="photo-kicker" id="matches-modal-title">${t("competitions.matches.summary")
+                        .replace("{teams}", String(countMatchTeams(matches)))
+                        .replace("{matches}", String(matches.length))}</p>
+                    <ol class="matches-modal-list"></ol>
+                </section>
+            </div>
+        `;
+
+        const list = modal.querySelector(".matches-modal-list");
+        if (list) {
+            if (matches.length === 0) {
+                const item = document.createElement("li");
+                item.textContent = t("competitions.matches.empty");
+                list.appendChild(item);
+            } else {
+                matches.forEach((match) => {
+                    const teams = Array.isArray(match.teams) ? match.teams : [];
+                    const home = teams[0]?.name || t("competitions.matches.teamFallback");
+                    const away = teams[1]?.name || t("competitions.matches.teamFallback");
+                    const item = document.createElement("li");
+                    const matchInfo = document.createElement("div");
+                    matchInfo.className = "matches-modal-match";
+                    matchInfo.innerHTML = `<span>${formatMatchDate(match.date)}</span><strong>${home} - ${away}</strong>`;
+                    item.appendChild(matchInfo);
+
+                    if (match.reschedule && match.reschedule.proposedDate) {
+                        const rescheduleStatus = document.createElement("p");
+                        rescheduleStatus.className = "matches-reschedule-status";
+                        rescheduleStatus.textContent = t("competitions.matches.reschedulePending")
+                            .replace("{date}", formatMatchDate(match.reschedule.proposedDate));
+                        item.appendChild(rescheduleStatus);
+                    }
+
+                    if (match.reschedule?.canRespond) {
+                        const responseActions = document.createElement("div");
+                        responseActions.className = "matches-response-actions";
+
+                        const approveButton = document.createElement("button");
+                        approveButton.type = "button";
+                        approveButton.className = "button button-secondary matches-response-button";
+                        approveButton.dataset.rescheduleApprove = String(match.id);
+                        approveButton.innerHTML = `<i class="fa-solid fa-check"></i><span>${t("competitions.matches.approve")}</span>`;
+
+                        const rejectButton = document.createElement("button");
+                        rejectButton.type = "button";
+                        rejectButton.className = "button button-outline matches-response-button";
+                        rejectButton.dataset.rescheduleReject = String(match.id);
+                        rejectButton.innerHTML = `<i class="fa-solid fa-xmark"></i><span>${t("competitions.matches.reject")}</span>`;
+
+                        responseActions.append(approveButton, rejectButton);
+                        item.appendChild(responseActions);
+                    } else if (!match.reschedule && canRescheduleMatch(match, userTeams)) {
+                        const rescheduleLink = document.createElement("a");
+                        rescheduleLink.className = "button button-outline matches-reschedule-button";
+                        rescheduleLink.href = getCalendarUrl(match.id);
+                        rescheduleLink.innerHTML = `<i class="fa-solid fa-calendar-days"></i><span>${t("competitions.matches.reschedule")}</span>`;
+                        item.appendChild(rescheduleLink);
+                    }
+
+                    list.appendChild(item);
+                });
+            }
+        }
+
+        modal.querySelectorAll("[data-matches-close]").forEach((button) => {
+            button.addEventListener("click", closeMatchesModal);
+        });
+
+        modal.querySelectorAll("[data-reschedule-approve], [data-reschedule-reject]").forEach((button) => {
+            button.addEventListener("click", async () => {
+                const matchId = button.getAttribute("data-reschedule-approve") || button.getAttribute("data-reschedule-reject");
+                const approved = button.hasAttribute("data-reschedule-approve");
+                if (!matchId) {
+                    return;
+                }
+
+                button.disabled = true;
+                try {
+                    await respondToReschedule(matchId, approved);
+                    const updatedMatches = await loadCompetitionMatches(competitionId, true);
+                    openMatchesModal(updatedMatches, userTeams, competitionId);
+                } catch (error) {
+                    button.disabled = false;
+                    window.alert(error.message || t("competitions.matches.rescheduleResponseError"));
+                }
+            });
+        });
+
+        matchesModalElement = modal;
+        refs.body.appendChild(modal);
+        refs.body.classList.add("matches-modal-open");
     }
 
     // Render alle aankomende competities.
@@ -827,6 +1056,13 @@ export function createCompetitionsModule({
             return;
         }
 
+        const competition = getCompetitionById(competitionId);
+        if (competition && isRegistrationClosed(competition)) {
+            renderCompetitions();
+            window.alert(t("competitions.teamSignup.closed"));
+            return;
+        }
+
         const select = refs.competitionGrid?.querySelector(`[data-competition-team-select="${competitionId}"]`);
         const teamId = select instanceof HTMLSelectElement ? select.value : "";
         if (!teamId) {
@@ -864,6 +1100,62 @@ export function createCompetitionsModule({
             if (button) {
                 button.disabled = false;
             }
+        }
+    }
+
+    async function startCompetition(competitionId) {
+        if (!canManageCompetitions() || !competitionId) {
+            return;
+        }
+
+        const competition = getCompetitionById(competitionId);
+        if (!competition || !isRegistrationClosed(competition)) {
+            return;
+        }
+
+        if (!window.confirm(t("competitions.start.confirm"))) {
+            return;
+        }
+
+        const button = refs.competitionGrid?.querySelector(`[data-competition-start="${competitionId}"]`);
+        if (button) {
+            button.disabled = true;
+        }
+
+        try {
+            const result = await startCompetitionSchedule(competitionId);
+            const updatedCompetition = normalizeCompetitionFromApi(result.competition);
+            if (updatedCompetition) {
+                state.competitions = state.competitions.map((entry) => (
+                    String(entry.id) === String(competitionId)
+                        ? { ...updatedCompetition, matchesGenerated: true }
+                        : entry
+                ));
+                saveCompetitions(state.competitions);
+            }
+            competitionMatchesCache.delete(String(competitionId));
+            renderCompetitions();
+            window.alert(t("competitions.start.success").replace("{count}", String(result.matchesCreated || 0)));
+        } catch (error) {
+            window.alert(error.message || t("competitions.start.error"));
+        } finally {
+            if (button) {
+                button.disabled = false;
+            }
+        }
+    }
+
+    async function toggleCompetitionMatches(competitionId) {
+        if (!competitionId) {
+            return;
+        }
+
+        try {
+            const matches = await loadCompetitionMatches(String(competitionId));
+            const userTeams = state.loggedIn ? await loadCurrentUserTeams(true) : [];
+            openMatchesModal(matches, userTeams, String(competitionId));
+        } catch (error) {
+            window.alert(error.message || t("competitions.matches.error"));
         }
     }
 
@@ -916,6 +1208,9 @@ export function createCompetitionsModule({
         saveCompetition,
         deleteCompetition,
         registerSelectedTeam,
+        startCompetition,
+        toggleCompetitionMatches,
+        closeMatchesModal,
         acceptCompetitionRequest,
         rejectCompetitionRequest
     };

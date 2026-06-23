@@ -105,6 +105,7 @@ function normalizeCompetition(competition) {
         endDate,
         tone: normalizeCompetitionTone(competition.tone),
         status: typeof competition.status === "string" ? competition.status.trim() : "",
+        matchesGenerated: competition.matchesGenerated === true,
         registeredTeamIds: Array.isArray(competition.registeredTeamIds) ? competition.registeredTeamIds.map(String) : [],
         // Namen zijn nodig om aangemelde teams te tonen.
         registeredTeams: Array.isArray(competition.registeredTeams)

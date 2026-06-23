@@ -233,6 +233,32 @@ function boules_registered_team_ids($pdo, $tournamentId)
     return $teamIds;
 }
 
+function boules_competition_matches_generated($pdo, $tournamentId)
+{
+    if ($tournamentId === "" || !boules_table_exists($pdo, "poules") || !boules_table_exists($pdo, "wedstrijden")) {
+        return false;
+    }
+
+    $pouleColumns = boules_table_columns($pdo, "poules");
+    $wedstrijdColumns = boules_table_columns($pdo, "wedstrijden");
+    $pouleId = boules_first_existing_column($pouleColumns, array("poule_id", "id"));
+    $pouleTournament = boules_first_existing_column($pouleColumns, array("tournament_id", "competition_id", "id_tournament", "id_competition"));
+    $wedstrijdPoule = boules_first_existing_column($wedstrijdColumns, array("poule_id", "id_poule"));
+
+    if (!$pouleId || !$pouleTournament || !$wedstrijdPoule) {
+        return false;
+    }
+
+    $statement = $pdo->prepare(
+        "SELECT COUNT(*) FROM `wedstrijden` w " .
+        "INNER JOIN `poules` p ON p.`$pouleId` = w.`$wedstrijdPoule` " .
+        "WHERE p.`$pouleTournament` = ?"
+    );
+    $statement->execute(array($tournamentId));
+
+    return (int) $statement->fetchColumn() > 0;
+}
+
 // Haal competities op voor de eerste paginalaad.
 function boules_fetch_competitions($pdo, $competitionHref)
 {
@@ -280,6 +306,7 @@ function boules_fetch_competitions($pdo, $competitionHref)
         $competitions[$index]["registeredTeamIds"] = array_map(function ($team) {
             return isset($team["id"]) ? (string) $team["id"] : "";
         }, $registeredTeams);
+        $competitions[$index]["matchesGenerated"] = boules_competition_matches_generated($pdo, $competitionId);
     }
 
     return $competitions;

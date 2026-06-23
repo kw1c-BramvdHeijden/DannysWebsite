@@ -270,6 +270,18 @@ export function bindEvents({
         const registerButton = target.closest("[data-competition-team-register]");
         if (registerButton) {
             competitions.registerSelectedTeam(registerButton.getAttribute("data-competition-team-register"));
+            return;
+        }
+
+        const startButton = target.closest("[data-competition-start]");
+        if (startButton) {
+            competitions.startCompetition(startButton.getAttribute("data-competition-start"));
+            return;
+        }
+
+        const matchesButton = target.closest("[data-competition-matches]");
+        if (matchesButton) {
+            competitions.toggleCompetitionMatches(matchesButton.getAttribute("data-competition-matches"));
         }
     });
 
@@ -357,6 +369,8 @@ export function bindEvents({
             leaderboard.closeLeaderboardModal();
             return;
         }
+
+        competitions.closeMatchesModal();
 
         if (refs.competitionModal && !refs.competitionModal.hidden) {
             competitions.closeCompetitionModal();
