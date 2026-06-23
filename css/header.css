@@ -180,6 +180,23 @@ body.auth-modal-open {
     color: var(--ink);
 }
 
+.auth-mail-consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: rgba(36, 49, 28, 0.78);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.auth-mail-consent input {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--olive);
+}
+
 .auth-password-toggle {
     border: 0;
     background: transparent;

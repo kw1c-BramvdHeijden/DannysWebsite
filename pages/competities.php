@@ -207,6 +207,11 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
                     </button>
                 </label>
 
+                <label class="auth-mail-consent">
+                    <input type="checkbox" data-auth-signup-email-notifications>
+                    <span data-i18n="auth.modal.emailConsent">Ik ga ermee akkoord dat wij mijn e-mailadres gebruiken voor e-mails over competities waarvoor mijn team is aangemeld.</span>
+                </label>
+
                 <p class="auth-popup-feedback" data-auth-feedback="signup" aria-live="polite"></p>
 
                 <button type="submit" class="button button-primary auth-popup-submit" data-auth-submit-signup>Account aanmaken</button>

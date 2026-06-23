@@ -6,6 +6,7 @@ session_start();
 
 require_once __DIR__ . "/../includes/db.php";
 require_once __DIR__ . "/../includes/bootstrap-data.php";
+require_once __DIR__ . "/../Functions/mailer.php";
 
 function auth_respond($statusCode, array $payload)
 {
@@ -136,6 +137,43 @@ function auth_assign_default_role($pdo, $userId)
     $statement->execute(array($userId, $roleIdValue));
 }
 
+function auth_add_user_column_if_missing($pdo, $column, $definition)
+{
+    $columns = auth_column_meta($pdo, "users");
+
+    if (!isset($columns[$column])) {
+        $pdo->exec("ALTER TABLE `users` ADD COLUMN $definition");
+    }
+}
+
+function auth_escape($value)
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, "UTF-8");
+}
+
+function auth_send_signup_thank_you_mail($name, $email)
+{
+    $safeName = auth_escape($name);
+    $subject = "Bedankt voor je registratie";
+    $html = "<!doctype html>" .
+        "<html lang=\"nl\"><head><meta charset=\"UTF-8\"><title>" . auth_escape($subject) . "</title></head>" .
+        "<body style=\"font-family: Arial, sans-serif; color: #1f2933; line-height: 1.5;\">" .
+        "<h2>Hoi " . $safeName . ",</h2>" .
+        "<p>Bedankt voor je registratie bij Jeu De Dabs.</p>" .
+        "<p>Je account is aangemaakt. Vanaf nu kun je meedoen met competities en ontvang je e-mails over competities waarvoor jouw team is aangemeld.</p>" .
+        "<p>Wil je later geen e-mails meer ontvangen, dan kan een beheerder deze voorkeur voor je aanpassen.</p>" .
+        "<br>" .
+        "<p>Met vriendelijke groet,<br>De organisatie</p>" .
+        "</body></html>";
+    $text = "Hoi $name,\n\n" .
+        "Bedankt voor je registratie bij Jeu De Dabs.\n\n" .
+        "Je account is aangemaakt. Vanaf nu kun je meedoen met competities en ontvang je e-mails over competities waarvoor jouw team is aangemeld.\n\n" .
+        "Wil je later geen e-mails meer ontvangen, dan kan een beheerder deze voorkeur voor je aanpassen.\n\n" .
+        "Met vriendelijke groet,\nDe organisatie";
+
+    boules_send_html_mail($email, $name, $subject, $html, $text);
+}
+
 function auth_public_user($pdo, array $user, array $columns)
 {
     $idColumn = auth_first_column($columns, array("user_id", "id"));
@@ -217,6 +255,7 @@ function auth_handle_signup($pdo, array $data)
     $name = isset($data["name"]) ? trim((string) $data["name"]) : "";
     $email = isset($data["email"]) ? trim((string) $data["email"]) : "";
     $password = isset($data["password"]) ? (string) $data["password"] : "";
+    $emailNotifications = isset($data["emailNotifications"]) && $data["emailNotifications"] === true ? 1 : 0;
 
     if ($name === "" || $email === "" || $password === "") {
         auth_respond(422, array("error" => "Vul alle velden in om je account aan te maken."));
@@ -229,6 +268,8 @@ function auth_handle_signup($pdo, array $data)
     if (strlen($password) < 6) {
         auth_respond(422, array("error" => "Gebruik een wachtwoord van minimaal 6 tekens."));
     }
+
+    auth_add_user_column_if_missing($pdo, "email_notifications", "`email_notifications` tinyint(1) NOT NULL DEFAULT 0");
 
     $columns = auth_column_meta($pdo, "users");
     $idColumn = auth_first_column($columns, array("user_id", "id"));
@@ -276,6 +317,9 @@ function auth_handle_signup($pdo, array $data)
     if ($createdColumn) {
         $insert[$createdColumn] = date("Y-m-d H:i:s");
     }
+    if (isset($columns["email_notifications"])) {
+        $insert["email_notifications"] = $emailNotifications;
+    }
 
     $columnSql = implode(", ", array_map(function ($column) {
         return "`$column`";
@@ -293,15 +337,34 @@ function auth_handle_signup($pdo, array $data)
     auth_assign_default_role($pdo, $newId);
     $_SESSION["user_id"] = $newId;
     $_SESSION["role"] = "player";
+    $signupMailSent = false;
+    $signupMailError = "";
 
-    auth_respond(201, array(
+    if ($emailNotifications === 1) {
+        try {
+            auth_send_signup_thank_you_mail($name, $email);
+            $signupMailSent = true;
+        } catch (Throwable $exception) {
+            $signupMailError = $exception->getMessage();
+        }
+    }
+
+    $response = array(
         "user" => array(
             "id" => (string) $newId,
             "name" => $name,
             "initials" => auth_initials($name),
         ),
         "role" => "player",
-    ));
+        "emailNotifications" => $emailNotifications === 1,
+        "signupMailSent" => $signupMailSent,
+    );
+
+    if ($signupMailError !== "") {
+        $response["signupMailError"] = $signupMailError;
+    }
+
+    auth_respond(201, $response);
 }
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
