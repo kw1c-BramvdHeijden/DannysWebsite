@@ -552,6 +552,7 @@ function competitions_list_generated_matches(array $data)
                 "id" => $matchId,
                 "date" => isset($row["datum"]) ? (string) $row["datum"] : "",
                 "verified" => isset($row["verified"]) ? (int) $row["verified"] === 1 : false,
+                "canReschedule" => false,
                 "reschedule" => $pendingRequest ? array(
                     "proposedDate" => isset($pendingRequest["proposedDate"]) ? (string) $pendingRequest["proposedDate"] : "",
                     "requesterTeamId" => isset($pendingRequest["requesterTeamId"]) ? (string) $pendingRequest["requesterTeamId"] : "",
@@ -567,6 +568,10 @@ function competitions_list_generated_matches(array $data)
             "name" => isset($row["team_name"]) && trim((string) $row["team_name"]) !== "" ? (string) $row["team_name"] : "Team",
             "score" => isset($row["score"]) ? (int) $row["score"] : 0,
         );
+
+        if (isset($row["team_id"]) && in_array((string) $row["team_id"], $userTeamIds, true)) {
+            $matches[$matchId]["canReschedule"] = true;
+        }
     }
 
     competitions_respond(200, array("matches" => array_values($matches)));
