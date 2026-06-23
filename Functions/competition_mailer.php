@@ -200,6 +200,7 @@ function competition_mail_fetch_team_recipients(PDO $pdo, $teamId)
 {
     competition_mail_require_table($pdo, "team_members");
     competition_mail_require_table($pdo, "users");
+    competition_mail_add_column_if_missing($pdo, "users", "email_notifications", "`email_notifications` tinyint(1) NOT NULL DEFAULT 0");
 
     $teamMemberTeamId = competition_mail_require_column($pdo, "team_members", array("team_id", "teamId"), "team-id");
     $teamMemberUserId = competition_mail_require_column($pdo, "team_members", array("user_id", "userId", "id_user"), "user-id");
@@ -216,7 +217,8 @@ function competition_mail_fetch_team_recipients(PDO $pdo, $teamId)
         "INNER JOIN `users` u ON u.`$userId` = tm.`$teamMemberUserId` " .
         "WHERE tm.`$teamMemberTeamId` = ? " .
         "AND u.`$email` IS NOT NULL " .
-        "AND u.`$email` != ''"
+        "AND u.`$email` != '' " .
+        "AND u.`email_notifications` = 1"
     );
     $statement->execute(array($teamId));
 

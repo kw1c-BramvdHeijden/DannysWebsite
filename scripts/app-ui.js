@@ -681,10 +681,12 @@ export function createUiModule({
         const emailInput = form.querySelector("[data-auth-signup-email]");
         const passwordInput = form.querySelector("[data-auth-signup-password]");
         const confirmInput = form.querySelector("[data-auth-signup-password-confirm]");
+        const emailNotificationsInput = form.querySelector("[data-auth-signup-email-notifications]");
         const name = nameInput instanceof HTMLInputElement ? nameInput.value.trim() : "";
         const email = emailInput instanceof HTMLInputElement ? emailInput.value.trim() : "";
         const password = passwordInput instanceof HTMLInputElement ? passwordInput.value : "";
         const passwordConfirm = confirmInput instanceof HTMLInputElement ? confirmInput.value : "";
+        const emailNotifications = emailNotificationsInput instanceof HTMLInputElement ? emailNotificationsInput.checked : false;
 
         if (!name || !email || !password || !passwordConfirm) {
             if (feedback) {
@@ -721,7 +723,8 @@ export function createUiModule({
                 action: "signup",
                 name,
                 email,
-                password
+                password,
+                emailNotifications
             });
             setAuthenticatedUser(result.user, result.role);
         } catch (error) {
