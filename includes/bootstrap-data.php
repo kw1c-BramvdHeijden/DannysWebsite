@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/leaderboard-data.php";
 
 function boules_table_exists($pdo, $tableName)
 {
@@ -34,9 +35,15 @@ function boules_table_columns($pdo, $tableName)
 
 function boules_first_existing_column(array $columns, array $columnNames)
 {
+    $columnsByLowerName = array();
+    foreach ($columns as $column) {
+        $columnsByLowerName[strtolower($column)] = $column;
+    }
+
     foreach ($columnNames as $columnName) {
-        if (in_array($columnName, $columns, true)) {
-            return $columnName;
+        $columnKey = strtolower($columnName);
+        if (isset($columnsByLowerName[$columnKey])) {
+            return $columnsByLowerName[$columnKey];
         }
     }
 
@@ -287,32 +294,82 @@ function boules_fetch_competitions($pdo, $competitionHref)
 
 function boules_fetch_leaderboard($pdo)
 {
-    $table = boules_first_existing_table($pdo, array("leaderboard", "teams"));
+    if (function_exists("leaderboard_fetch_team_rows") && function_exists("leaderboard_bootstrap_entries")) {
+        return leaderboard_bootstrap_entries(leaderboard_fetch_team_rows($pdo));
+    }
+
+    $table = boules_first_existing_table($pdo, array("teams", "Teams", "leaderboard"));
     if (!$table) {
         return array();
     }
 
     $columns = boules_table_columns($pdo, $table);
+    $id = boules_first_existing_column($columns, array("team_id", "teamid", "id"));
     $team = boules_first_existing_column($columns, array("team", "team_name", "naam", "name"));
     $played = boules_first_existing_column($columns, array("played", "gespeeld", "matches_played", "wedstrijden"));
     $won = boules_first_existing_column($columns, array("won", "gewonnen", "wins"));
     $diff = boules_first_existing_column($columns, array("diff", "puntverschil", "point_diff", "doelsaldo"));
     $points = boules_first_existing_column($columns, array("points", "punten", "score"));
     $trend = boules_first_existing_column($columns, array("trend", "richting"));
+    $active = boules_first_existing_column($columns, array("active", "is_active"));
 
-    if (!$team) {
+    if (!$team || !$won) {
         return array();
     }
 
-    $orderColumn = $points ? $points : $team;
+    $join = "";
+    $playedExpression = $played ? "COALESCE(lb.`$played`, 0)" : "0";
+
+    $teamMatchTable = boules_first_existing_table($pdo, array("teamwedstrijd", "TeamWedstrijd"));
+    if (!$played && $id && $teamMatchTable) {
+        $teamMatchColumns = boules_table_columns($pdo, $teamMatchTable);
+        $teamMatchTeamColumn = boules_first_existing_column($teamMatchColumns, array("team_id", "teamid"));
+        $teamMatchMatchColumn = boules_first_existing_column($teamMatchColumns, array("wedstrijd_id", "wedstrijdid", "match_id", "matchid"));
+
+        if ($teamMatchTeamColumn && $teamMatchMatchColumn) {
+            $join = " LEFT JOIN `$teamMatchTable` tw ON tw.`$teamMatchTeamColumn` = lb.`$id`";
+            $playedExpression = "COUNT(DISTINCT tw.`$teamMatchMatchColumn`)";
+        }
+    }
+
+    $wonExpression = "COALESCE(lb.`$won`, 0)";
+    $pointsExpression = $points ? "COALESCE(lb.`$points`, 0)" : $wonExpression;
+    $diffExpression = $diff ? "COALESCE(lb.`$diff`, 0)" : "(" . $wonExpression . " - GREATEST(0, " . $playedExpression . " - " . $wonExpression . "))";
+    $trendExpression = $trend ? "lb.`$trend`" : "'flat'";
+
     $sql = "SELECT " . implode(", ", array(
-        boules_select_alias($team, "team", "''"),
-        boules_select_alias($played, "played", "0"),
-        boules_select_alias($won, "won", "0"),
-        boules_select_alias($diff, "diff", "0"),
-        boules_select_alias($points, "points", "0"),
-        boules_select_alias($trend, "trend", "'flat'"),
-    )) . " FROM `$table` ORDER BY `$orderColumn` DESC";
+        $id ? "lb.`$id` AS `teamId`" : "lb.`$team` AS `teamId`",
+        "lb.`$team` AS `team`",
+        $playedExpression . " AS `played`",
+        $wonExpression . " AS `won`",
+        $diffExpression . " AS `diff`",
+        $pointsExpression . " AS `points`",
+        $trendExpression . " AS `trend`",
+    )) . " FROM `$table` lb" . $join;
+
+    if ($active) {
+        $sql .= " WHERE lb.`$active` = 1";
+    }
+
+    $groupColumns = array("lb.`$team`", "lb.`$won`");
+    if ($id) {
+        $groupColumns[] = "lb.`$id`";
+    }
+    if ($played) {
+        $groupColumns[] = "lb.`$played`";
+    }
+    if ($diff) {
+        $groupColumns[] = "lb.`$diff`";
+    }
+    if ($points) {
+        $groupColumns[] = "lb.`$points`";
+    }
+    if ($trend) {
+        $groupColumns[] = "lb.`$trend`";
+    }
+
+    $sql .= " GROUP BY " . implode(", ", array_unique($groupColumns));
+    $sql .= " ORDER BY `won` DESC, `played` DESC, `team` ASC";
 
     return $pdo->query($sql)->fetchAll();
 }

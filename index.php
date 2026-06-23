@@ -22,7 +22,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
     <link rel="stylesheet" href="css/index_competities.css">
     <link rel="stylesheet" href="css/base.css">
 </head>
-<body data-competitions-href="pages/competities.php">
+<body data-competitions-href="pages/competities.php" data-leaderboard-feed-href="pages/leaderboard-feed.php">
     <main class="page-shell">
         <?php render_site_header("home", true); ?>
 
@@ -218,6 +218,9 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
 
     <?php render_leaderboard_modal(); ?>
 
+    <script>
+        window.__BOULES_BOOTSTRAP__ = <?= json_encode($bootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    </script>
     <script type="module" src="scripts/index.js"></script>
 </body>
 </html>
