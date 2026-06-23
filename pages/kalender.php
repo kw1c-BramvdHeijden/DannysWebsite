@@ -121,51 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 
-/* ===== DATUM VERWIJDEREN ===== */
 
-
-
-// Controleer of er een 'remove' parameter in de URL (GET-variabele) aanwezig is om een datum te wissen via de sidebar.
-if (isset($_GET['remove'])) {
-    // Sla de te verwijderen datum op in een variabele.
-    $removeDatum = $_GET['remove'];
-
-    // Verwijder deze specifieke datum uit de sessie-array met behulp van array_diff.
-    $_SESSION['gekozen_datums'] = array_diff(
-        $_SESSION['gekozen_datums'], // De huidige lijst.
-        [$removeDatum] // De specifieke datum om te wissen in een nieuwe array.
-    );
-
-    // Bepaal naar welke maand de pagina moet teruglinken (gebruik de GET-waarde, of de huidige maand als back-up).
-    $redirectMaand = isset($_GET['maand'])
-        ? (int)$_GET['maand'] // Zet om naar een heel getal (integer).
-        : (int)date('m'); // Huidige maand van het systeem.
-
-    // Bepaal naar welk jaar de pagina moet teruglinken (gebruik de GET-waarde, of het huidige jaar als back-up).
-    $redirectJaar = isset($_GET['jaar'])
-        ? (int)$_GET['jaar'] // Zet om naar een heel getal (integer).
-        : (int)date('Y'); // Huidig jaar van het systeem.
-
-    // Controleer of de maandwaarde buiten het geldige bereik (1 t/m 12) valt.
-    if ($redirectMaand < 1 || $redirectMaand > 12) {
-        // Indien ongeldig, val terug op de huidige maand.
-        $redirectMaand = (int)date('m');
-    }
-
-    // Controleer of het jaar buiten een realistisch bereik (1900 t/m 2100) valt.
-    if ($redirectJaar < 1900 || $redirectJaar > 2100) {
-        // Indien ongeldig, val terug op het huidige jaar.
-        $redirectJaar = (int)date('Y');
-    }
-
-    // Stuur een HTTP-header om de browser te herladen naar de kalenderpagina met de juiste maand en jaar, zodat de URL schoon blijft.
-    header(
-        "Location: kalender.php" . calendar_url($redirectMaand, $redirectJaar, $wedstrijdId !== "" ? array("wedstrijd_id" => $wedstrijdId) : array())
-    );
-
-    // Stop de uitvoering van het PHP-script direct na het verzenden van de redirect-header.
-    exit;
-}
 
 
 
@@ -406,30 +362,27 @@ require_once __DIR__ . "/../includes/header.php";
 
 
 
-                        <label class="dag<?php echo $checked ? ' selected' : ''; ?><?php echo $isVandaag ? ' vandaag' : ''; ?><?php echo $isVerleden ? ' verleden' : ''; ?>">
+                        <label class="dag<?php echo !empty($dagCompetities) ? ' has-event' : ''; ?><?php echo $checked ? ' selected' : ''; ?><?php echo $isVandaag ? ' vandaag' : ''; ?><?php echo $isVerleden ? ' verleden' : ''; ?>">
+
                             <input
                                     type="checkbox"
                                     name="datums[]"
                                     value="<?php echo htmlspecialchars($datum); ?>"
-                                <?php echo $checked ? 'checked' : ''; // Voeg 'checked' toe als de datum in de sessie staat ?>
-                                <?php echo ($isVandaag || $isVerleden) ? 'disabled' : ''; // Schakel de checkbox uit als het vandaag of in het verleden is ?>
-                                <?php echo $isVandaag ? 'checked' : ''; // Vink vandaag automatisch aan (visueel) ?>
-                                    onchange="this.form.submit()" >
-
-
+                                <?php echo $checked ? 'checked' : ''; ?>
+                                <?php echo ($isVandaag || $isVerleden) ? 'disabled' : ''; ?>
+                                <?php echo $isVandaag ? 'checked' : ''; ?>
+                                    onchange="this.form.submit()"
+                            >
 
                             <span class="day-number">
-                                <?php echo $dag; ?>
-
-                            </span>
+        <?php echo $dag; ?>
+    </span>
 
                             <?php foreach ($dagCompetities as $competitie): ?>
                                 <div class="calendar-event">
                                     <?php echo htmlspecialchars($competitie); ?>
                                 </div>
                             <?php endforeach; ?>
-
-
 
                         </label>
                     <?php endfor; ?>
@@ -439,48 +392,6 @@ require_once __DIR__ . "/../includes/header.php";
 
 
 
-        <aside class="sidebar">
-            <h2>Geselecteerde datums</h2>
-
-
-
-            <?php
-            // Controleer of er datums zijn opgeslagen in de sessie.
-            if (!empty($_SESSION['gekozen_datums'])):
-                ?>
-                <ul>
-                    <?php
-                    // Sorteer de geselecteerde datums chronologisch (van oud naar nieuw).
-                    sort($_SESSION['gekozen_datums']);
-
-
-
-                    // Loop door alle opgeslagen datums heen om ze afzonderlijk te tonen.
-                    foreach ($_SESSION['gekozen_datums'] as $datum):
-                        ?>
-                        <li>
-                            <span>
-                                <?php echo htmlspecialchars(date('d-m-Y', strtotime($datum))); ?>
-                            </span>
-
-
-
-                            <a
-                                class="remove-btn"
-                                href="<?php echo htmlspecialchars(calendar_url($maand, $jaar, array_merge(array("remove" => $datum), $wedstrijdId !== "" ? array("wedstrijd_id" => $wedstrijdId) : array()))); ?>"
-                                aria-label="Verwijder <?php echo htmlspecialchars(date('d-m-Y', strtotime($datum))); ?>"
-                            >
-                                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                            </a>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php else: ?>
-                <p class="geen-datums">
-                    Geen datums geselecteerd
-                </p>
-            <?php endif; ?>
-        </aside>
     </section>
 </main>
 

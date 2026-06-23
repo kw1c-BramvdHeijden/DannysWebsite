@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3f0f760a-abb2-4edf-a9b0-337268a9f358" name="Changes" comment="kalender overzicht van competities 2.0">
+    <list default="true" id="3f0f760a-abb2-4edf-a9b0-337268a9f358" name="Changes" comment="aangepast">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/css/kalender.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/kalender.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages/kalender.php" beforeDir="false" afterPath="$PROJECT_DIR$/pages/kalender.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,12 +39,15 @@
     &quot;assignee&quot;: &quot;kw1c-HorstmanConnor&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/kw1c-BramvdHeijden/DannysWebsite.git&quot;,
-    &quot;accountId&quot;: &quot;24ec1093-a692-4f1b-a22d-9aa24925cfbe&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/kw1c-BramvdHeijden/DannysWebsite.git",
+    "accountId": "82275a85-5db7-43e5-97a5-96a77875dfca"
   }
-}</component>
+}]]></component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/includes/header.php" root0="FORCE_HIGHLIGHTING" root1="SKIP_INSPECTION" />
+  </component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -106,7 +111,7 @@
       <entry key="W1" value="45.3112089300867" />
     </decayedShown>
   </component>
-  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="PHP" />
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="C:\xampp\php\php.exe" />
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -153,11 +158,12 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-PS-261.25134.104" />
-        <option value="bundled-php-predefined-a98d8de5180a-6bbb74dbab74-com.jetbrains.php.sharedIndexes-PS-261.25134.104" />
+        <option value="bundled-js-predefined-d6986cc7102b-822845ee3bb5-JavaScript-PS-243.23654.168" />
+        <option value="bundled-php-predefined-a98d8de5180a-4c3855d0ab16-com.jetbrains.php.sharedIndexes-PS-243.23654.168" />
       </set>
     </attachedChunks>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="3f0f760a-abb2-4edf-a9b0-337268a9f358" name="Changes" comment="" />
@@ -172,6 +178,7 @@
       <workItem from="1780383286725" duration="9443000" />
       <workItem from="1780989063730" duration="461000" />
       <workItem from="1780989577286" duration="3091000" />
+      <workItem from="1782207362529" duration="903000" />
     </task>
     <task id="LOCAL-00001" summary="made includes folder,header footer files.">
       <option name="closed" value="true" />
@@ -229,7 +236,15 @@
       <option name="project" value="LOCAL" />
       <updated>1780992806954</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="aangepast">
+      <option name="closed" value="true" />
+      <created>1782201474386</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1782201474386</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -241,6 +256,7 @@
     <MESSAGE value="comment" />
     <MESSAGE value="halve login, werkt nog niet en fucked met de CSS" />
     <MESSAGE value="kalender overzicht van competities 2.0" />
-    <option name="LAST_COMMIT_MESSAGE" value="kalender overzicht van competities 2.0" />
+    <MESSAGE value="aangepast" />
+    <option name="LAST_COMMIT_MESSAGE" value="aangepast" />
   </component>
 </project>

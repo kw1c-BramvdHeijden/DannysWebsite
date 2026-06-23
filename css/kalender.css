@@ -12,8 +12,7 @@ body {
 /* ===== WRAPPER ===== */
 
 .kalender-wrapper {
-    width: 72vw;
-    max-width: 1800px;
+    width: min(1400px, 95%);
 
     height: 88vh;
 
@@ -28,7 +27,7 @@ body {
 /* ===== KALENDER ===== */
 
 .kalender {
-    width: 78%;
+    width: 100%;
 
     height: 100%;
 
@@ -230,134 +229,6 @@ body {
 
 /* ===== SIDEBAR ===== */
 
-.sidebar {
-    width: 22%;
-
-    min-width: 340px;
-
-    height: 100%;
-
-    background: #f5f1eb;
-
-    border-radius: 24px;
-
-    padding: 28px;
-
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-
-    overflow-y: auto;
-}
-
-/* ===== SIDEBAR TITEL ===== */
-
-.sidebar h2 {
-    margin-top: 0;
-
-    margin-bottom: 24px;
-
-    font-size: 28px;
-    font-weight: 700;
-
-    color: #2f2f2f;
-
-    line-height: 1.2;
-}
-
-/* ===== LIJST ===== */
-
-.sidebar ul {
-    list-style: none;
-
-    margin: 0;
-    padding: 0;
-}
-
-/* ===== ITEM ===== */
-
-.sidebar li {
-    background: #ebe5dc;
-
-    margin-bottom: 14px;
-
-    padding: 14px 16px;
-
-    border-radius: 14px;
-
-    border: 1px solid #d7cfc3;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    color: #4f4a43;
-
-    font-weight: 600;
-}
-
-/* ===== REMOVE BUTTON ===== */
-
-.remove-btn {
-    width: 30px;
-    height: 30px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    text-decoration: none;
-
-    border-radius: 50%;
-
-    background: #d9d1c6;
-
-    color: #5d564d;
-
-    font-size: 16px;
-    font-weight: bold;
-
-    transition: 0.2s;
-}
-
-.remove-btn:hover {
-    background: #cf6f45;
-
-    color: white;
-}
-
-/* ===== GEEN DATUMS ===== */
-
-.geen-datums {
-    color: #8b8479;
-
-    font-size: 15px;
-
-    margin: 0;
-}
-
-/* ===== RESPONSIVE ===== */
-
-@media (max-width: 1200px) {
-
-    .kalender-wrapper {
-        flex-direction: column;
-
-        height: auto;
-    }
-
-    .kalender {
-        width: 100%;
-
-        height: 85vh;
-    }
-
-    .sidebar {
-        width: 100%;
-
-        min-width: unset;
-
-        height: auto;
-    }
-}
 .calendar-event {
     background: #d85d3a;
     color: white;
@@ -376,4 +247,150 @@ body {
 .day-number {
     display: block;
     margin-bottom: 4px;
+}
+
+/* ==========================================
+   TABLET
+========================================== */
+
+@media (max-width: 1024px) {
+
+    .kalender-wrapper {
+        width: 98%;
+        height: auto;
+        min-height: auto;
+        margin: 15px auto;
+    }
+
+    .header {
+        padding: 0 15px;
+        height: 70px;
+    }
+
+    .header h1 {
+        font-size: 24px;
+    }
+
+    .arrow {
+        width: 40px;
+        height: 40px;
+        font-size: 22px;
+    }
+
+    .grid {
+        grid-template-rows: 50px repeat(6, minmax(90px, 1fr));
+    }
+
+    .calendar-event {
+        font-size: 10px;
+    }
+}
+
+/* ==========================================
+   MOBIEL
+========================================== */
+
+@media (max-width: 768px) {
+
+    .calendar-event {
+        display: none;
+    }
+
+    .dag.has-event::after {
+        content: "";
+        width: 8px;
+        height: 8px;
+        background: #d85d3a;
+        border-radius: 50%;
+        position: absolute;
+        bottom: 6px;
+        right: 6px;
+    }
+
+    .kalender-wrapper {
+        width: 100%;
+        padding: 0 8px;
+        margin: 10px auto;
+    }
+
+    .kalender {
+        border-radius: 16px;
+    }
+
+    .header {
+        height: auto;
+        min-height: 60px;
+        padding: 12px;
+    }
+
+    .header h1 {
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .arrow {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+
+    .grid {
+        grid-template-rows: 40px repeat(6, minmax(75px, auto));
+    }
+
+    .weekdag {
+        font-size: 12px;
+    }
+
+    .dag span {
+        top: 6px;
+        left: 6px;
+        font-size: 13px;
+    }
+
+    .calendar-event {
+        margin-top: 22px;
+        font-size: 9px;
+        padding: 2px 3px;
+    }
+}
+
+/* ==========================================
+   KLEINE MOBIELS
+========================================== */
+
+@media (max-width: 480px) {
+
+    .header {
+        gap: 8px;
+    }
+
+    .header h1 {
+        font-size: 16px;
+    }
+
+    .arrow {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .weekdag {
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .grid {
+        grid-template-rows: 35px repeat(6, minmax(60px, auto));
+    }
+
+    .dag span {
+        font-size: 12px;
+    }
+
+    .calendar-event {
+        font-size: 8px;
+        margin-top: 18px;
+        padding: 1px 2px;
+    }
 }
