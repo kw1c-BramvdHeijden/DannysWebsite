@@ -258,7 +258,7 @@ export const translations = {
         "photos.authorUnknown": "Onbekend",
         "photos.time.today": "Vandaag",
         "photos.time.yesterday": "Gisteren",
-        "footer.quote": "\" Laat de ballen kletsen,<br>En raak aan het kletsen!\"",
+        "footer.quote": "\" Laat de ballen ketsen,<br>En raak aan het kletsen!\"",
         "upload.kicker": "FOTO PUBLICEREN",
         "upload.title": "Geef je foto een titel en beschrijving",
         "upload.description": "Pas eerst de titel en beschrijving aan voordat je de foto post.",
