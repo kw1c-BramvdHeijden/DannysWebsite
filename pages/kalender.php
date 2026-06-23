@@ -5,6 +5,30 @@ session_start();
 require_once __DIR__ . "/../includes/db.php";
 require_once __DIR__ . "/../includes/bootstrap-data.php";
 
+$competities = [];
+
+$stmt = $pdo->prepare("
+    SELECT name, start_date, end_date
+    FROM tournaments
+    WHERE status = 'geaccepteert'
+ 
+");
+
+$stmt->execute();
+
+$resultaten = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($resultaten as $row) {
+    $datum = date('Y-m-d', strtotime($row['start_date']));
+    $competities[$datum][] = $row['name'];
+}
+
+
+
+foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+    $datum = date('Y-m-d', strtotime($row['start_date']));
+    $competities[$datum][] = $row['name'];
+}
 /* ===== SESSION ===== */
 
 if (!isset($_SESSION['gekozen_datums'])) {
@@ -95,6 +119,44 @@ $herplanMessage = isset($_GET["requested"]) ? "Herplanaanvraag opgeslagen. Het a
 $herplanError = "";
 $herplanCurrentDate = $isHerplanMode ? kalender_match_date($pdo, $herplanMatchId) : "";
 
+function calendar_wedstrijd_id()
+{
+    $wedstrijdId = isset($_POST['wedstrijd_id'])
+        ? trim((string)$_POST['wedstrijd_id'])
+        : (isset($_GET['wedstrijd_id']) ? trim((string)$_GET['wedstrijd_id']) : "");
+
+    return $wedstrijdId !== "" && is_numeric($wedstrijdId) ? $wedstrijdId : "";
+}
+
+function calendar_update_wedstrijd_datum($wedstrijdId, array $datums)
+{
+    global $pdo;
+
+    if ($wedstrijdId === "" || count($datums) === 0) {
+        return;
+    }
+
+    $datum = reset($datums);
+    if (!is_valid_calendar_date_input($datum)) {
+        return;
+    }
+
+    $statement = $pdo->prepare("UPDATE `wedstrijden` SET `datum` = ? WHERE `wedstrijd_id` = ?");
+    $statement->execute(array($datum . " 00:00:00", $wedstrijdId));
+}
+
+function calendar_url($maand, $jaar, $extra = array())
+{
+    $params = array_merge(array(
+        "maand" => (int)$maand,
+        "jaar" => (int)$jaar,
+    ), $extra);
+
+    return "?" . http_build_query($params);
+}
+
+$wedstrijdId = calendar_wedstrijd_id();
+
 /* ===== DATUMS OPSLAAN ===== */
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -150,10 +212,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $maandDatums
         );
 
-        $_SESSION['gekozen_datums'] = array_unique(
-            array_merge($_SESSION['gekozen_datums'], $geselecteerd)
-        );
-    }
+    $_SESSION['gekozen_datums'] = array_unique(
+        array_merge($_SESSION['gekozen_datums'], $geselecteerd)
+    );
+
+    calendar_update_wedstrijd_datum($wedstrijdId, array_values($geselecteerd));
 }
 
 /* ===== DATUM VERWIJDEREN ===== */
@@ -183,7 +246,7 @@ if (isset($_GET['remove'])) {
     }
 
     header(
-        "Location: kalender.php?maand=$redirectMaand&jaar=$redirectJaar"
+        "Location: kalender.php" . calendar_url($redirectMaand, $redirectJaar, $wedstrijdId !== "" ? array("wedstrijd_id" => $wedstrijdId) : array())
     );
 
     exit;
@@ -301,10 +364,6 @@ require_once __DIR__ . "/../includes/header.php";
             </div>
 
             <form method="POST" class="kalender-form">
-                <?php if ($isHerplanMode): ?>
-                    <input type="hidden" name="reschedule_match_id" value="<?php echo htmlspecialchars($herplanMatchId); ?>">
-                <?php endif; ?>
-
                 <div class="grid">
                     <div class="weekdag">Ma</div>
                     <div class="weekdag">Di</div>
@@ -329,12 +388,10 @@ require_once __DIR__ . "/../includes/header.php";
 
                         $isVandaag = $datum === $vandaag;
                         $isVerleden = strtotime($datum) < strtotime($vandaag);
-                        $checked = $isHerplanMode
-                            ? $datum === $herplanCurrentDate
-                            : in_array(
-                                $datum,
-                                $_SESSION['gekozen_datums']
-                            );
+                        $checked = in_array(
+                            $datum,
+                            $_SESSION['gekozen_datums']
+                        );
                         ?>
 
                         <input
@@ -350,7 +407,7 @@ require_once __DIR__ . "/../includes/header.php";
                                 value="<?php echo htmlspecialchars($datum); ?>"
                                 <?php echo $checked ? 'checked' : ''; ?>
                                 <?php echo ($isVandaag || $isVerleden) ? 'disabled' : ''; ?>
-                                <?php echo (!$isHerplanMode && $isVandaag) ? 'checked' : ''; ?>
+                                <?php echo $isVandaag ? 'checked' : ''; ?>
                                 onchange="this.form.submit()"
                             >
 
@@ -364,27 +421,9 @@ require_once __DIR__ . "/../includes/header.php";
         </div>
 
         <aside class="sidebar">
-            <h2><?php echo $isHerplanMode ? "Wedstrijd herplannen" : "Geselecteerde datums"; ?></h2>
+            <h2>Geselecteerde datums</h2>
 
-            <?php if ($isHerplanMode): ?>
-                <?php if ($herplanError !== ""): ?>
-                    <p class="geen-datums"><?php echo htmlspecialchars($herplanError); ?></p>
-                <?php elseif ($herplanMessage !== ""): ?>
-                    <p class="geen-datums"><?php echo htmlspecialchars($herplanMessage); ?></p>
-                <?php else: ?>
-                    <p class="geen-datums">
-                        Kies een nieuwe datum. Het andere team moet deze datum daarna goedkeuren.
-                    </p>
-                <?php endif; ?>
-
-                <?php if ($herplanCurrentDate !== ""): ?>
-                    <ul>
-                        <li>
-                            <span>Huidige datum: <?php echo htmlspecialchars(date('d-m-Y', strtotime($herplanCurrentDate))); ?></span>
-                        </li>
-                    </ul>
-                <?php endif; ?>
-            <?php elseif (!empty($_SESSION['gekozen_datums'])): ?>
+            <?php if (!empty($_SESSION['gekozen_datums'])): ?>
                 <ul>
                     <?php
                     sort($_SESSION['gekozen_datums']);

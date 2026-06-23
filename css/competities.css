@@ -97,6 +97,207 @@
     font-weight: 700;
 }
 
+.competition-matches-status {
+    min-height: 1.4em;
+    margin: 0;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.match-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 84;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 220ms ease, visibility 220ms ease;
+}
+
+.match-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.match-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(22, 25, 23, 0.44);
+    backdrop-filter: blur(8px);
+}
+
+.match-modal-dialog {
+    position: relative;
+    width: min(100%, 940px);
+    max-height: calc(100vh - 48px);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 30px;
+    background: rgba(251, 245, 236, 0.98);
+    box-shadow: var(--shadow-strong);
+    transform: translateY(24px) scale(0.98);
+    transition: transform 240ms ease;
+}
+
+.match-modal.is-open .match-modal-dialog {
+    transform: translateY(0) scale(1);
+}
+
+.match-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.82);
+    cursor: pointer;
+    transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
+}
+
+.match-modal-close:hover,
+.match-modal-close:focus-visible {
+    transform: scale(1.04);
+    border-color: rgba(203, 53, 44, 0.34);
+    box-shadow: 0 12px 20px rgba(59, 46, 31, 0.12);
+}
+
+.match-modal-content {
+    display: grid;
+    gap: 16px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding: 34px 30px 30px;
+}
+
+.match-modal-content h2 {
+    margin: 0;
+    padding-right: 48px;
+    font-size: clamp(1.8rem, 3vw, 2.35rem);
+    line-height: 1.04;
+}
+
+.competition-match-list {
+    display: grid;
+    gap: 14px;
+}
+
+.competition-match-card {
+    display: grid;
+    grid-template-columns: minmax(100px, 0.28fr) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid rgba(134, 109, 74, 0.12);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.66);
+}
+
+.competition-match-round-label {
+    color: var(--green-deep);
+    font-size: 0.86rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.competition-match-teams {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+}
+
+.competition-match-teams strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-weight: 700;
+}
+
+.competition-match-teams strong:last-child {
+    text-align: right;
+}
+
+.competition-match-vs {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.competition-match-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.competition-match-schedule,
+.competition-match-start,
+.competition-match-verify-button {
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.competition-match-date {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid rgba(240, 196, 88, 0.36);
+    border-radius: 12px;
+    background: rgba(240, 196, 88, 0.18);
+    color: #6d5414;
+    font-size: 0.88rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.competition-match-date.is-verified {
+    border-color: rgba(123, 145, 81, 0.3);
+    background: rgba(123, 145, 81, 0.16);
+    color: var(--green-deep);
+}
+
+.competition-match-verify-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid rgba(123, 145, 81, 0.28);
+    border-radius: 12px;
+    background: rgba(123, 145, 81, 0.12);
+    color: var(--green-deep);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.competition-match-verify-button.is-reject {
+    border-color: rgba(171, 46, 39, 0.24);
+    background: rgba(171, 46, 39, 0.08);
+    color: #8f241e;
+}
+
+.competition-match-verify-button:hover,
+.competition-match-verify-button:focus-visible {
+    background: rgba(123, 145, 81, 0.18);
+}
+
+.competition-match-verify-button.is-reject:hover,
+.competition-match-verify-button.is-reject:focus-visible {
+    background: rgba(171, 46, 39, 0.14);
+}
+
 @media (max-width: 1280px) {
     .competition-request-card {
         grid-template-columns: minmax(0, 1fr) minmax(180px, auto);
@@ -130,4 +331,47 @@
     .competition-request-actions .button {
         width: 100%;
     }
+
+    .match-modal {
+        padding: 14px;
+    }
+
+    .match-modal-content {
+        padding: 28px 18px 22px;
+    }
+
+    .competition-match-card {
+        grid-template-columns: 1fr;
+    }
+
+    .competition-match-teams {
+        grid-template-columns: 1fr;
+    }
+
+    .competition-match-teams strong:last-child {
+        text-align: left;
+    }
+
+    .competition-match-actions {
+        align-items: stretch;
+        justify-content: stretch;
+    }
+
+    .competition-match-schedule,
+    .competition-match-start,
+    .competition-match-date,
+    .competition-match-verify-button {
+        width: 100%;
+    }
+}
+.calendar-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    padding-right: 20px;
+}
+
+.calendar-button {
+    min-width: 160px;
 }
