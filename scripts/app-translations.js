@@ -10,7 +10,7 @@ export const translations = {
         "nav.competitions": "Competities",
         "nav.scoreboard": "Scoreboard",
         "nav.about": "Over ons",
-        "nav.how": "spelregels",
+        "nav.how": "Spelregels",
         "nav.photos": "Foto's",
         "nav.contact": "Contact",
         "auth.login": "Inloggen",
