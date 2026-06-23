@@ -1067,7 +1067,7 @@ function competitions_register_team(array $data)
         competitions_respond(401, array("error" => "Log opnieuw in om een team aan te melden."));
     }
 
-    if (!competitions_team_belongs_to_user($teamId, $userId)) {
+    if (!competitions_is_admin() && !competitions_team_belongs_to_user($teamId, $userId)) {
         competitions_respond(403, array("error" => "Je kunt alleen een team aanmelden waar je zelf in zit."));
     }
 
