@@ -402,22 +402,16 @@ export function createTeamsModule({ refs, state, t, getLocalizedText }) {
     async function submitTeam(event) {
         event.preventDefault();
 
-        if (!state.loggedIn || !refs.teamNameInput || !refs.teamTournamentInput) {
+        if (!state.loggedIn || !refs.teamNameInput) {
             return;
         }
 
         const name = refs.teamNameInput.value.trim();
-        const tournamentId = refs.teamTournamentInput.value;
+        const tournamentId = refs.teamTournamentInput ? refs.teamTournamentInput.value : "";
         const memberIds = getSelectedUserIds();
 
         if (!name) {
             refs.teamNameInput.focus();
-            return;
-        }
-
-        if (!tournamentId) {
-            setTeamFeedback(t("teams.form.competitionRequired"));
-            refs.teamTournamentInput.focus();
             return;
         }
 

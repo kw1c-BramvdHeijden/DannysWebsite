@@ -314,15 +314,17 @@ function teams_create(array $data)
         return $memberId !== "" && is_numeric($memberId) ? $memberId : "";
     }, $memberIds))));
 
-    if ($name === "" || $tournamentId === "" || count($memberIds) === 0) {
-        teams_respond(422, array("error" => "Vul een teamnaam in, kies een competitie en selecteer minimaal 1 gebruiker."));
+    if ($name === "" || count($memberIds) === 0) {
+        teams_respond(422, array("error" => "Vul een teamnaam in en selecteer minimaal 1 gebruiker."));
     }
 
     if (teams_text_length($name) > 35) {
         teams_respond(422, array("error" => "Teamnaam mag maximaal 35 karakters zijn."));
     }
 
-    $name = teams_format_name_for_tournament($name, $tournamentId);
+    if ($tournamentId !== "") {
+        $name = teams_format_name_for_tournament($name, $tournamentId);
+    }
 
     $requesterId = teams_user_id_from_session();
     if ($requesterId === "") {
