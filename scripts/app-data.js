@@ -75,21 +75,15 @@ function normalizePhoto(photo) {
 }
 
 function normalizeCompetitionTone(tone) {
-    if (typeof tone === "string" && /^#[0-9a-f]{6}$/i.test(tone)) {
-        return tone.toLowerCase();
-    }
-
-    return competitionToneMap[tone] ? tone : "#7b9151";
+    return competitionToneMap[tone] ? tone : "green";
 }
 
-// Zet competitie-data om naar het vaste frontend-formaat.
 function normalizeCompetition(competition) {
     if (!competition || typeof competition !== "object") {
         return null;
     }
 
     const startDate = typeof competition.startDate === "string" ? competition.startDate : "";
-    const endDate = typeof competition.endDate === "string" ? competition.endDate : "";
     const title = normalizeLocalizedField(competition.title);
     const type = normalizeLocalizedField(competition.type);
 
@@ -102,20 +96,9 @@ function normalizeCompetition(competition) {
         title,
         type,
         startDate,
-        endDate,
         tone: normalizeCompetitionTone(competition.tone),
         status: typeof competition.status === "string" ? competition.status.trim() : "",
-        registeredTeamIds: Array.isArray(competition.registeredTeamIds) ? competition.registeredTeamIds.map(String) : [],
-        // Namen zijn nodig om aangemelde teams te tonen.
-        registeredTeams: Array.isArray(competition.registeredTeams)
-            ? competition.registeredTeams
-                .filter((team) => team && typeof team === "object")
-                .map((team) => ({
-                    id: typeof team.id === "string" || typeof team.id === "number" ? String(team.id) : "",
-                    name: typeof team.name === "string" && team.name.trim() ? team.name.trim() : "Team"
-                }))
-                .filter((team) => team.id || team.name)
-            : [],
+        started: competition.started === true,
         href: typeof competition.href === "string" && competition.href.trim() ? competition.href.trim() : "#competities"
     };
 }
@@ -146,22 +129,12 @@ function normalizeLeaderboardEntry(entry) {
         return null;
     }
 
-    const id = typeof entry.id === "string" || typeof entry.id === "number"
-        ? String(entry.id)
-        : (typeof entry.teamId === "string" || typeof entry.teamId === "number"
-            ? String(entry.teamId)
-            : (typeof entry.team_id === "string" || typeof entry.team_id === "number" ? String(entry.team_id) : team));
-    const won = normalizeNumber(entry.won !== undefined ? entry.won : entry.wins);
-
     return {
-        id,
-        teamId: id,
         team,
         played: normalizeNumber(entry.played),
-        won,
-        lost: normalizeNumber(entry.lost !== undefined ? entry.lost : entry.losses),
+        won: normalizeNumber(entry.won),
         diff: normalizeNumber(entry.diff),
-        points: normalizeNumber(entry.points !== undefined ? entry.points : won),
+        points: normalizeNumber(entry.points),
         trend: entry.trend === "up" || entry.trend === "down" ? entry.trend : "flat",
         players: Array.isArray(entry.players)
             ? entry.players.map(normalizeLeaderboardPlayer).filter(Boolean)
@@ -239,22 +212,19 @@ export function generateRecordId() {
         : String(Date.now());
 }
 
-// Bouw de centrale applicatie-state.
 export function createAppState() {
     const bootstrap = getBootstrapData();
     const auth = bootstrap.auth && typeof bootstrap.auth === "object" ? bootstrap.auth : {};
-    const hasBootstrapAuth = Object.prototype.hasOwnProperty.call(bootstrap, "auth");
     const storedAuth = readStoredAuth();
     const bootstrapUser = normalizeUser(bootstrap.user ?? auth.user);
     const bootstrapAuth = auth.loggedIn === true && bootstrapUser
         ? {
             loggedIn: true,
             role: normalizeRole(auth.role),
-            accountRole: normalizeRole(auth.accountRole || auth.role),
             user: bootstrapUser
         }
         : null;
-    const activeAuth = bootstrapAuth || (hasBootstrapAuth ? null : storedAuth);
+    const activeAuth = bootstrapAuth || storedAuth;
 
     return {
         lang: normalizeLanguage(localStorage.getItem(STORAGE_KEYS.lang)),
@@ -271,8 +241,7 @@ export function createAppState() {
         pendingUpload: null,
         pendingPhotoId: null,
         pendingCompetitionId: null,
-        leaderboardTeamFilter: "all",
-        leaderboardWinsSort: "desc"
+        leaderboardTeamFilter: "all"
     };
 }
 

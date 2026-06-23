@@ -1,20 +1,14 @@
-export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} }) {
+export function createTeamsModule({ refs, state, t, getLocalizedText }) {
     let teamModalTimer = 0;
     let teamsLoaded = false;
     let teamsLoading = false;
     let usersLoaded = false;
     let usersLoading = false;
-    let currentUserTeamsLoaded = false;
-    let currentUserTeamsLoading = false;
-    let currentUserTeamsError = "";
-    let currentUserTeamsUserId = "";
     let teams = [];
-    let currentUserTeams = [];
     let users = [];
     let userSearchTerm = "";
     let selectedUserIds = [];
 
-    // Bepaal API-pad voor teams.
     function getTeamApiUrl() {
         const script = document.querySelector("script[src$='scripts/index.js']");
         return script ? new URL("../api/teams.php", script.src).toString() : "api/teams.php";
@@ -26,7 +20,6 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
             : "";
     }
 
-    // Verstuur request naar teams-API.
     async function requestTeams(payload) {
         const response = await fetch(getTeamApiUrl(), {
             method: "POST",
@@ -44,7 +37,6 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         return result;
     }
 
-    // Zet teamdata om naar frontend-formaat.
     function normalizeTeam(team) {
         if (!team || typeof team !== "object") {
             return null;
@@ -69,7 +61,6 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         };
     }
 
-    // Zet gebruiker om naar keuzelijst-formaat.
     function normalizeUser(user) {
         if (!user || typeof user !== "object") {
             return null;
@@ -83,24 +74,6 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         }
 
         return { id, name };
-    }
-
-    // Teams waar de ingelogde gebruiker lid van is.
-    function getCurrentUserTeams() {
-        if (!state.loggedIn || currentUserTeamsUserId !== getCurrentUserId()) {
-            return [];
-        }
-
-        return currentUserTeams.slice();
-    }
-
-    // Laadstatus van mijn teams.
-    function getCurrentUserTeamsStatus() {
-        return {
-            loaded: currentUserTeamsLoaded,
-            loading: currentUserTeamsLoading,
-            error: currentUserTeamsError
-        };
     }
 
     function setTeamFeedback(message = "", isSuccess = false) {
@@ -163,6 +136,54 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         }
     }
 
+    function resetUserPicker() {
+        selectedUserIds = [];
+        userSearchTerm = "";
+
+        if (refs.teamUserSearch) {
+            refs.teamUserSearch.value = "";
+        }
+
+        renderUsers();
+    }
+
+    function isVisibleCompetition(competition) {
+        const status = competition && typeof competition.status === "string"
+            ? competition.status.trim().toLowerCase()
+            : "";
+
+        return ["pending", "in afwachting", "aangevraagd", "rejected", "denied", "afgewezen"].indexOf(status) === -1;
+    }
+
+    function renderTournamentOptions() {
+        if (!refs.teamTournamentInput) {
+            return;
+        }
+
+        const selectedValue = refs.teamTournamentInput.value;
+        refs.teamTournamentInput.innerHTML = "";
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = t("teams.form.competitionPlaceholder");
+        refs.teamTournamentInput.appendChild(placeholder);
+
+        state.competitions
+            .filter(isVisibleCompetition)
+            .slice()
+            .sort((left, right) => left.startDate.localeCompare(right.startDate))
+            .forEach((competition) => {
+                const option = document.createElement("option");
+                option.value = String(competition.id);
+                option.textContent = getLocalizedText(competition.title, state.lang);
+                refs.teamTournamentInput.appendChild(option);
+            });
+
+        if (selectedValue && Array.from(refs.teamTournamentInput.options).some((option) => option.value === selectedValue)) {
+            refs.teamTournamentInput.value = selectedValue;
+        }
+    }
+
     function createTeamCard(team) {
         const card = document.createElement("article");
         card.className = "team-card";
@@ -181,6 +202,16 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         meta.textContent = team.createdByName ? `${t("teams.createdBy")} ${team.createdByName}` : t("teams.createdByUnknown");
 
         card.append(title, players, meta);
+
+        if (state.loggedIn && state.role === "admin") {
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "team-delete-button";
+            deleteButton.dataset.teamDelete = String(team.id);
+            deleteButton.innerHTML = `<i class="fa-solid fa-trash"></i><span>${t("teams.delete")}</span>`;
+            card.appendChild(deleteButton);
+        }
+
         return card;
     }
 
@@ -201,8 +232,6 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
             return;
         }
 
-        setUserStatus("");
-
         const visibleUsers = userSearchTerm
             ? users.filter((user) => user.name.toLowerCase().indexOf(userSearchTerm) !== -1)
             : users;
@@ -212,6 +241,8 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
             syncUserSummary();
             return;
         }
+
+        setUserStatus("");
 
         visibleUsers.forEach((user) => {
             const label = document.createElement("label");
@@ -293,7 +324,6 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         });
     }
 
-    // Laad alle teams voor het teamoverzicht.
     async function loadTeams(force = false) {
         if (teamsLoading || (teamsLoaded && !force)) {
             renderTeams();
@@ -309,7 +339,6 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
                 ? result.teams.map(normalizeTeam).filter(Boolean)
                 : [];
             teamsLoaded = true;
-            onTeamsChanged();
         } catch (error) {
             setTeamStatus(error.message || t("teams.error"));
         } finally {
@@ -318,55 +347,6 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         }
     }
 
-    // Laad alleen teams van de huidige gebruiker.
-    async function loadCurrentUserTeams(force = false) {
-        const currentUserId = getCurrentUserId();
-        const userChanged = currentUserTeamsUserId !== currentUserId;
-
-        if (!state.loggedIn || !currentUserId) {
-            currentUserTeams = [];
-            currentUserTeamsLoaded = false;
-            currentUserTeamsError = "";
-            currentUserTeamsUserId = "";
-            onTeamsChanged();
-            return [];
-        }
-
-        if (currentUserTeamsLoading) {
-            return userChanged ? [] : currentUserTeams.slice();
-        }
-
-        if (currentUserTeamsLoaded && !force && !userChanged) {
-            return currentUserTeams.slice();
-        }
-
-        currentUserTeamsLoading = true;
-        currentUserTeamsError = "";
-        onTeamsChanged();
-
-        try {
-            const result = await requestTeams({ action: "listMine" });
-            currentUserTeams = Array.isArray(result.teams)
-                ? result.teams.map(normalizeTeam).filter(Boolean)
-                : [];
-            currentUserTeamsLoaded = true;
-            currentUserTeamsUserId = currentUserId;
-            onTeamsChanged();
-        } catch (error) {
-            currentUserTeams = [];
-            currentUserTeamsLoaded = false;
-            currentUserTeamsError = error.message || t("teams.error");
-            currentUserTeamsUserId = "";
-            onTeamsChanged();
-        } finally {
-            currentUserTeamsLoading = false;
-            onTeamsChanged();
-        }
-
-        return currentUserTeams.slice();
-    }
-
-    // Open teamvenster.
     function openTeamModal() {
         if (!refs.teamModal || !state.loggedIn) {
             return;
@@ -376,9 +356,9 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         setTeamFeedback();
         refs.teamModal.hidden = false;
         refs.body.classList.add("team-modal-open");
+        renderTournamentOptions();
         loadTeams();
-        loadCurrentUserTeams();
-        loadUsers();
+        loadUsers(true);
 
         requestAnimationFrame(() => {
             refs.teamModal.classList.add("is-open");
@@ -392,26 +372,11 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
     }
 
     function preloadUsers() {
-        if (!refs.teamUserOptions) {
+        if (!refs.teamUserOptions || !state.loggedIn) {
             return;
         }
 
-        loadUsers();
-    }
-
-    // Laad teamdata alvast op de competitiepagina.
-    function preloadTeamData() {
-        if (!refs.teamList && !refs.teamUserOptions) {
-            return;
-        }
-
-        loadTeams();
-        loadCurrentUserTeams();
-        loadUsers();
-    }
-
-    function preloadCurrentUserTeams(force = false) {
-        return loadCurrentUserTeams(force);
+        loadUsers(true);
     }
 
     function closeTeamModal() {
@@ -428,35 +393,31 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
             if (refs.teamForm) {
                 refs.teamForm.reset();
             }
-            userSearchTerm = "";
-            selectedUserIds = [];
-            if (refs.teamUserSearch) {
-                refs.teamUserSearch.value = "";
-            }
-            if (refs.teamUserOptions) {
-                refs.teamUserOptions.querySelectorAll("input[type='checkbox']").forEach((input) => {
-                    input.checked = false;
-                });
-            }
+            resetUserPicker();
             setUserMenuOpen(false);
-            syncUserSummary();
             setTeamFeedback();
         }, 220);
     }
 
-    // Maak een nieuw team aan.
     async function submitTeam(event) {
         event.preventDefault();
 
-        if (!state.loggedIn || !refs.teamNameInput) {
+        if (!state.loggedIn || !refs.teamNameInput || !refs.teamTournamentInput) {
             return;
         }
 
         const name = refs.teamNameInput.value.trim();
+        const tournamentId = refs.teamTournamentInput.value;
         const memberIds = getSelectedUserIds();
 
         if (!name) {
             refs.teamNameInput.focus();
+            return;
+        }
+
+        if (!tournamentId) {
+            setTeamFeedback(t("teams.form.competitionRequired"));
+            refs.teamTournamentInput.focus();
             return;
         }
 
@@ -477,34 +438,20 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
                 userId: getCurrentUserId(),
                 team: {
                     name,
+                    tournamentId,
                     memberIds
                 }
             });
             const createdTeam = normalizeTeam(result.team);
             if (createdTeam) {
                 teams.unshift(createdTeam);
-                currentUserTeams.unshift(createdTeam);
-                currentUserTeamsLoaded = true;
-                currentUserTeamsError = "";
-                currentUserTeamsUserId = getCurrentUserId();
                 teamsLoaded = true;
-                onTeamsChanged();
             }
             if (refs.teamForm) {
                 refs.teamForm.reset();
             }
-            userSearchTerm = "";
-            selectedUserIds = [];
-            if (refs.teamUserSearch) {
-                refs.teamUserSearch.value = "";
-            }
-            if (refs.teamUserOptions) {
-                refs.teamUserOptions.querySelectorAll("input[type='checkbox']").forEach((input) => {
-                    input.checked = false;
-                });
-            }
+            resetUserPicker();
             setUserMenuOpen(false);
-            syncUserSummary();
             setTeamFeedback(t("teams.success"), true);
             renderTeams();
         } catch (error) {
@@ -539,20 +486,39 @@ export function createTeamsModule({ refs, state, t, onTeamsChanged = () => {} })
         renderUsers();
     }
 
+    async function deleteTeam(teamId) {
+        if (!state.loggedIn || state.role !== "admin" || !teamId) {
+            return;
+        }
+
+        if (!window.confirm(t("teams.deleteConfirm"))) {
+            return;
+        }
+
+        try {
+            await requestTeams({
+                action: "delete",
+                id: teamId,
+                userId: getCurrentUserId()
+            });
+            teams = teams.filter((team) => String(team.id) !== String(teamId));
+            teamsLoaded = true;
+            renderTeams();
+            setTeamFeedback(t("teams.deleteSuccess"), true);
+        } catch (error) {
+            setTeamFeedback(error.message || t("teams.error"));
+        }
+    }
+
     return {
         openTeamModal,
         preloadUsers,
-        preloadTeamData,
-        preloadCurrentUserTeams,
-        loadTeams,
-        loadCurrentUserTeams,
-        getCurrentUserTeams,
-        getCurrentUserTeamsStatus,
         closeTeamModal,
         submitTeam,
         toggleUserMenu,
         closeUserMenu,
         filterUsers,
+        deleteTeam,
         syncTeamButtons
     };
 }

@@ -358,3 +358,22 @@ body {
         height: auto;
     }
 }
+.calendar-event {
+    background: #d85d3a;
+    color: white;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin-top: 30px;
+    margin-left: 5px;
+    margin-right: 5px;
+    font-size: 11px;
+    line-height: 1.2;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.day-number {
+    display: block;
+    margin-bottom: 4px;
+}
