@@ -35,20 +35,7 @@ export function createApp() {
         savePhotos
     });
 
-    let competitions = null;
-
-    const teams = createTeamsModule({
-        refs,
-        state,
-        t,
-        onTeamsChanged: () => {
-            if (competitions) {
-                competitions.renderCompetitions();
-            }
-        }
-    });
-
-    competitions = createCompetitionsModule({
+    const competitions = createCompetitionsModule({
         refs,
         state,
         t,
@@ -56,28 +43,20 @@ export function createApp() {
         competitionToneMap,
         getLocalizedText,
         generateRecordId,
-        saveCompetitions,
-        getCurrentUserTeams: teams.getCurrentUserTeams,
-        getCurrentUserTeamsStatus: teams.getCurrentUserTeamsStatus,
-        loadCurrentUserTeams: teams.loadCurrentUserTeams
+        saveCompetitions
     });
-
-    function isCompetitionsPage() {
-        return Boolean(refs.competitionGrid) && window.location.pathname.indexOf("competities") !== -1;
-    }
-
-    function preloadCompetitionPageTeams(force = false) {
-        if (!isCompetitionsPage()) {
-            return;
-        }
-
-        teams.preloadCurrentUserTeams(force);
-    }
 
     const leaderboard = createLeaderboardModule({
         refs,
         state,
         t
+    });
+
+    const teams = createTeamsModule({
+        refs,
+        state,
+        t,
+        getLocalizedText
     });
 
     const ui = createUiModule({
@@ -98,10 +77,7 @@ export function createApp() {
         closeTeamModal: teams.closeTeamModal,
         syncTeamButtons: teams.syncTeamButtons,
         closeLeaderboardModal: leaderboard.closeLeaderboardModal,
-        canManageCompetitions: competitions.canManageCompetitions,
-        onAuthStateChanged: () => {
-            preloadCompetitionPageTeams(true);
-        }
+        canManageCompetitions: competitions.canManageCompetitions
     });
 
     bindEvents({
@@ -125,7 +101,8 @@ export function createApp() {
     ui.setAuthMode("login");
     ui.syncNavToggleLabel();
     ui.updateActiveNavLink();
-    leaderboard.startLiveUpdates();
 
-    preloadCompetitionPageTeams(true);
+    if (refs.teamUserOptions && window.location.pathname.indexOf("competities") !== -1) {
+        teams.preloadUsers();
+    }
 }
