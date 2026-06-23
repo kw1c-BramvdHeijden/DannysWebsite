@@ -70,6 +70,10 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
         <div class="panel-heading">
             <h2 data-i18n="competitions.heading">AANKOMENDE COMPETITIES</h2>
             <div class="panel-actions">
+                <a class="button button-outline panel-admin-button" href="kalender.php">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Kalender</span>
+                </a>
                     <span class="panel-admin-indicator" data-competition-admin-indicator hidden>
                         <i class="fa-solid fa-pen-to-square"></i>
                         <span data-i18n="competitions.adminMode">Admin-modus: beheer aankomende competities</span>
