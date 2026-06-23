@@ -9,7 +9,7 @@ $competities = [];
 $stmt = $pdo->prepare("
     SELECT name, start_date, end_date
     FROM tournaments
-    WHERE status = 'geaccepteert'
+    WHERE status = 'accepted'
  
 ");
 
