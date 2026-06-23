@@ -201,6 +201,11 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
                 </label>
 
                 <label class="upload-label">
+                    <span data-i18n="competitions.form.endDate">Einddatum</span>
+                    <input type="date" data-competition-end-date>
+                </label>
+
+                <label class="upload-label">
                     <span data-i18n="competitions.form.style">Accentkleur</span>
                     <select class="competition-select" data-competition-tone>
                         <option value="green" data-i18n="competitions.form.styleGreen">Groen</option>
@@ -217,6 +222,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
                         <span data-competition-submit-label data-i18n="competitions.form.save">Competitie opslaan</span>
                     </button>
                 </div>
+                <p class="auth-popup-feedback" data-competition-feedback aria-live="polite"></p>
             </form>
         </div>
     </div>
