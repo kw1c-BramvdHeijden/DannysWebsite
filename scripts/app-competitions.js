@@ -32,6 +32,10 @@ export function createCompetitionsModule({
         return document.body.dataset.competitionsHref || "pages/competities.php";
     }
 
+    function isCompetitionPreview() {
+        return getDefaultCompetitionHref() !== "#competities";
+    }
+
     function getCompetitionApiUrl() {
         const script = document.querySelector("script[src$='scripts/index.js']");
         return script ? new URL("../api/competitions.php", script.src).toString() : "api/competitions.php";
@@ -431,6 +435,16 @@ export function createCompetitionsModule({
         const signup = document.createElement("div");
         signup.className = "competition-team-signup";
 
+        if (isCompetitionPreview()) {
+            const moreInfoLink = document.createElement("a");
+            moreInfoLink.className = "button button-outline";
+            moreInfoLink.href = getDefaultCompetitionHref();
+            moreInfoLink.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${t("competitions.more")}</span>`;
+            signup.appendChild(moreInfoLink);
+            card.appendChild(signup);
+            return card;
+        }
+
         // Toon de juiste aanmeldstatus per gebruiker.
         if (registrationClosed) {
             const message = document.createElement("p");
@@ -532,6 +546,10 @@ export function createCompetitionsModule({
     }
 
     function canRescheduleMatch(match, userTeams) {
+        if (match && match.canReschedule === true) {
+            return true;
+        }
+
         if (!state.loggedIn || !Array.isArray(userTeams)) {
             return false;
         }
