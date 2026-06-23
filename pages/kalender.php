@@ -3,16 +3,22 @@
 session_start();
 
 require_once __DIR__ . "/../includes/db.php";
-
 $competities = [];
 
 $stmt = $pdo->prepare("
     SELECT name, start_date
     FROM tournaments
-    WHERE status = 'geaccepteerd'
+ 
 ");
 
 $stmt->execute();
+
+$resultaten = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($resultaten as $row) {
+    $datum = date('Y-m-d', strtotime($row['start_date']));
+    $competities[$datum][] = $row['name'];
+}
 
 
 
