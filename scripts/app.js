@@ -35,7 +35,18 @@ export function createApp() {
         savePhotos
     });
 
-    const competitions = createCompetitionsModule({
+    let competitions = null;
+    const teams = createTeamsModule({
+        refs,
+        state,
+        t,
+        getLocalizedText,
+        onTeamsChanged: () => {
+            competitions?.renderCompetitions();
+        }
+    });
+
+    competitions = createCompetitionsModule({
         refs,
         state,
         t,
@@ -43,20 +54,18 @@ export function createApp() {
         competitionToneMap,
         getLocalizedText,
         generateRecordId,
-        saveCompetitions
+        saveCompetitions,
+        getCurrentUserTeams: teams.getCurrentUserTeams,
+        getCompetitionSignupTeams: teams.getCompetitionSignupTeams,
+        getCurrentUserTeamsStatus: teams.getCurrentUserTeamsStatus,
+        loadCurrentUserTeams: teams.loadCurrentUserTeams,
+        loadCompetitionSignupTeams: teams.loadCompetitionSignupTeams
     });
 
     const leaderboard = createLeaderboardModule({
         refs,
         state,
         t
-    });
-
-    const teams = createTeamsModule({
-        refs,
-        state,
-        t,
-        getLocalizedText
     });
 
     const ui = createUiModule({
