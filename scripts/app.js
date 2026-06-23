@@ -125,6 +125,7 @@ export function createApp() {
     ui.setAuthMode("login");
     ui.syncNavToggleLabel();
     ui.updateActiveNavLink();
+    leaderboard.startLiveUpdates();
 
     preloadCompetitionPageTeams(true);
 }

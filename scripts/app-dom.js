@@ -112,5 +112,6 @@ export const refs = {
     leaderboardTable: document.querySelector(".leaderboard-table"),
     leaderboardTableBody: document.querySelector("[data-leaderboard-table-body]"),
     leaderboardUpdatedText: document.querySelector("[data-leaderboard-updated]"),
-    leaderboardTeamFilter: document.querySelector("[data-leaderboard-team-filter]")
+    leaderboardTeamFilter: document.querySelector("[data-leaderboard-team-filter]"),
+    leaderboardSortFilter: document.querySelector("[data-leaderboard-sort]")
 };

@@ -308,6 +308,14 @@ function renderTeam(match, team) {
 
     const scoreControls = createElement("div", "scoreboard-team-score");
 
+    if (!match.canEdit) {
+        const number = createElement("span", "scoreboard-score-number", String(score).padStart(2, "0"));
+        scoreControls.appendChild(number);
+        row.append(copy, scoreControls);
+
+        return row;
+    }
+
     const minus = createElement("button", "scoreboard-score-button");
     minus.type = "button";
     minus.dataset.scoreAction = "minus";

@@ -740,6 +740,14 @@
     margin: 0;
 }
 
+.leaderboard-modal-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
 .leaderboard-status-chip {
     display: inline-flex;
     align-items: center;
@@ -818,7 +826,7 @@
 }
 
 .leaderboard-team-header {
-    min-width: 220px;
+    min-width: 250px;
 }
 
 .leaderboard-team-header-copy {
@@ -826,9 +834,9 @@
     margin-bottom: 8px;
 }
 
-.leaderboard-team-filter {
+.leaderboard-team-filter,
+.leaderboard-sort-control select {
     width: 100%;
-    min-width: 180px;
     padding: 10px 38px 10px 14px;
     border: 1px solid rgba(134, 109, 74, 0.16);
     border-radius: 14px;
@@ -848,19 +856,26 @@
     transition: border-color var(--ease), box-shadow var(--ease), background-color var(--ease);
 }
 
-.leaderboard-team-filter:focus {
+.leaderboard-team-filter {
+    min-width: 180px;
+}
+
+.leaderboard-sort-control {
+    display: grid;
+    gap: 7px;
+    min-width: min(100%, 210px);
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.leaderboard-team-filter:focus,
+.leaderboard-sort-control select:focus {
     border-color: rgba(123, 145, 81, 0.4);
     box-shadow: 0 0 0 4px rgba(123, 145, 81, 0.12);
     background-color: var(--white);
-}
-
-.leaderboard-table-points {
-    color: #524f49;
-}
-
-.leaderboard-table[data-mode="players"] th:nth-child(n+4),
-.leaderboard-table[data-mode="players"] td:nth-child(n+4) {
-    display: none;
 }
 
 .leaderboard-trend-badge {
@@ -886,6 +901,28 @@
 .leaderboard-trend-badge.down {
     color: var(--red-deep);
     background: rgba(203, 53, 44, 0.12);
+}
+
+.leaderboard-delete-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    width: fit-content;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 1px solid rgba(203, 53, 44, 0.22);
+    border-radius: 999px;
+    background: rgba(203, 53, 44, 0.08);
+    color: var(--red-deep);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.leaderboard-delete-button:hover,
+.leaderboard-delete-button:focus-visible {
+    border-color: rgba(203, 53, 44, 0.42);
+    background: rgba(203, 53, 44, 0.14);
 }
 
 @keyframes reveal-down {
@@ -1043,6 +1080,11 @@
         text-align: center;
     }
 
+    .leaderboard-modal-toolbar,
+    .leaderboard-sort-control {
+        width: 100%;
+    }
+
     .leaderboard-table-shell {
         max-height: min(52dvh, 420px);
         border-radius: 20px;
@@ -1142,7 +1184,6 @@
     }
 
     .leaderboard-table-team strong,
-    .leaderboard-table-points,
     .leaderboard-trend-badge,
     .leaderboard-table td .rank {
         justify-self: start;
