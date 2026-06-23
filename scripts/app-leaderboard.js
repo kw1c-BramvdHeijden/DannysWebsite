@@ -1,10 +1,35 @@
 export function createLeaderboardModule({ refs, state, t }) {
     let leaderboardModalTimer = 0;
+    let leaderboardRefreshTimer = 0;
+    let leaderboardRefreshInFlight = false;
+    const leaderboardRefreshMs = 30000;
 
     function getLeaderboardCollection() {
         return state.leaderboard
             .slice()
-            .sort((left, right) => right.points - left.points || right.diff - left.diff || right.won - left.won || left.team.localeCompare(right.team));
+            .sort(compareLeaderboardEntries);
+    }
+
+    function compareLeaderboardEntries(left, right) {
+        const sortDirection = state.leaderboardWinsSort === "asc" ? "asc" : "desc";
+        const primaryDirection = sortDirection === "asc" ? 1 : -1;
+        const winsCompare = Number(left.won) - Number(right.won);
+
+        if (winsCompare !== 0) {
+            return primaryDirection * winsCompare;
+        }
+
+        const diffCompare = Number(left.diff) - Number(right.diff);
+        if (diffCompare !== 0) {
+            return primaryDirection * diffCompare;
+        }
+
+        const lossCompare = Number(left.lost) - Number(right.lost);
+        if (lossCompare !== 0) {
+            return sortDirection === "desc" ? lossCompare : -lossCompare;
+        }
+
+        return left.team.localeCompare(right.team, state.lang === "en" ? "en" : "nl");
     }
 
     function getLeaderboardRankTone(rank) {
@@ -49,12 +74,108 @@ export function createLeaderboardModule({ refs, state, t }) {
         return normalizedDiff > 0 ? `+${normalizedDiff}` : String(normalizedDiff);
     }
 
+    function normalizeFeedNumber(value) {
+        return Number.isFinite(Number(value)) ? Number(value) : 0;
+    }
+
+    function normalizeFeedEntry(entry) {
+        if (!entry || typeof entry !== "object") {
+            return null;
+        }
+
+        const team = typeof entry.team === "string"
+            ? entry.team.trim()
+            : (typeof entry.team_name === "string" ? entry.team_name.trim() : "");
+
+        if (!team) {
+            return null;
+        }
+
+        const won = normalizeFeedNumber(entry.won !== undefined ? entry.won : entry.wins);
+
+        return {
+            id: typeof entry.id === "string" || typeof entry.id === "number"
+                ? String(entry.id)
+                : (typeof entry.teamId === "string" || typeof entry.teamId === "number"
+                    ? String(entry.teamId)
+                    : (typeof entry.team_id === "string" || typeof entry.team_id === "number" ? String(entry.team_id) : team)),
+            team,
+            played: normalizeFeedNumber(entry.played),
+            won,
+            lost: normalizeFeedNumber(entry.lost !== undefined ? entry.lost : entry.losses),
+            diff: normalizeFeedNumber(entry.diff),
+            points: normalizeFeedNumber(entry.points !== undefined ? entry.points : won),
+            trend: entry.trend === "up" || entry.trend === "down" ? entry.trend : "flat",
+            players: Array.isArray(entry.players) ? entry.players : []
+        };
+    }
+
+    function getLeaderboardFeedHref() {
+        return refs.body?.dataset.leaderboardFeedHref || "";
+    }
+
+    function canManageLeaderboard() {
+        return state.loggedIn && state.role === "admin";
+    }
+
+    async function refreshLeaderboardFromServer() {
+        const feedHref = getLeaderboardFeedHref();
+        if (!feedHref || typeof fetch !== "function" || leaderboardRefreshInFlight) {
+            return;
+        }
+
+        leaderboardRefreshInFlight = true;
+
+        try {
+            const response = await fetch(feedHref, {
+                cache: "no-store",
+                headers: {
+                    Accept: "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const payload = await response.json();
+            if (payload.error) {
+                return;
+            }
+
+            if (payload.role === "admin") {
+                state.role = "admin";
+                state.accountRole = "admin";
+            }
+
+            const nextLeaderboard = Array.isArray(payload.leaderboard)
+                ? payload.leaderboard.map(normalizeFeedEntry).filter(Boolean)
+                : [];
+
+            state.leaderboard = nextLeaderboard;
+            renderLeaderboard();
+        } catch (error) {
+            console.error("Could not refresh leaderboard", error);
+        } finally {
+            leaderboardRefreshInFlight = false;
+        }
+    }
+
+    function startLiveUpdates() {
+        if (leaderboardRefreshTimer || !getLeaderboardFeedHref() || (!refs.leaderboardPreviewList && !refs.leaderboardTableBody)) {
+            return;
+        }
+
+        refreshLeaderboardFromServer();
+        leaderboardRefreshTimer = window.setInterval(refreshLeaderboardFromServer, leaderboardRefreshMs);
+    }
+
     function getSelectedLeaderboardTeam() {
         if (state.leaderboardTeamFilter === "all") {
             return null;
         }
 
-        return getLeaderboardCollection().find((entry) => entry.team === state.leaderboardTeamFilter) || null;
+        return getLeaderboardCollection().find((entry) => entry.id === state.leaderboardTeamFilter) || null;
     }
 
     function syncLeaderboardTeamFilter() {
@@ -63,7 +184,7 @@ export function createLeaderboardModule({ refs, state, t }) {
         }
 
         const leaderboard = getLeaderboardCollection();
-        const selectedValue = getSelectedLeaderboardTeam()?.team || "all";
+        const selectedValue = getSelectedLeaderboardTeam()?.id || "all";
         refs.leaderboardTeamFilter.innerHTML = "";
         refs.leaderboardTeamFilter.setAttribute("aria-label", t("leaderboard.teamFilter.aria"));
 
@@ -74,13 +195,71 @@ export function createLeaderboardModule({ refs, state, t }) {
 
         leaderboard.forEach((entry) => {
             const option = document.createElement("option");
-            option.value = entry.team;
+            option.value = entry.id;
             option.textContent = entry.team;
             refs.leaderboardTeamFilter.appendChild(option);
         });
 
         refs.leaderboardTeamFilter.disabled = leaderboard.length === 0;
         refs.leaderboardTeamFilter.value = selectedValue;
+    }
+
+    function syncLeaderboardSortFilter() {
+        if (!refs.leaderboardSortFilter) {
+            return;
+        }
+
+        refs.leaderboardSortFilter.value = state.leaderboardWinsSort === "asc" ? "asc" : "desc";
+    }
+
+    function applyLeaderboardPayload(payload) {
+        const nextLeaderboard = Array.isArray(payload.leaderboard)
+            ? payload.leaderboard.map(normalizeFeedEntry).filter(Boolean)
+            : [];
+
+        state.leaderboard = nextLeaderboard;
+        state.leaderboardTeamFilter = "all";
+        renderLeaderboard();
+    }
+
+    async function deleteLeaderboardTeam(teamId) {
+        if (!canManageLeaderboard() || !teamId) {
+            return;
+        }
+
+        if (!window.confirm(t("leaderboard.deleteConfirm"))) {
+            return;
+        }
+
+        const feedHref = getLeaderboardFeedHref();
+        if (!feedHref) {
+            return;
+        }
+
+        try {
+            const response = await fetch(feedHref, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json"
+                },
+                body: JSON.stringify({
+                    action: "deleteTeam",
+                    teamId,
+                    sort: state.leaderboardWinsSort
+                })
+            });
+            const payload = await response.json().catch(() => ({}));
+
+            if (!response.ok || payload.deleted !== true) {
+                throw new Error(payload.error || t("leaderboard.deleteError"));
+            }
+
+            applyLeaderboardPayload(payload);
+        } catch (error) {
+            window.alert(error.message || t("leaderboard.deleteError"));
+        }
     }
 
     function getLeaderboardUpdatedLabel() {
@@ -91,7 +270,7 @@ export function createLeaderboardModule({ refs, state, t }) {
 
         const selectedTeam = getSelectedLeaderboardTeam();
         if (selectedTeam) {
-            return `${t("leaderboard.playersOf")} ${selectedTeam.team}`;
+            return `${t("leaderboard.selectedTeam")} ${selectedTeam.team}`;
         }
 
         const round = leaderboard.reduce((maxRound, entry) => Math.max(maxRound, Number(entry.played) || 0), 0);
@@ -142,22 +321,27 @@ export function createLeaderboardModule({ refs, state, t }) {
         teamName.textContent = entry.team;
         teamCell.appendChild(teamName);
 
-        const playedCell = document.createElement("td");
-        playedCell.dataset.label = t("leaderboard.column.played");
-        playedCell.textContent = String(entry.played);
+        if (canManageLeaderboard()) {
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "leaderboard-delete-button";
+            deleteButton.dataset.leaderboardDeleteTeam = entry.id;
+            deleteButton.setAttribute("aria-label", `${t("leaderboard.deleteTeam")} ${entry.team}`);
+            deleteButton.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i><span>' + t("leaderboard.deleteTeam") + '</span>';
+            teamCell.appendChild(deleteButton);
+        }
 
         const wonCell = document.createElement("td");
         wonCell.dataset.label = t("leaderboard.column.won");
         wonCell.textContent = String(entry.won);
 
+        const lostCell = document.createElement("td");
+        lostCell.dataset.label = t("leaderboard.column.lost");
+        lostCell.textContent = String(entry.lost);
+
         const diffCell = document.createElement("td");
         diffCell.dataset.label = t("leaderboard.column.diff");
         diffCell.textContent = formatLeaderboardDiff(entry.diff);
-
-        const pointsCell = document.createElement("td");
-        pointsCell.className = "leaderboard-table-points";
-        pointsCell.dataset.label = t("leaderboard.column.points");
-        pointsCell.textContent = formatLeaderboardPoints(entry.points);
 
         const trendCell = document.createElement("td");
         trendCell.dataset.label = t("leaderboard.column.trend");
@@ -166,58 +350,17 @@ export function createLeaderboardModule({ refs, state, t }) {
         trendBadge.innerHTML = `<span aria-hidden="true">${getLeaderboardTrendSymbol(trendState)}</span><span>${getLeaderboardTrendLabel(trendState)}</span>`;
         trendCell.appendChild(trendBadge);
 
-        row.append(rankCell, teamCell, playedCell, wonCell, diffCell, pointsCell, trendCell);
-        return row;
-    }
-
-    function createLeaderboardPlayerRow(player, rank, teamName) {
-        const row = document.createElement("tr");
-
-        const rankCell = document.createElement("td");
-        rankCell.dataset.label = t("leaderboard.column.rank");
-        const rankBadge = document.createElement("span");
-        rankBadge.className = "rank olive";
-        rankBadge.textContent = String(rank);
-        rankCell.appendChild(rankBadge);
-
-        const playerCell = document.createElement("td");
-        playerCell.className = "leaderboard-table-team";
-        playerCell.dataset.label = t("leaderboard.column.player");
-        const playerName = document.createElement("strong");
-        playerName.textContent = player.name;
-        const playerTeam = document.createElement("small");
-        playerTeam.className = "leaderboard-table-subcopy";
-        playerTeam.textContent = teamName;
-        playerCell.append(playerName, playerTeam);
-
-        const playedCell = document.createElement("td");
-        playedCell.dataset.label = t("leaderboard.column.played");
-        playedCell.textContent = String(player.played);
-
-        const wonCell = document.createElement("td");
-        wonCell.dataset.label = t("leaderboard.column.won");
-        wonCell.textContent = "";
-
-        const diffCell = document.createElement("td");
-        diffCell.dataset.label = t("leaderboard.column.diff");
-        diffCell.textContent = "";
-
-        const pointsCell = document.createElement("td");
-        pointsCell.className = "leaderboard-table-points";
-        pointsCell.dataset.label = t("leaderboard.column.points");
-        pointsCell.textContent = "";
-
-        const trendCell = document.createElement("td");
-        trendCell.dataset.label = t("leaderboard.column.trend");
-        trendCell.textContent = "";
-
-        row.append(rankCell, playerCell, playedCell, wonCell, diffCell, pointsCell, trendCell);
+        row.append(rankCell, teamCell, wonCell, lostCell, diffCell, trendCell);
         return row;
     }
 
     function renderLeaderboard() {
         const leaderboard = getLeaderboardCollection();
         const selectedTeam = getSelectedLeaderboardTeam();
+        const visibleLeaderboard = selectedTeam
+            ? leaderboard.filter((entry) => entry.id === selectedTeam.id)
+            : leaderboard;
+        const ranksById = new Map(leaderboard.map((entry, index) => [entry.id, index + 1]));
 
         if (refs.leaderboardPreviewList) {
             refs.leaderboardPreviewList.innerHTML = "";
@@ -235,32 +378,26 @@ export function createLeaderboardModule({ refs, state, t }) {
         }
 
         syncLeaderboardTeamFilter();
+        syncLeaderboardSortFilter();
 
         if (refs.leaderboardTable) {
-            refs.leaderboardTable.dataset.mode = selectedTeam ? "players" : "teams";
+            refs.leaderboardTable.dataset.mode = "teams";
         }
 
         if (refs.leaderboardTableBody) {
             refs.leaderboardTableBody.innerHTML = "";
 
-            if (leaderboard.length === 0) {
+            if (visibleLeaderboard.length === 0) {
                 const row = document.createElement("tr");
                 const cell = document.createElement("td");
-                cell.colSpan = 7;
+                cell.colSpan = 6;
                 cell.className = "leaderboard-empty-cell";
                 cell.textContent = t("leaderboard.empty");
                 row.appendChild(cell);
                 refs.leaderboardTableBody.appendChild(row);
-            } else if (selectedTeam) {
-                selectedTeam.players
-                    .slice()
-                    .sort((left, right) => right.played - left.played || left.name.localeCompare(right.name))
-                    .forEach((player, index) => {
-                        refs.leaderboardTableBody.appendChild(createLeaderboardPlayerRow(player, index + 1, selectedTeam.team));
-                    });
             } else {
-                leaderboard.forEach((entry, index) => {
-                    refs.leaderboardTableBody.appendChild(createLeaderboardTableRow(entry, index + 1));
+                visibleLeaderboard.forEach((entry, index) => {
+                    refs.leaderboardTableBody.appendChild(createLeaderboardTableRow(entry, ranksById.get(entry.id) || index + 1));
                 });
             }
         }
@@ -275,6 +412,7 @@ export function createLeaderboardModule({ refs, state, t }) {
             return;
         }
 
+        refreshLeaderboardFromServer();
         clearTimeout(leaderboardModalTimer);
         refs.leaderboardModal.hidden = false;
         refs.body.classList.add("leaderboard-modal-open");
@@ -307,6 +445,8 @@ export function createLeaderboardModule({ refs, state, t }) {
     return {
         renderLeaderboard,
         openLeaderboardModal,
-        closeLeaderboardModal
+        closeLeaderboardModal,
+        deleteLeaderboardTeam,
+        startLiveUpdates
     };
 }

@@ -33,15 +33,25 @@ function render_leaderboard_modal()
                 <div class="leaderboard-modal-copy">
                     <p class="photo-kicker" data-i18n="leaderboard.modalKicker">VOLLEDIGE STAND</p>
                     <h2 id="leaderboard-modal-title" data-i18n="leaderboard.modalTitle">Volledig leaderboard</h2>
-                    <p class="upload-description" data-i18n="leaderboard.modalDescription">Bekijk alle teams, gespeelde wedstrijden en punten in een overzicht.</p>
+                    <p class="upload-description" data-i18n="leaderboard.modalDescription">Bekijk alle teams, wins, losses, puntverschil en trend in een overzicht.</p>
                 </div>
 
-                <p class="leaderboard-modal-meta">
-                    <span class="leaderboard-status-chip">
-                        <i class="fa-solid fa-rotate-right"></i>
-                        <span data-leaderboard-updated>Bijgewerkt na speelronde 14</span>
-                    </span>
-                </p>
+                <div class="leaderboard-modal-toolbar">
+                    <p class="leaderboard-modal-meta">
+                        <span class="leaderboard-status-chip">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            <span data-leaderboard-updated>Leaderboard laden...</span>
+                        </span>
+                    </p>
+
+                    <label class="leaderboard-sort-control">
+                        <span data-i18n="leaderboard.sortLabel">Sorteer op wins</span>
+                        <select data-leaderboard-sort aria-label="Sorteer leaderboard op wins">
+                            <option value="desc" data-i18n="leaderboard.sortDesc">Meeste wins eerst</option>
+                            <option value="asc" data-i18n="leaderboard.sortAsc">Minste wins eerst</option>
+                        </select>
+                    </label>
+                </div>
 
                 <div class="leaderboard-table-shell">
                     <table class="leaderboard-table">
@@ -54,10 +64,9 @@ function render_leaderboard_modal()
                                         <option value="all">Alle teams</option>
                                     </select>
                                 </th>
-                                <th scope="col" data-i18n="leaderboard.column.played">Gespeeld</th>
-                                <th scope="col" data-i18n="leaderboard.column.won">Gewonnen</th>
+                                <th scope="col" data-i18n="leaderboard.column.won">Wins</th>
+                                <th scope="col" data-i18n="leaderboard.column.lost">Losses</th>
                                 <th scope="col" data-i18n="leaderboard.column.diff">Puntverschil</th>
-                                <th scope="col" data-i18n="leaderboard.column.points">Punten</th>
                                 <th scope="col" data-i18n="leaderboard.column.trend">Trend</th>
                             </tr>
                         </thead>

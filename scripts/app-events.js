@@ -225,6 +225,25 @@ export function bindEvents({
         leaderboard.renderLeaderboard();
     });
 
+    refs.leaderboardSortFilter?.addEventListener("change", (event) => {
+        const nextValue = event.target instanceof HTMLSelectElement ? event.target.value : "desc";
+        state.leaderboardWinsSort = nextValue === "asc" ? "asc" : "desc";
+        leaderboard.renderLeaderboard();
+    });
+
+    refs.leaderboardTableBody?.addEventListener("click", (event) => {
+        const target = event.target;
+
+        if (!(target instanceof Element)) {
+            return;
+        }
+
+        const deleteButton = target.closest("[data-leaderboard-delete-team]");
+        if (deleteButton) {
+            leaderboard.deleteLeaderboardTeam(deleteButton.getAttribute("data-leaderboard-delete-team"));
+        }
+    });
+
     refs.leaderboardCloseButtons.forEach((button) => {
         button.addEventListener("click", () => {
             leaderboard.closeLeaderboardModal();

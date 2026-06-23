@@ -128,12 +128,22 @@ function normalizeLeaderboardEntry(entry) {
         return null;
     }
 
+    const id = typeof entry.id === "string" || typeof entry.id === "number"
+        ? String(entry.id)
+        : (typeof entry.teamId === "string" || typeof entry.teamId === "number"
+            ? String(entry.teamId)
+            : (typeof entry.team_id === "string" || typeof entry.team_id === "number" ? String(entry.team_id) : team));
+    const won = normalizeNumber(entry.won !== undefined ? entry.won : entry.wins);
+
     return {
+        id,
+        teamId: id,
         team,
         played: normalizeNumber(entry.played),
-        won: normalizeNumber(entry.won),
+        won,
+        lost: normalizeNumber(entry.lost !== undefined ? entry.lost : entry.losses),
         diff: normalizeNumber(entry.diff),
-        points: normalizeNumber(entry.points),
+        points: normalizeNumber(entry.points !== undefined ? entry.points : won),
         trend: entry.trend === "up" || entry.trend === "down" ? entry.trend : "flat",
         players: Array.isArray(entry.players)
             ? entry.players.map(normalizeLeaderboardPlayer).filter(Boolean)
@@ -240,7 +250,8 @@ export function createAppState() {
         pendingUpload: null,
         pendingPhotoId: null,
         pendingCompetitionId: null,
-        leaderboardTeamFilter: "all"
+        leaderboardTeamFilter: "all",
+        leaderboardWinsSort: "desc"
     };
 }
 
