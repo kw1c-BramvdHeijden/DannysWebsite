@@ -1,4 +1,10 @@
-<?php require_once __DIR__ . "/../includes/header.php"; ?>
+<?php
+require_once __DIR__ . "/../includes/db.php";
+require_once __DIR__ . "/../includes/bootstrap-data.php";
+require_once __DIR__ . "/../includes/header.php";
+
+$bootstrapData = boules_bootstrap_data($pdo, "competities.php", 100, "../");
+?>
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -10,7 +16,6 @@
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/header.css">
     <link rel="stylesheet" href="../css/footer.css">
-    <link rel="stylesheet" href="../css/competities_fotos_kalender_spelregels.css">
     <link rel="stylesheet" href="../css/fotos.css">
     <link rel="stylesheet" href="../css/base.css">
 </head>
@@ -64,7 +69,6 @@
         </section>
     </main>
 
-    <!-- Auth modal is rendered by includes/header.php. -->
     <div class="upload-modal" data-upload-modal hidden>
         <div class="upload-modal-backdrop" data-upload-cancel></div>
         <div class="upload-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
@@ -111,6 +115,9 @@
         </div>
     </div>
 
+    <script>
+        window.__BOULES_BOOTSTRAP__ = <?= json_encode($bootstrapData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    </script>
     <script type="module" src="../scripts/index.js"></script>
 </body>
 </html>

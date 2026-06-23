@@ -70,18 +70,15 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
         <div class="panel-heading">
             <h2 data-i18n="competitions.heading">AANKOMENDE COMPETITIES</h2>
             <div class="panel-actions">
-        <span class="panel-admin-indicator" data-competition-admin-indicator hidden>
-            <i class="fa-solid fa-pen-to-square"></i>
-            <span data-i18n="competitions.adminMode">Admin-modus: beheer aankomende competities</span>
-        </span>
+                <a class="button button-outline panel-admin-button" href="kalender.php">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Kalender</span>
+                </a>
+                <span class="panel-admin-indicator" data-competition-admin-indicator hidden>
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span data-i18n="competitions.adminMode">Admin-modus: beheer aankomende competities</span>
+                </span>
             </div>
-        </div>
-
-        <div class="calendar-container">
-            <a href="kalender.php" class="button button-secondary calendar-button">
-                <i class="fa-solid fa-calendar-days"></i>
-                Kalender
-            </a>
         </div>
 
         <div class="competition-cards" data-competition-grid></div>
@@ -205,6 +202,11 @@ $bootstrapData = boules_bootstrap_data($pdo, "#competities", 0, "../");
                     <button type="button" class="auth-password-toggle" data-auth-password-toggle aria-label="Toon wachtwoord">
                         <i class="fa-regular fa-eye"></i>
                     </button>
+                </label>
+
+                <label class="auth-mail-consent">
+                    <input type="checkbox" data-auth-signup-email-notifications>
+                    <span data-i18n="auth.modal.emailConsent">Ik ga ermee akkoord dat wij mijn e-mailadres gebruiken voor e-mails over competities waarvoor mijn team is aangemeld.</span>
                 </label>
 
                 <p class="auth-popup-feedback" data-auth-feedback="signup" aria-live="polite"></p>

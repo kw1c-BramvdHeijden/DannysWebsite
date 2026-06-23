@@ -1,5 +1,5 @@
 <?php
-include_once("includes/db.php");
+require_once __DIR__ . '/includes/db.php';
 include_once("includes/bootstrap-data.php");
 include_once("includes/header.php");
 include_once("includes/leaderboard.php");
@@ -24,7 +24,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
 </head>
 <body data-competitions-href="pages/competities.php" data-leaderboard-feed-href="pages/leaderboard-feed.php">
     <main class="page-shell">
-        <?php render_site_header("home", true); ?>
+    <?php render_site_header("home", true); ?>
 
         <section class="hero-section" id="home">
             <div class="hero-copy">
@@ -201,13 +201,13 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
                 </label>
 
                 <label class="upload-label">
+                    <span data-i18n="competitions.form.endDate">Einddatum</span>
+                    <input type="date" data-competition-end-date>
+                </label>
+
+                <label class="upload-label">
                     <span data-i18n="competitions.form.style">Accentkleur</span>
-                    <select class="competition-select" data-competition-tone>
-                        <option value="green" data-i18n="competitions.form.styleGreen">Groen</option>
-                        <option value="yellow" data-i18n="competitions.form.styleYellow">Geel</option>
-                        <option value="red" data-i18n="competitions.form.styleRed">Rood</option>
-                        <option value="olive" data-i18n="competitions.form.styleOlive">Olijf</option>
-                    </select>
+                    <input type="color" class="competition-color-picker" data-competition-tone value="#7b9151">
                 </label>
 
                 <div class="upload-actions">
@@ -217,6 +217,7 @@ $bootstrapData = boules_bootstrap_data($pdo, "pages/competities.php", 3, "");
                         <span data-competition-submit-label data-i18n="competitions.form.save">Competitie opslaan</span>
                     </button>
                 </div>
+                <p class="auth-popup-feedback" data-competition-feedback aria-live="polite"></p>
             </form>
         </div>
     </div>
