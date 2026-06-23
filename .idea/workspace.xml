@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3f0f760a-abb2-4edf-a9b0-337268a9f358" name="Changes" comment="kalender overzicht van competities 2.0">
+      <change beforePath="$PROJECT_DIR$/css/kalender.css" beforeDir="false" afterPath="$PROJECT_DIR$/css/kalender.css" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CSS File" />
+        <option value="PHP File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="login_2" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;kw1c-HorstmanConnor&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/kw1c-BramvdHeijden/DannysWebsite.git&quot;,
+    &quot;accountId&quot;: &quot;24ec1093-a692-4f1b-a22d-9aa24925cfbe&quot;
+  }
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0272994017321957" />
+      <entry key="MS500" value="2.042265012748259" />
+      <entry key="S2" value="5.836973143697991" />
+      <entry key="S5" value="9.85886365641069" />
+      <entry key="S10" value="12.608152613898472" />
+      <entry key="S30" value="15.297693855624935" />
+      <entry key="S60" value="16.2902284503729" />
+      <entry key="M2" value="17.502119953687025" />
+      <entry key="M5" value="19.670322308309622" />
+      <entry key="M10" value="21.511354797399648" />
+      <entry key="M15" value="22.8534672373829" />
+      <entry key="M30" value="25.427967594434474" />
+      <entry key="H1" value="27.654792232105013" />
+      <entry key="H2" value="29.155801542905408" />
+      <entry key="H4" value="30.187430462204464" />
+      <entry key="D1" value="38.24710790739566" />
+      <entry key="W1" value="45.31121042890149" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.965528711907291" />
+      <entry key="MS500" value="2.0194286048786214" />
+      <entry key="S2" value="5.821655733818472" />
+      <entry key="S5" value="9.848718269258564" />
+      <entry key="S10" value="12.601718547313356" />
+      <entry key="S30" value="15.295097385138565" />
+      <entry key="S60" value="16.288781676687407" />
+      <entry key="M2" value="17.501199237238065" />
+      <entry key="M5" value="19.66976626753798" />
+      <entry key="M10" value="21.51098734952429" />
+      <entry key="M15" value="22.853176589546564" />
+      <entry key="M30" value="25.427777541964034" />
+      <entry key="H1" value="27.654677677003505" />
+      <entry key="H2" value="29.155737662352085" />
+      <entry key="H4" value="30.187396299209713" />
+      <entry key="D1" value="38.24709964042558" />
+      <entry key="W1" value="45.3112089300867" />
+    </decayedShown>
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="PHP" />
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3DwRK0GTiHSFMDuvpFLdG8YhVPt" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;JavaScript Debug.auth_modal.php.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript Debug.db.php.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript Debug.header.php.executor&quot;: &quot;Run&quot;,
+    &quot;JavaScript Debug.index.php.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Root&quot;,
+    &quot;git.auto.fetch.suggestion.counter&quot;: &quot;1&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
+    ]
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-PS-261.25134.104" />
+        <option value="bundled-php-predefined-a98d8de5180a-6bbb74dbab74-com.jetbrains.php.sharedIndexes-PS-261.25134.104" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3f0f760a-abb2-4edf-a9b0-337268a9f358" name="Changes" comment="" />
+      <created>1779191077950</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1779191077950</updated>
+      <workItem from="1779191079086" duration="3593000" />
+      <workItem from="1779268160507" duration="2808000" />
+      <workItem from="1779874917036" duration="2395000" />
+      <workItem from="1780382530896" duration="647000" />
+      <workItem from="1780383286725" duration="9443000" />
+      <workItem from="1780989063730" duration="461000" />
+      <workItem from="1780989577286" duration="3091000" />
+    </task>
+    <task id="LOCAL-00001" summary="made includes folder,header footer files.">
+      <option name="closed" value="true" />
+      <created>1779191825361</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1779191825361</updated>
+    </task>
+    <task id="LOCAL-00002" summary="made includes folder,header footer files, CSS Files.">
+      <option name="closed" value="true" />
+      <created>1779268514335</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1779268514335</updated>
+    </task>
+    <task id="LOCAL-00003" summary="comment">
+      <option name="closed" value="true" />
+      <created>1780383609181</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1780383609181</updated>
+    </task>
+    <task id="LOCAL-00004" summary="comment">
+      <option name="closed" value="true" />
+      <created>1780384077784</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1780384077784</updated>
+    </task>
+    <task id="LOCAL-00005" summary="comment">
+      <option name="closed" value="true" />
+      <created>1780384093382</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1780384093382</updated>
+    </task>
+    <task id="LOCAL-00006" summary="halve login, werkt nog niet en fucked met de CSS">
+      <option name="closed" value="true" />
+      <created>1780992076939</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1780992076939</updated>
+    </task>
+    <task id="LOCAL-00007" summary="halve login, werkt nog niet en fucked met de CSS">
+      <option name="closed" value="true" />
+      <created>1780992806953</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1780992806954</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="made includes folder,header footer files." />
+    <MESSAGE value="made includes folder,header footer files, CSS Files." />
+    <MESSAGE value="comment" />
+    <MESSAGE value="halve login, werkt nog niet en fucked met de CSS" />
+    <MESSAGE value="kalender overzicht van competities 2.0" />
+    <option name="LAST_COMMIT_MESSAGE" value="kalender overzicht van competities 2.0" />
+  </component>
+</project>
